@@ -161,8 +161,8 @@ $_['billing_display_name_label'] = 'Название платежного сер
 $_['billing_display_name_description'] = 'Это название увидит пользователь';
 $_['billing_default_display_name'] = 'Яндекс.Платежка (банковские карты, кошелек)';
 
-$_['billing_success_order_status_label'] = 'Статус заказа после оплаты';
-$_['billing_success_order_status_description'] = '';
+$_['billing_success_order_status_label'] = 'Статус заказа';
+$_['billing_success_order_status_description'] = 'Статус должен показать, что результат платежа неизвестен: заплатил клиент или нет, вы можете узнать только из уведомления на электронной почте или в своем банке';
 
 $_['billing_minimum_payment_amount_label'] = 'Минимальная сумма заказа';
 $_['billing_minimum_payment_amount_description'] = 'Сумма заказа при которой можно провести платёж с помощью Яндекс.Кассы';

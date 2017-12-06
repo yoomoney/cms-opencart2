@@ -4,6 +4,8 @@
  * Class ControllerExtensionPaymentYandexMoney
  *
  * @property ModelSettingSetting $model_setting_setting
+ * @property Url $url
+ * @property Loader $load
  */
 class ControllerExtensionPaymentYandexMoney extends Controller
 {
@@ -155,7 +157,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             $this->session->data['last-active-tab'] = $tab;
         }
 
-        $data['module_version'] = '1.0.1';
+        $data['module_version'] = '1.0.2';
         $data['breadcrumbs'] = $this->getBreadCrumbs();
         $data['kassaTaxRates'] = $this->getKassaTaxRates();
         $data['shopTaxRates'] = $this->getShopTaxRates();
@@ -714,10 +716,24 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             $data['yandex_money_market_lnk_yml'] = HTTP_CATALOG.'index.php?route='.$prefix.'payment/yandex_money/market';
         }
 
-        $data['yandex_money_metrika_callback_url'] = 'https://oauth.yandex.ru/authorize?response_type=code&client_id='.$this->config->get('yandex_money_metrika_idapp').'&device_id='.md5('metrika'.$this->config->get('yandex_money_metrika_idapp')).'&client_secret='.$this->config->get('yandex_money_metrika_pw');
-        $data['yandex_money_metrika_callback'] = $this->url->link($prefix.'payment/yandex_money/prepare_m', 'token='.$this->session->data['token'], true);
-        $data['yandex_money_pokupki_callback_url'] = 'https://oauth.yandex.ru/authorize?response_type=code&client_id='.$this->config->get('yandex_money_pokupki_idapp').'&device_id='.md5('pokupki'.$this->config->get('yandex_money_pokupki_idapp')).'&client_secret='.$this->config->get('yandex_money_pokupki_pw');
-        $data['yandex_money_pokupki_callback'] = $this->url->link($prefix.'payment/yandex_money/prepare_p', 'token='.$this->session->data['token'], true);
+        $data['yandex_money_metrika_callback_url'] = 'https://oauth.yandex.ru/authorize?response_type=code&client_id='
+            . $this->config->get('yandex_money_metrika_idapp') . '&device_id='
+            . md5('metrika'.$this->config->get('yandex_money_metrika_idapp'))
+            . '&client_secret=' . $this->config->get('yandex_money_metrika_pw');
+        $data['yandex_money_metrika_callback'] = str_replace(
+            'http://',
+            'https://',
+            $this->url->link($prefix . 'payment/yandex_money/prepare_m', 'token='.$this->session->data['token'])
+        );
+        $data['yandex_money_pokupki_callback_url'] = 'https://oauth.yandex.ru/authorize?response_type=code&client_id='
+            . $this->config->get('yandex_money_pokupki_idapp') . '&device_id='
+            . md5('pokupki'.$this->config->get('yandex_money_pokupki_idapp'))
+            . '&client_secret=' . $this->config->get('yandex_money_pokupki_pw');
+        $data['yandex_money_pokupki_callback'] = str_replace(
+            'http://',
+            'https://',
+            $this->url->link($prefix . 'payment/yandex_money/prepare_p', 'token='.$this->session->data['token'], true)
+        );
         $data['yandex_money_pokupki_gtoken'] = $this->config->get('yandex_money_pokupki_gtoken');
         $data['yandex_money_metrika_o2auth'] = $this->config->get('yandex_money_metrika_o2auth');
         $data['token_url'] = 'https://oauth.yandex.ru/token?';
@@ -741,8 +757,8 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         return $this->goCurl(
             'p',
             'grant_type=authorization_code&code='.$this->request->get['code']
-                . '&client_id='.$this->config->get('yandex_money__pokupki_idapp')
-                . '&client_secret='.$this->config->get('yandex_money__pokupki_pw')
+                . '&client_id='.$this->config->get('yandex_money_pokupki_idapp')
+                . '&client_secret='.$this->config->get('yandex_money_pokupki_pw')
         );
     }
 
