@@ -20,6 +20,12 @@ class AbstractPaymentModel
     protected $minPaymentAmount;
     protected $displayName;
 
+    /** @var bool */
+    protected $createOrderBeforeRedirect;
+
+    /** @var bool */
+    protected $clearCartAfterOrderCreation;
+
     /**
      * AbstractPaymentModel constructor.
      * @param \Config $config
@@ -75,5 +81,21 @@ class AbstractPaymentModel
     public function applyTemplateVariables($controller, &$templateData, $orderInfo)
     {
         return 'extension/payment/yandex_money';
+    }
+
+    /**
+     * @return bool
+     */
+    public function getCreateOrderBeforeRedirect()
+    {
+        return $this->createOrderBeforeRedirect;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getClearCartBeforeRedirect()
+    {
+        return $this->clearCartAfterOrderCreation;
     }
 }

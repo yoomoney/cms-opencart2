@@ -2,7 +2,7 @@
 
 //Remove old modificator
 $this->load->model("extension/modification");
-$old_mod = $this->model_extension_modification->getModificationByCode("ycms2");
+$old_mod = $this->model_extension_modification->getModificationByCode("ycms.2.0");
 if (isset($old_mod['modification_id'])) {
     $this->model_extension_modification->deleteModification($old_mod['modification_id']);
 }

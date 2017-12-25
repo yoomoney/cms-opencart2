@@ -198,3 +198,30 @@
         </div>
     </div>
 </div>
+
+<script type="text/javascript">
+    function showcatall($tree) {
+        $tree.find("ul.tree").each(function() {
+            $(this).slideDown();
+        });
+    }
+
+    function hidecatall($tree) {
+        $tree.find("ul.tree").each(function() {
+            $(this).slideUp();
+        });
+    }
+    function checkAllAssociatedCategories($tree) {
+        $tree.find(":input[type=checkbox]").each(function() {
+            $(this).prop("checked", true);
+            $(this).parent().addClass("tree-selected");
+        });
+    }
+
+    function uncheckAllAssociatedCategories($tree) {
+        $tree.find(":input[type=checkbox]").each(function() {
+            $(this).prop("checked", false);
+            $(this).parent().removeClass("tree-selected");
+        });
+    }
+</script>

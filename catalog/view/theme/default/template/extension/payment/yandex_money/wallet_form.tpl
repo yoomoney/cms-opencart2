@@ -62,8 +62,6 @@
     </div>
     <script type="text/javascript"><!--
     jQuery('#button-confirm').on('click', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
         $.ajax({
             type: 'get',
             url: '<?php echo $validate_url; ?>',

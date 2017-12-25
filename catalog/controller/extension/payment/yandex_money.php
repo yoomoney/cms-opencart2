@@ -7,6 +7,7 @@
  * @property ModelPaymentYandexMoney $model_payment_yandex_money
  * @property ModelCheckoutOrder $model_checkout_order
  * @property ModelAccountOrder $model_account_order
+ * @property \Cart\Cart $cart
  * @property \Cart\Customer $customer
  */
 class ControllerExtensionPaymentYandexMoney extends Controller
@@ -194,6 +195,10 @@ class ControllerExtensionPaymentYandexMoney extends Controller
 
     private function jsonError($message)
     {
+        if (ob_get_level() != 0) {
+            $output = ob_get_clean();
+            $this->getModel()->log('warning', 'None empty buffer: ' . $output);
+        }
         $this->getModel()->log('info', $message);
         echo json_encode(array(
             'success' => false,
@@ -207,6 +212,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
      */
     public function create()
     {
+        ob_start();
         $kassa = $this->getModel()->getKassaModel();
         if (!$kassa->isEnabled()) {
             $this->jsonError('Yandex.Kassa module disabled');
@@ -252,6 +258,21 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         if ($confirmation !== null && $confirmation->getType() === \YaMoney\Model\ConfirmationType::REDIRECT) {
             $result['redirect'] = $confirmation->getConfirmationUrl();
         }
+
+        if ($kassa->getCreateOrderBeforeRedirect()) {
+            $this->getModel()->log('debug', 'Confirm order#' . $orderId . ' after payment creation');
+            $this->getModel()->confirmOrder($orderId, $payment);
+        }
+        if ($kassa->getClearCartBeforeRedirect()) {
+            $this->getModel()->log('debug', 'Clear order#' . $orderId . ' cart after payment creation');
+            $this->cart->clear();
+        }
+
+        $output = ob_get_clean();
+        if (!empty($output)) {
+            $this->getModel()->log('warning', 'Non empty buffer: ' . $output);
+        }
+
         echo json_encode($result);
         exit();
     }
@@ -311,10 +332,23 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             $this->jsonError('Invalid payment type');
         }
 
-        $this->load->model('checkout/order');
-        $url = $this->url->link($this->getPrefix() . 'payment/yandex_money/repay', 'order_id=' . $this->session->data['order_id'], true);
-        $comment = '<a href="' . $url . '" class="button">' . $this->language->get('text_repay') . '</a>';
-        $this->model_checkout_order->addOrderHistory($this->session->data['order_id'], 1, $comment, true);
+        $paymentModel = $this->getModel()->getPaymentModel();
+        if ($paymentModel instanceof \YandexMoneyModule\Model\WalletModel) {
+            if ($paymentModel->getCreateOrderBeforeRedirect()) {
+                $this->load->model('checkout/order');
+                $url = $this->url->link($this->getPrefix() . 'payment/yandex_money/repay', 'order_id=' . $this->session->data['order_id'], true);
+                $comment = '<a href="' . $url . '" class="button">' . $this->language->get('text_repay') . '</a>';
+                $this->model_checkout_order->addOrderHistory($this->session->data['order_id'], 1, $comment, true);
+            }
+            if ($paymentModel->getClearCartBeforeRedirect()) {
+                $this->cart->clear();
+            }
+        } else {
+            $this->load->model('checkout/order');
+            $url = $this->url->link($this->getPrefix() . 'payment/yandex_money/repay', 'order_id=' . $this->session->data['order_id'], true);
+            $comment = '<a href="' . $url . '" class="button">' . $this->language->get('text_repay') . '</a>';
+            $this->model_checkout_order->addOrderHistory($this->session->data['order_id'], 1, $comment, true);
+        }
     }
 
     /**
@@ -432,7 +466,8 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         $categories = $model->getCategories();
         $allow_cat_array = $this->config->get('yandex_money_market_categories');
         if (!empty($allow_cat_array) || $this->config->get('yandex_money_market_catall')) {
-            $ids_cat = ($this->config->get('yandex_money_market_catall')) ? '' : implode(',', $allow_cat_array);
+            $ids_cat = ($this->config->get('yandex_money_market_catall')) ? '' : $allow_cat_array;
+            $allow_cat_array = explode(',', $allow_cat_array);
         } else {
             die("Need select categories");
         }
@@ -444,15 +479,14 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         $shop_currency = $this->config->get('config_currency');
         $offers_currency = 'RUB';
         $currency_default = $model->getCurrencyByISO($offers_currency);
-        if (!isset($currency_default['value'])){
+        if (!isset($currency_default['value'])) {
             die("Not exist RUB");
         }
 
         $decimal_place = 2;
         $currencies = array_intersect_key($currencies, array_flip(array('RUR', 'RUB', 'USD', 'EUR', 'UAH', 'BYN')));
         $market = new \YandexMoneyModule\YandexMarket($this->config);
-        $market->yml('utf-8');
-        $market->set_shop(
+        $market->setShop(
             $this->config->get('yandex_money_market_shopname'),
             $this->config->get('config_name'),
             $this->config->get('config_url')
@@ -461,12 +495,12 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         if ($this->config->get('yandex_money_market_allcurrencies')) {
             foreach ($currencies as $currency) {
                 if ($currency['status'] == 1) {
-                    $market->add_currency($currency['code'], ((float)$currency_default['value'] / (float)$currency['value']));
+                    $market->addCurrency($currency['code'], ((float)$currency_default['value'] / (float)$currency['value']));
                 }
             }
         }
         else {
-            $market->add_currency($currency_default['code'], ((float)$currency_default['value']));
+            $market->addCurrency($currency_default['code'], ((float)$currency_default['value']));
         }
 
         foreach ($categories as $category) {
@@ -475,125 +509,157 @@ class ControllerExtensionPaymentYandexMoney extends Controller
                     continue;
                 }
             }
-            $market->add_category($category['name'], $category['category_id'], $category['parent_id']);
+            $market->addCategory($category['name'], $category['category_id'], $category['parent_id']);
         }
+
+        $enabled = $this->config->get('yandex_money_market_available');
+        $marketAvailabilityMode = $this->config->get('yandex_money_market_set_available');
+        $simple = $this->config->get('yandex_money_market_prostoy');
+        $length = new \Cart\Length($this->registry);
         foreach ($products as $product) {
-            if ($this->config->get('yandex_money_market_available') && $product['quantity'] < 1) {
+            if ($enabled && $product['quantity'] < 1) {
                 continue;
             }
 
-            $available = false;
-            if ($this->config->get('yandex_money_market_set_available') == 1) {
-                $available = true;
-            } elseif ($this->config->get('yandex_money_market_set_available') == 2) {
-                if ($product['quantity'] > 0) $available = true;
-            } elseif ($this->config->get('yandex_money_market_set_available') == 3) {
-                $available = true;
-                if ($product['quantity'] == 0) {
-                    continue;
-                }
-            } elseif ($this->config->get('yandex_money_market_set_available') == 4) {
-                $available = false;
+            $offer = $market->addOffer($product['product_id'], $product['category_id'], $product['name']);
+            switch ($marketAvailabilityMode) {
+                case 1:
+                    $offer->setAvailable(true);
+                    break;
+                case 2:
+                    if ($product['quantity'] > 0) {
+                        $offer->setAvailable(true);
+                    }
+                    break;
+                case 3:
+                    $offer->setAvailable(true);
+                    if ($product['quantity'] == 0) {
+                        continue;
+                    }
+                    break;
+                case 4:
+                    $offer->setAvailable(false);
+                    break;
             }
             $data = array();
-            $data['id'] = $product['product_id'];
-            $data['available'] = $available;
-            $data['url'] = htmlspecialchars_decode($this->url->link('product/product', 'product_id=' . $product['product_id'], true));
+            $offer->setUrl(
+                htmlspecialchars_decode(
+                    $this->url->link('product/product', 'product_id=' . $product['product_id'], true)
+                )
+            );
 
-            $data['price'] = round(floatval($product['price']), 2);
-            if ($product['special'] && $product['special'] < $product['price']){
-                $data['price'] = round(floatval($product['special']), 2);
-                $data['oldprice'] = round(floatval($product['price']), 2);
+            if ($product['special'] && $product['special'] < $product['price']) {
+                $price = $this->calculatePrice($product, $shop_currency, $offers_currency, $decimal_place, 'special');
+                if ($price > 0) {
+                    $offer->setPrice($price);
+                } else {
+                    continue;
+                }
+                $price = $this->calculatePrice($product, $shop_currency, $offers_currency, $decimal_place, 'price');
+                if ($price > 0) {
+                    $offer->setOldPrice($price);
+                } else {
+                    continue;
+                }
+            } else {
+                $price = $this->calculatePrice($product, $shop_currency, $offers_currency, $decimal_place, 'price');
+                if ($price > 0) {
+                    $offer->setPrice($price);
+                } else {
+                    continue;
+                }
             }
 
-            $data['currencyId'] = $currency_default['code'];
-            $data['categoryId'] = $product['category_id'];
-            $data['vendor'] = $product['manufacturer'];
-            $data['vendorCode'] = $product['model'];
-            $data['delivery'] = ($this->config->get('yandex_money_market_delivery') && $product['shipping'] == '1')? 'true' : 'false';
-            $data['pickup'] = ($this->config->get('yandex_money_market_pickup') ? 'true' : 'false');
-            $data['store'] = ($this->config->get('yandex_money_market_store') ? 'true' : 'false');
-            $data['description'] = $product['description'];
+            $offer->setCurrencyId($currency_default['code'])
+                ->setVendor($product['manufacturer'])
+                ->setVendorCode($product['model'])
+                ->setDelivery($this->config->get('yandex_money_market_delivery') && $product['shipping'] == '1')
+                ->setPickup($this->config->get('yandex_money_market_pickup'))
+                ->setStore($this->config->get('yandex_money_market_store'));
+            if (!empty($product['description'])) {
+                $value = strip_tags($product['description']);
+                $value = preg_replace('|<[/]?[^>]+?>|', '', trim(html_entity_decode($value)));
+                $offer->setDescription(preg_replace("/&#?[a-z0-9]+;/i", '', $value));
+            }
 
             if ($product['quantity'] < 1) {
                 $stock_id = $product['stock_status_id'];
                 $delivery_cost = $this->config->get('yandex_money_market_stock_cost');
                 $delivery_days = $this->config->get('yandex_money_market_stock_days');
-                $data['delivery-options'][] = array(
-                    'cost' => $delivery_cost[$stock_id],
-                    'days' => $delivery_days[$stock_id]
-                );
-            }
-            if ($product['minimum'] > 1) {
-                $data['sales_notes'] = 'Минимальное кол-во для заказа: ' . $product['minimum'];
+                $offer->addDeliveryOption($delivery_cost[$stock_id], $delivery_days[$stock_id]);
             }
             if ($this->config->get('config_comment')) {
-                $data['sales_notes'] = $this->config->get('config_comment');
+                $offer->setSalesNotes($this->config->get('config_comment'));
+            } elseif ($product['minimum'] > 1) {
+                $offer->setSalesNotes('Минимальное кол-во для заказа: ' . $product['minimum']);
+                $offer->setMinQuantity($product['minimum']);
             }
 
             $data['picture'] = array();
             if (isset($product['image'])) {
-                $data['picture'][] = str_replace(" ", "%20", $this->model_tool_image->resize($product['image'], 600, 600));
+                $url = str_replace(" ", "%20", $this->model_tool_image->resize($product['image'], 600, 600));
+                $offer->addPicture($url);
             }
-            foreach ($this->model_catalog_product->getProductImages($data['id']) as $pic) {
+            foreach ($this->model_catalog_product->getProductImages($offer->getId()) as $pic) {
                 if (count($data['picture']) <= 9) {
-                    $data['picture'][] = str_replace(array('&amp;',' '),array('&', '%20'), $this->model_tool_image->resize($pic['image'], 600, 600));
+                    $url = str_replace(
+                        array('&amp;',' '),
+                        array('&', '%20'),
+                        $this->model_tool_image->resize($pic['image'], 600, 600)
+                    );
+                    $offer->addPicture($url);
                 }
             }
 
-            if ($this->config->get('yandex_money_market_prostoy')) {
-                $data['price'] = number_format($this->currency->convert($this->tax->calculate($data['price'], $product['tax_class_id'], $this->config->get('config_tax')), $shop_currency, $offers_currency), $decimal_place, '.', '');
-                $data['name'] = $product['name'];
-                if ($data['price'] > 0) {
-                    $market->add_offer($data['id'], $data, $data['available']);
-                }
-            } else {
-                $data['model'] = $product['name'];
-                if ($product['weight'] > 0) {
-                    $data['weight'] = number_format($product['weight'], 1, '.', '');
-                }
-                if ($this->config->get('yandex_money_market_dimensions') && $product['length'] > 0 && $product['width'] > 0 && $product['height'] > 0) {
-                    $data['dimensions'] = number_format($product['length'], 1, '.', '') . '/' . number_format($product['width'], 1, '.', '') . '/' . number_format($product['height'], 1, '.', '');
-                }
-                $data['downloadable'] = 'false';
-                $data['rec'] = explode(',', $product['rel']);
-                $data['param'][] = array('id' => 'weight', 'name' => 'Вес', 'value' => number_format($product['weight'], 1, '.', ''), 'unit' => $product['weight_unit']);
+            if ($this->config->get('yandex_money_market_dimensions') && $product['length'] > 0 && $product['width'] > 0 && $product['height'] > 0) {
+                $offer->setDimensions(
+                    $product['length'],
+                    $product['width'],
+                    $product['height'],
+                    $length->getUnit($product['length_class_id'])
+                );
+            }
+            if ($product['weight'] > 0) {
+                $offer->setWeight($product['weight'], $product['weight_unit']);
+            }
+
+            if (!$simple) {
+                $offer->setModel($product['name']);
+                $offer->setDownloadable(false);
+                $offer->setRec(explode(',', $product['rel']));
                 if ($this->config->get('yandex_money_market_features')) {
-                    $attributes = $this->model_catalog_product->getProductAttributes($data['id']);
+                    $attributes = $this->model_catalog_product->getProductAttributes($offer->getId());
                     if (count($attributes)) {
                         foreach ($attributes as $attr) {
                             foreach ($attr['attribute'] as $val) {
-                                $data['param'][] = array(
-                                    'id' => $val['attribute_id'],
-                                    'name' => $val['name'],
-                                    'value' => $val['text']
-                                );
+                                $offer->addParameter($val['name'], $val['text']);
                             }
                         }
-                    }
-                }
-
-                if (!$this->makeOfferCombination($data, $product, $shop_currency, $offers_currency, $decimal_place, $market)) {
-                    $data['price'] = number_format(
-                        $this->currency->convert(
-                            $this->tax->calculate(
-                                $data['price'], $product['tax_class_id'], $this->config->get('config_tax')
-                            ),
-                            $shop_currency,
-                            $offers_currency
-                        ),
-                        $decimal_place,
-                        '.',
-                        ''
-                    );
-                    if ($data['price'] > 0) {
-                        $market->add_offer($data['id'], $data, $data['available']);
                     }
                 }
             }
         }
         $this->response->addHeader('Content-Type: application/xml; charset=utf-8');
-        $this->response->setOutput($market->get_xml());
+        $this->response->setOutput($market->getXml());
+    }
+
+    private function calculatePrice($product, $shop_currency, $offers_currency, $decimal_place, $key = 'price')
+    {
+        $price = number_format(
+            $this->currency->convert(
+                $this->tax->calculate(
+                    $product[$key],
+                    $product['tax_class_id'],
+                    $this->config->get('config_tax')
+                ),
+                $shop_currency,
+                $offers_currency
+            ),
+            $decimal_place,
+            '.',
+            ''
+        );
+        return $price < 0 ? 0 : $price;
     }
 
     private function makeOfferCombination($data, $product, $shop_currency, $offers_currency, $decimal_place, $object)

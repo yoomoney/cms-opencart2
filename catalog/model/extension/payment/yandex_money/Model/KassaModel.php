@@ -21,6 +21,7 @@ class KassaModel extends AbstractPaymentModel
     protected $taxRates;
     protected $log;
     protected $testMode;
+    protected $showInFooter;
 
     /**
      * KassaModel constructor.
@@ -62,6 +63,11 @@ class KassaModel extends AbstractPaymentModel
                 }
             }
         }
+
+        $this->createOrderBeforeRedirect = $this->getConfigValue('create_order_before_redirect');
+        $this->clearCartAfterOrderCreation = $this->getConfigValue('clear_cart_before_redirect');
+
+        $this->showInFooter = $this->getConfigValue('show_in_footer');
     }
 
     public function isTestMode()
@@ -141,6 +147,11 @@ class KassaModel extends AbstractPaymentModel
     public function getDebugLog()
     {
         return $this->log;
+    }
+
+    public function getShowLinkInFooter()
+    {
+        return $this->showInFooter;
     }
 
     /**

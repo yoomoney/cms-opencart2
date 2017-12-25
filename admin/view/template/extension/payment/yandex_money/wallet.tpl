@@ -70,6 +70,21 @@
             </div>
         </div>
         <div class="form-group">
+            <div class="col-sm-2 control-label"><strong><?php echo $language->get('wallet_before_redirect_label'); ?></strong></div>
+            <div class="col-sm-10">
+                <label>
+                    <input type="checkbox" name="yandex_money_wallet_create_order_before_redirect" id="yandex_money_wallet_create_order_before_redirect"
+                           value="on" <?php echo ($wallet->getCreateOrderBeforeRedirect() ? 'checked' : ''); ?> />
+                    <?php echo $language->get('wallet_create_order_label'); ?>
+                </label><br />
+                <label>
+                    <input type="checkbox" name="yandex_money_wallet_clear_cart_before_redirect" id="yandex_money_wallet_clear_cart_before_redirect"
+                           value="on" <?php echo ($wallet->getClearCartBeforeRedirect() ? 'checked' : ''); ?> />
+                    <?php echo $language->get('wallet_clear_cart_label'); ?>
+                </label>
+            </div>
+        </div>
+        <div class="form-group">
             <label class="col-sm-2 control-label" for="wallet-success-order-status">
                 <?php echo $language->get('wallet_success_order_status_label'); ?>
             </label>

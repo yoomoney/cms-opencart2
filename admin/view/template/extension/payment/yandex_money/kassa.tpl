@@ -14,6 +14,12 @@
             <p><?php echo $language->get('kassa_version_string'); ?> <?php echo $module_version; ?></p>
         </div>
 
+        <?php if (!empty($error_kassa_invalid_credentials)) : ?>
+        <div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> <?php echo $error_kassa_invalid_credentials; ?>
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+        </div>
+        <?php endif; ?>
+
         <div class="form-group">
             <div class="col-sm-10 col-sm-offset-2">
                 <label>
@@ -155,6 +161,17 @@
         </div>
 
         <div class="form-group">
+            <label class="col-sm-2 control-label">Показывать ссылку на сайт Кассы</label>
+            <div class="col-sm-10">
+                <select id="kassa-debug-log" name="yandex_money_kassa_show_in_footer" class="form-control">
+                    <option value="off" <?php echo ($kassa->getShowLinkInFooter() ? '' : 'selected'); ?>><?php echo $language->get('kassa_debug_log_off'); ?></option>
+                    <option value="on" <?php echo ($kassa->getShowLinkInFooter() ? 'selected' : ''); ?>><?php echo $language->get('kassa_debug_log_on'); ?></option>
+                </select>
+                <p class="help-block">Ссылка будет отображаться в подвале вашего сайта.</p>
+            </div>
+        </div>
+
+        <div class="form-group">
             <div class="col-sm-10 col-sm-offset-2">
                 <label>
                     <input type="checkbox" id="kassa-invoice" name="yandex_money_kassa_invoice" value="on"<?php echo $kassa->isInvoicesEnabled() ? ' checked' : ''; ?> />
@@ -185,7 +202,21 @@
                 </label>
             </div>
         </div>
-
+        <div class="form-group">
+            <div class="col-sm-2 control-label"><strong><?php echo $language->get('kassa_before_redirect_label'); ?></strong></div>
+            <div class="col-sm-10">
+                <label>
+                    <input type="checkbox" name="yandex_money_kassa_create_order_before_redirect" id="yandex_money_kassa_create_order_before_redirect"
+                           value="on" <?php echo ($kassa->getCreateOrderBeforeRedirect() ? 'checked' : ''); ?> />
+                    <?php echo $language->get('kassa_create_order_label'); ?>
+                </label><br />
+                <label>
+                    <input type="checkbox" name="yandex_money_kassa_clear_cart_before_redirect" id="yandex_money_kassa_clear_cart_before_redirect"
+                           value="on" <?php echo ($kassa->getClearCartBeforeRedirect() ? 'checked' : ''); ?> />
+                    <?php echo $language->get('kassa_clear_cart_label'); ?>
+                </label>
+            </div>
+        </div>
         <div class="form-group">
             <label class="col-sm-2 control-label" for="kassa-success-order-status">
                 <?php echo $language->get('kassa_success_order_status_label'); ?>
