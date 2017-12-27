@@ -1,0 +1,12 @@
+f:admin/controller/extension/payment/yandex_money.php
+f:{admin,catalog}/language/{en-gb,ru-ru}/extension/payment/yandex_money.php
+d:{admin,catalog}/model/extension/payment/yandex_money
+f:admin/model/extension/payment/yandex_money.php
+d:admin/view/template/extension/payment/yandex_money
+f:admin/view/template/extension/payment/yandex_money.tpl
+f:catalog/{controller,model}/extension/payment/yandex_money.php
+d:catalog/controller/extension/yandex_market
+f:catalog/view/theme/default/template/extension/payment/yandex_money_failure_status.tpl
+f:catalog/view/theme/default/template/extension/payment/yandex_money_success_status.tpl
+d:catalog/view/theme/default/template/extension/payment/yandex_money
+d:image/payment/yandex_money

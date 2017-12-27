@@ -10,6 +10,8 @@ require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'yandex_money' . DIRECTOR
  */
 class ModelExtensionPaymentYandexMoney extends Model
 {
+    const MODULE_VERSION = '1.0.4';
+
     private $kassaModel;
     private $walletModel;
     private $billingModel;
@@ -137,7 +139,7 @@ class ModelExtensionPaymentYandexMoney extends Model
                 ->setMetadata(array(
                     'order_id' => $orderId,
                     'cms_name' => 'ya_api_ycms_opencart',
-                    'module_version' => '1.0.3',
+                    'module_version' => self::MODULE_VERSION,
                 ));
 
             $confirmation = array(

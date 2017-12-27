@@ -276,3 +276,5 @@ $_['active_on']          = 'Activated';
 $_['active_off']          = 'Disabled';
 $_['active']          = 'Activity';
 $_['mod_off']          = 'Install the Yandex.Money extension from the payment modules folder.';
+
+$_['update_tab_header'] = 'Обновление модуля';
