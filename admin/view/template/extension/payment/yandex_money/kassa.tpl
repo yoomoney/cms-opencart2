@@ -267,6 +267,12 @@
             </div>
         </div>
         <div class="form-group">
+            <label class="col-sm-2 control-label"><?php echo $language->get('kassa_payment_list_label'); ?></label>
+            <div class="col-sm-9">
+                <p class="help-block"><a href="<?php echo $kassa_payments_link; ?>"><?php echo $language->get('kassa_payment_list_link'); ?></a></p>
+            </div>
+        </div>
+        <div class="form-group">
             <label class="col-sm-2 control-label" for="kassa-sort-order">
                 <?php echo $language->get('kassa_sort_order_label'); ?>
             </label>

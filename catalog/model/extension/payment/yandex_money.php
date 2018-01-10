@@ -10,7 +10,7 @@ require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'yandex_money' . DIRECTOR
  */
 class ModelExtensionPaymentYandexMoney extends Model
 {
-    const MODULE_VERSION = '1.0.4';
+    const MODULE_VERSION = '1.0.5';
 
     private $kassaModel;
     private $walletModel;

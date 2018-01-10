@@ -101,6 +101,157 @@ class ModelExtensionPaymentYandexMoney extends Model
     }
 
     /**
+     * @param int $offset
+     * @return array
+     */
+    public function findPayments($offset = 0)
+    {
+        $res = $this->db->query('SELECT * FROM `' . DB_PREFIX . 'ya_money_payment` ORDER BY `order_id` DESC LIMIT ' . (int)$offset . ', 20');
+        if ($res->num_rows) {
+            return $res->rows;
+        }
+        return array();
+    }
+
+    public function countPayments()
+    {
+        $res = $this->db->query('SELECT COUNT(*) AS `count` FROM `' . DB_PREFIX . 'ya_money_payment`');
+        if ($res->num_rows) {
+            return $res->row['count'];
+        }
+        return 0;
+    }
+
+    /**
+     * @param $payments
+     * @return \YaMoney\Model\PaymentInterface[]
+     */
+    public function updatePaymentsStatuses($payments)
+    {
+        $result = array();
+
+        $client = $this->getClient();
+        $statuses = array(
+            \YaMoney\Model\PaymentStatus::PENDING,
+            \YaMoney\Model\PaymentStatus::WAITING_FOR_CAPTURE,
+        );
+        foreach ($payments as $payment) {
+            if (in_array($payment['status'], $statuses)) {
+                try {
+                    $paymentObject = $client->getPaymentInfo($payment['payment_id']);
+                    if ($paymentObject === null) {
+                        $this->updatePaymentStatus($payment['payment_id'], \YaMoney\Model\PaymentStatus::CANCELED);
+                    } else {
+                        $result[] = $paymentObject;
+                        if ($paymentObject->getStatus() !== $payment['status']) {
+                            $this->updatePaymentStatus($payment['payment_id'], $paymentObject->getStatus(), $paymentObject->getCapturedAt());
+                        }
+                    }
+                } catch (\Exception $e) {
+                    // nothing to do
+                }
+            }
+        }
+        return $result;
+    }
+
+    /**
+     * @param \YaMoney\Model\PaymentInterface $payment
+     * @param bool $fetchPayment
+     * @return bool
+     */
+    public function capturePayment($payment, $fetchPayment = true)
+    {
+        if ($fetchPayment) {
+            $client = $this->getClient();
+            try {
+                $payment = $client->getPaymentInfo($payment->getId());
+            } catch (Exception $e) {
+                $this->log('error', 'Payment ' . $payment->getId() . ' not fetched from API in capture method');
+                return false;
+            }
+        }
+
+        if ($payment->getStatus() !== \YaMoney\Model\PaymentStatus::WAITING_FOR_CAPTURE) {
+            return $payment->getStatus() === \YaMoney\Model\PaymentStatus::SUCCEEDED;
+        }
+
+        $client = $this->getClient();
+        try {
+            $builder = \YaMoney\Request\Payments\Payment\CreateCaptureRequest::builder();
+            $builder->setAmount($payment->getAmount());
+            $key = uniqid('', true);
+            $tries = 0;
+            $request = $builder->build();
+            do {
+                $result = $client->capturePayment($request, $payment->getId(), $key);
+                if ($result === null) {
+                    $tries++;
+                    if ($tries > 3) {
+                        break;
+                    }
+                    sleep(2);
+                }
+            } while ($result === null);
+            if ($result === null) {
+                throw new RuntimeException('Failed to capture payment after 3 retries');
+            }
+            if ($result->getStatus() !== $payment->getStatus()) {
+                $this->updatePaymentStatus($payment->getId(), $result->getStatus(), $result->getCapturedAt());
+            }
+        } catch (Exception $e) {
+            $this->log('error', 'Failed to capture payment: ' . $e->getMessage());
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * @param int $orderId
+     * @param array $orderInfo
+     * @param \YaMoney\Model\PaymentInterface $payment
+     * @param int $statusId
+     */
+    public function confirmOrderPayment($orderId, $orderInfo, $payment, $statusId)
+    {
+        $sql = 'UPDATE `' . DB_PREFIX . 'order_history` SET `comment` = \'Платёж подтверждён\' WHERE `order_id` = '
+            . (int)$orderId . ' AND `order_status_id` <= 1';
+        $comment = 'Номер транзакции: ' . $payment->getId() . '. Сумма: ' . $payment->getAmount()->getValue()
+            . ' ' . $payment->getAmount()->getCurrency();
+        $this->db->query($sql);
+
+        $orderInfo['order_status_id'] = $statusId;
+        $this->updateOrderStatus($orderId, $orderInfo, $comment);
+    }
+
+    public function updateOrderStatus($order_id, $order_info, $comment = '')
+    {
+        if ($order_info && $order_info['order_status_id']) {
+            $sql = "UPDATE `" . DB_PREFIX . "order` SET order_status_id = '" . (int)$order_info['order_status_id']
+                . "', date_modified = NOW() WHERE order_id = '" . (int)$order_id . "'";
+            $this->db->query($sql);
+
+            $sql = "INSERT INTO " . DB_PREFIX . "order_history SET order_id = '" . (int)$order_id
+                . "', order_status_id = '" . (int)$order_info['order_status_id'] . "', notify = 0, comment = '"
+                . $this->db->escape($comment) . "', date_added = NOW()";
+            $this->db->query($sql);
+        }
+    }
+
+    private function updatePaymentStatus($paymentId, $status, $capturedAt = null)
+    {
+        $sql = 'UPDATE `' . DB_PREFIX . 'ya_money_payment` SET `status` = \'' . $status . '\'';
+        if ($capturedAt !== null) {
+            $sql .= ', `captured_at`=\'' . $capturedAt->format('Y-m-d H:i:s') . '\'';
+        }
+        if ($status !== \YaMoney\Model\PaymentStatus::CANCELED && $status !== \YaMoney\Model\PaymentStatus::PENDING) {
+            $sql .= ', `paid`=\'Y\'';
+        }
+        $sql .= ' WHERE `payment_id`=\'' . $paymentId . '\'';
+        $this->db->query($sql);
+    }
+
+    /**
      * @param int $orderId
      *
      * @return array
