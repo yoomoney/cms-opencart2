@@ -160,7 +160,7 @@
                 <label class="radio-inline">
                     <input type="radio" <?php echo ($yandex_money_market_catall ? ' checked="checked"' : ''); ?> name="yandex_money_market_catall" value="1"/> <?php echo $market_out_all; ?></label>
                 <label class="radio-inline">
-                    <input type="radio" <?php echo (!$yandex_money_market_catall ? ' checked="checked"' : ''); ?> name="yandex_money_market_catall" value="0"/> <?php echo $market_out_sel; ?></label>
+                    <input type="radio" <?php echo (!$yandex_money_market_catall ? 'checked="checked"' : ''); ?> name="yandex_money_market_catall" value="0"/> <?php echo $market_out_sel; ?></label>
             </div>
         </div>
         <div class="form-group">

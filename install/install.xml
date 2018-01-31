@@ -2,7 +2,7 @@
 <modification>
     <name>Y.CMS 2.0 for Opencart 2.0.x - 2.3.x</name>
     <code>ycms.2.0</code>
-    <version>1.0.5</version>
+    <version>1.0.6</version>
     <author>Yandex.Money</author>
     <!-- Вставка кнопки в историю заказов-->
     <file path="catalog/controller/account/order.php">
@@ -92,7 +92,7 @@
         <operation>
             <search><![CDATA['shipping_code' => $result['shipping_code'],]]></search>
             <add position="after"><![CDATA[
-                'payment_code'   => (isset($result['payment_code']) && $this->config->get('yandex_money_kassa_enabled') && $this->config->get('yandex_money_kassa_invoice') && $result['order_status_id'] == 1) ? $result['payment_code'] : '',
+                'payment_code'   => $this->config->get('yandex_money_kassa_enabled') && $this->config->get('yandex_money_kassa_invoice') ? $result['payment_code'] : '',
                 'payment_status' => (isset($result['yandex_money_payment_status']) ? $result['yandex_money_payment_status'] : ''),
                 'email'          => (isset($result['email']) && $this->config->get('yandex_money_kassa_enabled')) ? $result['email'] : '',
                 'refund_amount'  => (isset($result['refund_amount']) ? $result['refund_amount'] : ''),
