@@ -10,7 +10,7 @@
 class ControllerExtensionPaymentYandexMoney extends Controller
 {
     const MODULE_NAME = 'yandex_money';
-    const MODULE_VERSION = '1.0.5';
+    const MODULE_VERSION = '1.0.6';
 
     public $fields_metrika = array(
         'yandex_money_metrika_active',
@@ -1414,7 +1414,12 @@ class ControllerExtensionPaymentYandexMoney extends Controller
 
     public function treeItem($id, $name, $checked)
     {
-        $flag = in_array($id, $checked);
+        if(is_array($checked)) {
+            $flag = in_array($id, $checked);
+        } else if(is_bool($checked)){
+            $flag = $checked;
+        }
+
         $html = '<li class="tree-item">
             <span class="tree-item-name">
                 <input type="checkbox" name="yandex_money_market_categories[]" value="'.$id.'"'.($flag ? ' checked' : '').'>
@@ -1428,7 +1433,12 @@ class ControllerExtensionPaymentYandexMoney extends Controller
 
     public function treeFolder($id, $name, $checked)
     {
-        $flag = in_array($id, $checked);
+        if(is_array($checked)) {
+            $flag = in_array($id, $checked);
+        } else if(is_bool($checked)){
+            $flag = $checked;
+        }
+
         $html = '<li class="tree-folder">
             <span class="tree-folder-name">
                 <input type="checkbox" name="yandex_money_market_categories[]" value="'.$id.'"'.($flag ? ' checked' : '').'>
