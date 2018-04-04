@@ -24,3 +24,24 @@ $_['fast_pay_fio_label'] = 'Ф.И.О Плательщика';
 $_['text_repay'] = 'Оплатить';
 $_['text_order'] = 'Заказ';
 $_['text_comment'] = 'Комментарий';
+
+$_['text_invalid_payment_method'] = 'Не верный способ оплаты заказа';
+
+$_['log_text_create_payment'] = 'Создание платежа для заказа №';
+$_['log_text_payment_create_failed'] = 'Платеж не прошел. Попробуйте еще или выберите другой способ оплаты';
+$_['log_text_payment_init_failed'] = 'Не удалось инициализировать платёж';
+$_['log_text_payment_capture'] = 'Подтверждение платежа для заказа №';
+$_['log_text_order_not_found'] = 'Не найден платёж %s для заказа №%s';
+$_['log_text_error_payment_capture'] = 'Платёж не был проведён';
+$_['log_text_status_canceled'] = 'Статус платежа %s заказа №%s - canceled';
+$_[''] = '';
+
+$_['text_error_phone_empty'] = 'Не был указан телефон';
+$_['text_error_alfa_login_empty'] = 'Не указан логин в Альфа-клике';
+$_['text_error_payment_id'] = 'Не был передан идентификатор платежа';
+$_['text_module_disabled'] = 'Модуль оплаты выключен';
+$_['text_get_payment_id_failed'] = 'Не удалось получить ID платежа для заказа №';
+$_['text_capture_init'] = 'Проведение платежа %s заказа №%s';
+$_['text_failure_status'] = 'Не удалось провести платёж';
+$_['text_success_status'] = 'Заказ №%s был создан';
+$_[''] = '';

@@ -340,9 +340,9 @@ class ModelExtensionPaymentYandexMoney extends Model
     {
         $prefix = version_compare(VERSION, '2.3.0') >= 0 ? 'extension/' : '';
         $types  = array(
-            'POST'     => "Доставка почтой",
-            'PICKUP'   => "Самовывоз",
-            'DELIVERY' => "Доставка курьером",
+            'POST'     => $this->language->get('pokupki_carrier_post'),
+            'PICKUP'   => $this->language->get('pokupki_carrier_pickup'),
+            'DELIVERY' => $this->language->get('pokupki_carrier_delivery'),
         );
         $this->load->model('extension/extension');
         $extensions = $this->model_extension_extension->getInstalled('shipping');
@@ -628,7 +628,7 @@ class ModelExtensionPaymentYandexMoney extends Model
         $dir = DIR_DOWNLOAD.'/'.$this->versionDirectory;
         if (!file_exists($dir)) {
             if (!mkdir($dir)) {
-                $this->log('error', 'Не удалось создать директорию '.$dir);
+                $this->log('error', sprintf($this->language->log('updater_error_create_directory'), $dir));
 
                 return false;
             }
@@ -642,7 +642,7 @@ class ModelExtensionPaymentYandexMoney extends Model
         $connector = new GitHubConnector();
         $fileName  = $connector->downloadRelease($this->repository, $tag, $dir);
         if (empty($fileName)) {
-            $this->log('error', 'Не удалось загрузить архив с обновлением');
+            $this->log('error', $this->language->log('updater_error_load'));
 
             return false;
         }

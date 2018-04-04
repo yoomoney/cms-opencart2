@@ -8,7 +8,7 @@ echo $column_right;
 <div class="container">
     <?php echo $content_top; ?>
 
-    <p>Не удалось провести платёж</p>
+    <p><?= $language->get('text_failure_status')?></p>
 
     <?php echo $content_bottom; ?>
 </div>

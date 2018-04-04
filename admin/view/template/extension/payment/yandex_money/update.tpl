@@ -1,19 +1,19 @@
 <div role="tabpanel" class="tab-pane" id="updater">
     <div class='row'>
         <div class='col-md-12'>
-            Здесь будут появляться новые версии модуля — с новыми возможностями или с исправленными ошибками. Чтобы установить новую версию модуля, нажмите кнопку «Обновить».
+            <?= $language->get('updater_header_text')?>
         </div>
     </div>
     <div class='row'>
         <div class='col-md-12'>
-            <h4>О модуле:</h4>
+            <h4><?= $language->get('updater_about_title')?>:</h4>
             <ul>
-                <li>Установленная версия модуля: <?php echo $currentVersion; ?></li>
-                <li>Последняя доступная версия модуля: <?php echo $newVersion; ?></li>
+                <li><?= $language->get('updater_current_version')?>: <?php echo $currentVersion; ?></li>
+                <li><?= $language->get('updater_last_version')?>: <?php echo $newVersion; ?></li>
                 <li>
-                    Дата проверки наличия новой версии: <?php echo $newVersionInfo['date'] ?>
+                    <?= $language->get('updater_last_check_date')?>: <?php echo $newVersionInfo['date'] ?>
                     <?php if (time() - $newVersionInfo['time'] > 300) : ?>
-                    <button type="button" class="btn btn-success btn-xs" id="force-check">Проверить наличие обновлений
+                    <button type="button" class="btn btn-success btn-xs" id="force-check"><?= $language->get('updater_check_updates')?>
                     </button>
                     <?php endif; ?>
                 </li>
@@ -21,7 +21,7 @@
 
             <?php if ($new_version_available) : ?>
 
-            <h4>История изменений:</h4>
+            <h4><?= $language->get('updater_history_title')?></h4>
             <p><?php echo $changelog; ?></p>
 
                 <form method="post" id="update-form" action="<?php echo $update_action; ?>&type=update">
@@ -29,7 +29,7 @@
                     <input name="version" value="<?php echo htmlspecialchars($newVersion) ?>" type="hidden"/>
                 </form>
 
-                <button type="button" id="update-module" class="btn btn-primary">Обновить модуль</button>
+                <button type="button" id="update-module" class="btn btn-primary"><?= $language->get('updater_update')?></button>
 
                 <form method="post" id="update-form" action="<?php echo $update_action; ?>&type=update">
                     <input name="update" value="1" type="hidden"/>
@@ -37,7 +37,7 @@
                 </form>
 
             <?php else: ?>
-            <p>Установлена последняя версия модуля.</p>
+            <p><?= $language->get('updater_last_version_installed')?></p>
             <?php endif; ?>
 
             <form method="post" id="check-version" action="<?php echo $update_action; ?>&type=check">
@@ -49,14 +49,14 @@
 
     <?php if (!empty($backups)) : ?>
     <div class="row">
-        <h4>Резервные копии</h4>
+        <h4><?= $language->get('updater_backups_title')?></h4>
         <table class="table table-striped table-hover">
             <thead>
             <tr>
-                <th>Версия модуля</th>
-                <th>Дата создания</th>
-                <th>Имя файла</th>
-                <th>Размер файла</th>
+                <th><?= $language->get('updater_module_version')?></th>
+                <th><?= $language->get('updater_date_create')?></th>
+                <th><?= $language->get('updater_file_name')?></th>
+                <th><?= $language->get('updater_file_size')?></th>
                 <th>&nbsp;</th>
             </tr>
             </thead>
@@ -70,11 +70,11 @@
                 <td class="text-right">
                     <button type="button" class="btn btn-success btn-xs restore-backup"
                             data-id="<?php echo $backup['name'] ?>" data-version="<?php echo $backup['version'] ?>"
-                            data-date="<?php echo $backup['date'] ?>">Восстановить
+                            data-date="<?php echo $backup['date'] ?>"><?= $language->get('updater_restore')?>
                     </button>
                     <button type="button" class="btn btn-danger btn-xs remove-backup"
                             data-id="<?php echo $backup['name'] ?>" data-version="<?php echo $backup['version'] ?>"
-                            data-date="<?php echo $backup['date'] ?>">Удалить
+                            data-date="<?php echo $backup['date'] ?>"><?= $language->get('Удалить')?>
                     </button>
                 </td>
             </tr>
@@ -96,7 +96,7 @@
 <script type="text/javascript">
     jQuery(document).ready(function () {
         jQuery('button.restore-backup').click(function () {
-            var message = 'Вы действительно хотите восстановить модуль из бэкапа версии ' + this.dataset.version
+            var message = '<?= $language->get("updater_restore_message")?>' + this.dataset.version
                 + ' от ' + this.dataset.date + '?';
             if (confirm(message)) {
                 jQuery('#action-form-action').val('restore');
@@ -106,7 +106,7 @@
             }
         });
         jQuery('button.remove-backup').click(function () {
-            var message = 'Вы действительно хотите удалить бэкап модуля версии ' + this.dataset.version
+            var message = '<?= $language->get("updater_delete_message")?> ' + this.dataset.version
                 + ' от ' + this.dataset.date + '?';
             if (confirm(message)) {
                 jQuery('#action-form-action').val('remove');

@@ -2,7 +2,7 @@
 <modification>
     <name>Y.CMS 2.0 for Opencart 2.0.x - 2.3.x</name>
     <code>ycms.2.0</code>
-    <version>1.0.6</version>
+    <version>1.0.8</version>
     <author>Yandex.Money</author>
     <!-- Вставка кнопки в историю заказов-->
     <file path="catalog/controller/account/order.php">
@@ -227,7 +227,7 @@
         <operation>
             <search><![CDATA[<footer]]></search>
             <add position="before"><![CDATA[
-            <?php if (isset ($ya_metrika_active) && $ya_metrika_active){ ?>
+            <?php if (isset ($yandex_money_metrika_active) && $yandex_money_metrika_active){ ?>
                 <?php echo $yandex_metrika; ?>
                 <script type="text/javascript">
                     var old_addCart = cart.add;

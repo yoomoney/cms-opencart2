@@ -63,7 +63,7 @@
             </div>
         </div>
         <div class="form-group">
-            <label class="col-sm-4 control-label" for="">Товар в наличии</label>
+            <label class="col-sm-4 control-label" for=""><?php echo $language->get('market_product_in_stock_header'); ?></label>
             <div class="col-sm-8">
                 <table class="table">
                     <tr>
@@ -88,13 +88,13 @@
             </div>
         </div>
         <div class="form-group">
-            <label class="col-sm-4 control-label" for="yandex_money_market_localdays"><?php echo "Товара нет в наличии"; ?></label>
+            <label class="col-sm-4 control-label" for="yandex_money_market_localdays"><?php echo $language->get('market_product_in_out_of_stock'); ?></label>
             <div class="col-sm-8">
                 <table class="table">
                     <tr>
-                        <th>Статус товара на складе</th>
-                        <th>Срок доставки</th>
-                        <th>Стоимость доставки </th>
+                        <th><?php echo $language->get('market_product_status_in_stock'); ?></th>
+                        <th><?php echo $language->get('market_product_delivery_date'); ?></th>
+                        <th><?php echo $language->get('market_product_delivery_cost'); ?></th>
                     </tr>
                     <?php foreach ($stockstatuses as $stock) {?>
                     <tr>
