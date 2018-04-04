@@ -10,7 +10,7 @@ require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'yandex_money' . DIRECTOR
  */
 class ModelExtensionPaymentYandexMoney extends Model
 {
-    const MODULE_VERSION = '1.0.6';
+    const MODULE_VERSION = '1.0.8';
 
     private $kassaModel;
     private $walletModel;
@@ -466,7 +466,7 @@ class ModelExtensionPaymentYandexMoney extends Model
             $builder->setReceiptPhone($orderInfo['phone']);
         }
         $taxRates = $this->config->get('yandex_money_kassa_tax_rates');
-        $builder->setTaxSystemCode($this->config->get('yandex_money_kassa_tax_rate_default'));
+        $defaultTaxRate = $this->config->get('yandex_money_kassa_tax_rate_default');
 
         $orderProducts = $this->model_account_order->getOrderProducts($orderInfo['order_id']);
         foreach ($orderProducts as $prod) {
@@ -477,10 +477,10 @@ class ModelExtensionPaymentYandexMoney extends Model
                 if (isset($taxRates[$taxId])) {
                     $builder->addReceiptItem($prod['name'], $price, $prod['quantity'], $taxRates[$taxId]);
                 } else {
-                    $builder->addReceiptItem($prod['name'], $price, $prod['quantity']);
+                    $builder->addReceiptItem($prod['name'], $price, $prod['quantity'], $defaultTaxRate);
                 }
             } else {
-                $builder->addReceiptItem($prod['name'], $price, $prod['quantity']);
+                $builder->addReceiptItem($prod['name'], $price, $prod['quantity'], $defaultTaxRate);
             }
         }
 
@@ -492,7 +492,7 @@ class ModelExtensionPaymentYandexMoney extends Model
                     $taxId = $total['tax_class_id'];
                     $builder->addReceiptShipping($total['title'], $price, $taxRates[$taxId]);
                 } else {
-                    $builder->addReceiptShipping($total['title'], $price);
+                    $builder->addReceiptShipping($total['title'], $price, $defaultTaxRate);
                 }
             }
         }

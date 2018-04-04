@@ -27,19 +27,19 @@ echo $column_left;
     <div class="container-fluid">
         <div class="panel panel-default">
             <div class="panel-heading">
-                <h4>Журнал сообщений платежного модуля Яндекс.Деньги</h4>
+                <h4><?= $language->get('log_title');?></h4>
             </div>
             <div class="panel-body">
                 <form action="" method="post" id="log-form">
                     <input type="hidden" name="clear-logs" value="0" />
                     <input type="hidden" name="download" value="0" />
                     <div class="buttons">
-                        <button type="button" class="btn btn-primary" data-value="download">Скачать файл сообщений</button>
-                        <button type="button" class="btn btn-danger" data-value="clear-logs">Очистить файл сообщений</button>
+                        <button type="button" class="btn btn-primary" data-value="download"><?= $language->get('log_download');?></button>
+                        <button type="button" class="btn btn-danger" data-value="clear-logs"><?= $language->get('log_clear');?></button>
                     </div>
                 </form>
                 <?php if (empty($logs)): ?>
-                <p>Журнал сообщений пуст.</p>
+                <p><?= $language->get('log_empty');?></p>
                 <?php else: ?>
                 <pre style="margin-top: 10px; font-size: 9pt;"><?php echo $logs; ?></pre>
                 <?php endif; ?>

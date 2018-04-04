@@ -8,7 +8,7 @@ echo $column_right;
 <div class="container">
     <?php echo $content_top; ?>
 
-    <p><a href="<?php echo $orderLink; ?>">Заказ №<?php echo $orderId; ?></a> был создан</p>
+    <p><a href="<?php echo $orderLink; ?>"><?= sprintf($language->get('text_success_status'),$orderId);?></p>
 
     <?php echo $content_bottom; ?>
 </div>

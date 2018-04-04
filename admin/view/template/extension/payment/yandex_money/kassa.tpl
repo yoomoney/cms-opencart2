@@ -161,13 +161,13 @@
         </div>
 
         <div class="form-group">
-            <label class="col-sm-2 control-label">Показывать ссылку на сайт Кассы</label>
+            <label class="col-sm-2 control-label"><?php echo $language->get('kassa_show_url_link');?></label>
             <div class="col-sm-10">
                 <select id="kassa-debug-log" name="yandex_money_kassa_show_in_footer" class="form-control">
                     <option value="off" <?php echo ($kassa->getShowLinkInFooter() ? '' : 'selected'); ?>><?php echo $language->get('kassa_debug_log_off'); ?></option>
                     <option value="on" <?php echo ($kassa->getShowLinkInFooter() ? 'selected' : ''); ?>><?php echo $language->get('kassa_debug_log_on'); ?></option>
                 </select>
-                <p class="help-block">Ссылка будет отображаться в подвале вашего сайта.</p>
+                <p class="help-block"><?php echo $language->get('kassa_show_url_link_description');?></p>
             </div>
         </div>
 

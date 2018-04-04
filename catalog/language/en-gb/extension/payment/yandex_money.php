@@ -1,26 +1,26 @@
-<?php
+﻿<?php
 
-$_['heading_title'] = 'Яндекс.Касса (банковские карты, Яндекс.Деньги, интернет-банки, наличные, счет мобильного и другие)';
+$_['heading_title'] = 'Yandex.Checkout (bank cards, Yandex.Money, online banking, cash, direct carrier billing, etc.)';
 
 $_['heading_payment'] = $_['heading_title'];
-$_['text_continue'] = 'Перейти к оплате';
+$_['text_continue'] = 'Proceed to checkout';
 $_['kassa_title'] = $_['heading_title'];
 
-$_['text_method_yandex_money'] = 'Яндекс.Деньги';
-$_['text_method_bank_card'] = 'Банковские карты — Visa, Mastercard и Maestro, «Мир»';
-$_['text_method_cash'] = "Наличные";
-$_['text_method_mobile'] = 'Баланс мобильного — Билайн, Мегафон, МТС, Tele2';
+$_['text_method_yandex_money'] = 'Yandex.Money';
+$_['text_method_bank_card'] = 'Debit or credit cards—Visa, Mastercard, Maestro, MIR';
+$_['text_method_cash'] = "Cash";
+$_['text_method_mobile'] = 'Direct carrier billing—Beeline, MegaFon, MTS, Tele2';
 $_['text_method_webmoney'] = 'Webmoney';
-$_['text_method_alfabank'] = 'Альфа-Клик';
-$_['text_method_sberbank'] = 'Сбербанк Онлайн';
+$_['text_method_alfabank'] = 'Alfa-Click';
+$_['text_method_sberbank'] = 'Sberbank Online';
 $_['text_method_qiwi'] = 'QIWI Wallet';
 
-$_['text_payment_method_qiwi_phone'] = 'Телефон, который привязан к Qiwi Wallet';
-$_['text_payment_method_alfa_login'] = 'Укажите логин, и мы выставим счет в Альфа-Клике. После этого останется подтвердить платеж на сайте интернет-банка.';
+$_['text_payment_method_qiwi_phone'] = 'Phone number linked to QIWI Wallet';
+$_['text_payment_method_alfa_login'] = 'Specify the login, and we\'ll send the bill in Alfa-Click. All you have do after that is confirm the payment online at the bank\'s website.';
 
-$_['error_payment_method'] = 'Укажите способ оплаты';
-$_['fast_pay_fio_label'] = 'Ф.И.О Плательщика';
+$_['error_payment_method'] = 'Select payment method';
+$_['fast_pay_fio_label'] = 'Payer\'s full name';
 
-$_['text_repay'] = 'Оплатить';
-$_['text_order'] = 'Заказ';
-$_['text_comment'] = 'Комментарий';
+$_['text_repay'] = 'Pay';
+$_['text_order'] = 'Order';
+$_['text_comment'] = 'Comment';

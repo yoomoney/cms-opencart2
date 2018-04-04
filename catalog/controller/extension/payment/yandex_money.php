@@ -154,7 +154,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             );
         }
         if ($query->row['payment_code'] !== 'yandex_money') {
-            $this->session->data['error'] = 'Не верный способ оплаты заказа';
+            $this->session->data['error'] = $this->language->get('text_invalid_payment_method');
             $this->response->redirect(
                 $this->url->link('account/order/info', 'order_id=' . $orderId, true)
             );
@@ -166,19 +166,19 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             );
         }
 
-        $this->getModel()->log('info', 'Создание платежа для заказа №' . $orderId);
+        $this->getModel()->log('info', $this->language->get('log_text_create_payment') . $orderId);
 
         $payment = $this->getModel()->createOrderPayment($order, false);
         if ($payment === null) {
-            $this->failure('Платеж не прошел. Попробуйте еще или выберите другой способ оплаты');
+            $this->failure($this->language->get('log_text_payment_create_failed'));
         } elseif ($payment->getStatus() === \YaMoney\Model\PaymentStatus::CANCELED) {
-            $this->failure('Платеж не прошел. Попробуйте еще или выберите другой способ оплаты');
+            $this->failure($this->language->get('log_text_payment_create_failed'));
         }
         $confirmation = $payment->getConfirmation();
         if ($confirmation !== null && $confirmation->getType() === \YaMoney\Model\ConfirmationType::REDIRECT) {
             $this->response->redirect($confirmation->getConfirmationUrl());
         }
-        $this->session->data['error'] = 'Не удалось инициализировать платёж';
+        $this->session->data['error'] = $this->language->get('log_text_payment_init_failed');
         $this->response->redirect(
             $this->url->link('account/order/info', 'order_id=' . $orderId, true)
         );
@@ -221,7 +221,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             $this->jsonError('Cart is empty');
         }
         $orderId = $this->session->data['order_id'];
-        $this->getModel()->log('info', 'Создание платежа для заказа №' . $orderId);
+        $this->getModel()->log('info', $this->language->get('log_text_create_payment') . $orderId);
         if (!isset($this->request->get['paymentType'])) {
             $this->jsonError('Payment method not specified');
         }
@@ -235,20 +235,20 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         } elseif ($paymentMethod == \YaMoney\Model\PaymentMethodType::QIWI) {
             $phone = isset($_GET['qiwiPhone']) ? preg_replace('/[^\d]/', '', $_GET['qiwiPhone']) : '';
             if (empty($phone)) {
-                $this->jsonError('Не был указан телефон');
+                $this->jsonError($this->language->get('text_error_phone_empty'));
             }
         } elseif ($paymentMethod == \YaMoney\Model\PaymentMethodType::ALFABANK) {
             $login = isset($this->request->get['alphaLogin']) ? trim($this->request->get['alphaLogin']) : '';
             if (empty($login)) {
-                $this->jsonError('Не указан логин в Альфа-клике');
+                $this->jsonError($this->language->get('text_error_alfa_login_empty'));
             }
         }
 
         $payment = $this->getModel()->createPayment($orderId, $paymentMethod);
         if ($payment === null) {
-            $this->jsonError('Платеж не прошел. Попробуйте еще или выберите другой способ оплаты');
+            $this->jsonError($this->language->get('log_text_payment_create_failed'));
         } elseif ($payment->getStatus() === \YaMoney\Model\PaymentStatus::CANCELED) {
-            $this->jsonError('Платеж не прошел. Попробуйте еще или выберите другой способ оплаты');
+            $this->jsonError($this->language->get('log_text_payment_create_failed'));
         }
         $result = array(
             'success' => true,
@@ -285,26 +285,26 @@ class ControllerExtensionPaymentYandexMoney extends Controller
     {
         $this->load->language($this->getPrefix() . 'payment/' . self::MODULE_NAME);
         if (empty($_GET['order_id'])) {
-            $this->failure('Не был передан идентификатор платежа');
+            $this->failure($this->language->get('text_error_payment_id'));
         }
-        $this->getModel()->log('info', 'Подтверждение платежа для заказа №' . $_GET['order_id']);
+        $this->getModel()->log('info', $this->language->get('log_text_payment_capture') . $_GET['order_id']);
         $kassa = $this->getModel()->getKassaModel();
         if (!$kassa->isEnabled()) {
-            $this->failure('Модуль оплаты выключен');
+            $this->failure($this->language->get('text_module_disabled'));
         }
         $orderId = (int)$_GET['order_id'];
         $paymentId = $this->getModel()->findPaymentIdByOrderId($orderId);
         if (empty($paymentId)) {
-            $this->failure('Не удалось получить ID платежа для заказа №' . $orderId);
+            $this->failure($this->language->get('text_get_payment_id_failed') . $orderId);
         }
         $this->load->model('checkout/order');
         $payment = $this->getModel()->updatePaymentInfo($paymentId);
         if ($payment === null) {
-            $this->failure('Не найден платёж ' . $paymentId . ' для заказа №' . $orderId);
+            $this->failure(sprintf($this->language->get('log_text_order_not_found'),$paymentId, $orderId));
         } elseif (!$payment->getPaid()) {
-            $this->failure('Платёж не был проведён');
+            $this->failure($this->language->get('log_text_error_payment_capture'));
         } elseif ($payment->getStatus() === \YaMoney\Model\PaymentStatus::CANCELED) {
-            $this->failure('Статус платежа ' . $paymentId . ' заказа №' . $orderId . ' - canceled');
+            $this->failure(sprintf($this->language->get('log_text_status_canceled'), $paymentId, $orderId ));
         } elseif ($payment->getStatus() !== \YaMoney\Model\PaymentStatus::SUCCEEDED) {
             $this->getModel()->log('info', 'Confirm order#' . $orderId . ' with payment ' . $payment->getId());
             $this->getModel()->confirmOrder($orderId, $payment);
@@ -384,7 +384,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             return;
         }
         $orderId = $this->getModel()->findOrderIdByPayment($object->getObject());
-        $this->getModel()->log('info', 'Проведение платежа ' . $object->getObject()->getId() . ' заказа №' . $orderId);
+        $this->getModel()->log('info', sprintf($this->language->get('text_capture_init'), $object->getObject()->getId(), $orderId));
         if ($orderId <= 0) {
             $this->getModel()->log('error', 'Order not exists for payment ' . $object->getObject()->getId());
             header('HTTP/1.1 404 Order not exists');

@@ -33,13 +33,13 @@ echo $column_left;
                 <table class="table table-bordered table-hover">
                     <thead>
                     <tr>
-                        <td class="text-center">ID заказа</td>
-                        <td class="text-center">ID платежа</td>
-                        <td class="text-center">Сумма</td>
-                        <td class="text-center">Оплачен</td>
-                        <td class="text-center">Статус</td>
-                        <td class="text-center">Дата создания</td>
-                        <td class="text-center">Дата подтверждения</td>
+                        <td class="text-center"><?= $language->get('payments_list_header_id')?></td>
+                        <td class="text-center"><?= $language->get('payments_list_header_payment_id')?>ID платежа</td>
+                        <td class="text-center"><?= $language->get('payments_list_header_sum')?>Сумма</td>
+                        <td class="text-center"><?= $language->get('payments_list_header_paid')?>Оплачен</td>
+                        <td class="text-center"><?= $language->get('payments_list_header_status')?>Статус</td>
+                        <td class="text-center"><?= $language->get('payments_list_header_date_create')?>Дата создания</td>
+                        <td class="text-center"><?= $language->get('payments_list_header_date_captured')?>Дата подтверждения</td>
                     </tr>
                     </thead>
                     <tbody>

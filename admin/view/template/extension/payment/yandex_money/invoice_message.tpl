@@ -45,21 +45,21 @@
                         <tr>
                             <td style="padding:30px 25px 20px 25px;">
                                 <h1 style="line-height:normal;padding:0;margin:0;margin-bottom:20px;margin-bottom:24px;font-weight:normal;">
-                                    <font size="5" color="#000000" face="Arial"> К оплате <?php echo $sum; ?> руб. </font>
+                                    <font size="5" color="#000000" face="Arial"> <?php echo sprintf($language->get('invoice_sum_text'), $sum); ?></font>
                                 </h1>
                                 <p style="font-weight:normal;line-height:21px;padding:0;margin:0;margin-bottom:15px;">
-                                    <font color="#000000" face="Arial" size="3"> Здравствуйте, <font style="font-weight:bold;" color="#000000" face="Arial" size="3"><?php echo $customer_name; ?></font>. </font>
+                                    <font color="#000000" face="Arial" size="3"> <?php echo $language->get('invoice_greeting')?>, <font style="font-weight:bold;" color="#000000" face="Arial" size="3"><?php echo $customer_name; ?></font>. </font>
                                 </p>
                                 <p style="font-weight:normal;line-height:21px;padding:0;margin:0;margin-bottom:15px;">
                                     <font color="#000000" face="Arial" size="3">
-                                        Магазин <?php echo $shop_name; ?> благодарит вас за заказ и просит оплатить счет №&nbsp;<?php echo $order_id; ?>.
+                                        <?php echo sprintf($language->get('invoice_thanks'), $shop_name, $order_id);?>.
                                     </font>
                                 </p>
                                 <div>
                                     <img src="https://money.yandex.ru/i/html-letters/margin-block.png" width="100%" height="13" style="border:0;background:#ffffff;">
                                 </div>
                                 <h2 style="font-weight:normal;line-height:normal;padding:0;margin:0;margin-bottom:10px;font-weight:bold;">
-                                    <font size="4" color="#000000" face="Arial">В вашем заказе</font>
+                                    <font size="4" color="#000000" face="Arial"><?php echo $language->get('invoice_receipt_header');?></font>
                                 </h2>
                                 <table style="margin:0;padding:0;width:100%;">
                                     <tbody>
@@ -76,7 +76,7 @@
                                             </div>
                                         </td>
                                         <td valign="top">
-                                            <font color="#000000" face="Arial" size="3"><?php echo $product['quantity']; ?>&nbsp;x&nbsp;<?php echo number_format($product['price'],2,'.',''); ?>&nbsp;руб.</font>
+                                            <font color="#000000" face="Arial" size="3"><?php echo $product['quantity']; ?>&nbsp;x&nbsp;<?php echo number_format($product['price'],2,'.',''); ?>&nbsp;<?php echo $language->get('invoice_currency')?>.</font>
                                         </td>
                                     </tr>
                                     <?php } ?>
@@ -95,7 +95,7 @@
                                     <tr>
                                         <td style="width:70%;">
                                             <div style="line-height:20px;vertical-align:top;">
-                                                <font style="background-color:#fff;font-weight:bold;" color="#000000" face="Arial" size="3">К оплате&nbsp;</font>
+                                                <font style="background-color:#fff;font-weight:bold;" color="#000000" face="Arial" size="3"><?php echo $language->get('invoice_sum_label');?></font>
                                             </div>
                                         </td>
                                         <td>
@@ -103,7 +103,7 @@
                                             </div>
                                         </td>
                                         <td valign="top">
-                                            <font style="font-weight:bold;" color="#000000" face="Arial" size="3"><?php echo $sum; ?>&nbsp;руб.</font>
+                                            <font style="font-weight:bold;" color="#000000" face="Arial" size="3"><?php echo $sum; ?>&nbsp;<?php echo $language->get('invoice_currency')?>.</font>
                                         </td>
                                     </tr>
                                     <tr>
@@ -133,7 +133,7 @@
                                                     <td align="center">
                                                         <div>
                                                             <a href="<?php echo $link; ?>">
-                                                                <img width="176" height="81" src="cid:yandex_buttons.png" border="0" alt="Заплатить через Яндекс">
+                                                                <img width="176" height="81" src="cid:yandex_buttons.png" border="0" alt="<?php echo $language->get('invoice_yandex_text');?>">
                                                             </a>
                                                         </div>
                                                     </td>
@@ -151,8 +151,8 @@
                                     <tr>
                                         <td>
                                             <span>
-                                            <font color="#999999" size="2" face="Arial">Счет выставлен через <a href="https://github.com/yandex-money/yandex-money-cms-opencart2" target="_blank" style="font-weight:normal;text-decoration:none;cursor:pointer;">
-                                                    <font color="#666699" size="2" face="Arial">модуль Y.CMS</font>
+                                            <font color="#999999" size="2" face="Arial"><?php echo $language->get('invoice_footer_text')?><a href="https://github.com/yandex-money/yandex-money-cms-opencart2" target="_blank" style="font-weight:normal;text-decoration:none;cursor:pointer;">
+                                                    <font color="#666699" size="2" face="Arial"><?php echo $language->get('invoice_footer_text_ycms')?></font>
                                                 </a>
                                             </font>
                                             </span>
