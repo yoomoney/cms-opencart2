@@ -1,5 +1,8 @@
 <?php
 
+use YandexCheckout\Model\Notification\NotificationSucceeded;
+use YandexCheckout\Model\Notification\NotificationWaitingForCapture;
+
 /**
  * Класс контроллера модуля оплаты с помощью Яндекс.Денег
  *
@@ -171,11 +174,11 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         $payment = $this->getModel()->createOrderPayment($order, false);
         if ($payment === null) {
             $this->failure($this->language->get('log_text_payment_create_failed'));
-        } elseif ($payment->getStatus() === \YaMoney\Model\PaymentStatus::CANCELED) {
+        } elseif ($payment->getStatus() === \YandexCheckout\Model\PaymentStatus::CANCELED) {
             $this->failure($this->language->get('log_text_payment_create_failed'));
         }
         $confirmation = $payment->getConfirmation();
-        if ($confirmation !== null && $confirmation->getType() === \YaMoney\Model\ConfirmationType::REDIRECT) {
+        if ($confirmation !== null && $confirmation->getType() === \YandexCheckout\Model\ConfirmationType::REDIRECT) {
             $this->response->redirect($confirmation->getConfirmationUrl());
         }
         $this->session->data['error'] = $this->language->get('log_text_payment_init_failed');
@@ -232,12 +235,12 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             }
         } elseif (!$kassa->isPaymentMethodEnabled($paymentMethod)) {
             $this->jsonError('Invalid payment method');
-        } elseif ($paymentMethod == \YaMoney\Model\PaymentMethodType::QIWI) {
+        } elseif ($paymentMethod == \YandexCheckout\Model\PaymentMethodType::QIWI) {
             $phone = isset($_GET['qiwiPhone']) ? preg_replace('/[^\d]/', '', $_GET['qiwiPhone']) : '';
             if (empty($phone)) {
                 $this->jsonError($this->language->get('text_error_phone_empty'));
             }
-        } elseif ($paymentMethod == \YaMoney\Model\PaymentMethodType::ALFABANK) {
+        } elseif ($paymentMethod == \YandexCheckout\Model\PaymentMethodType::ALFABANK) {
             $login = isset($this->request->get['alphaLogin']) ? trim($this->request->get['alphaLogin']) : '';
             if (empty($login)) {
                 $this->jsonError($this->language->get('text_error_alfa_login_empty'));
@@ -247,7 +250,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         $payment = $this->getModel()->createPayment($orderId, $paymentMethod);
         if ($payment === null) {
             $this->jsonError($this->language->get('log_text_payment_create_failed'));
-        } elseif ($payment->getStatus() === \YaMoney\Model\PaymentStatus::CANCELED) {
+        } elseif ($payment->getStatus() === \YandexCheckout\Model\PaymentStatus::CANCELED) {
             $this->jsonError($this->language->get('log_text_payment_create_failed'));
         }
         $result = array(
@@ -255,7 +258,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             'redirect' => $this->url->link('checkout/success', '', true),
         );
         $confirmation = $payment->getConfirmation();
-        if ($confirmation !== null && $confirmation->getType() === \YaMoney\Model\ConfirmationType::REDIRECT) {
+        if ($confirmation !== null && $confirmation->getType() === \YandexCheckout\Model\ConfirmationType::REDIRECT) {
             $result['redirect'] = $confirmation->getConfirmationUrl();
         }
 
@@ -303,19 +306,19 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             $this->failure(sprintf($this->language->get('log_text_order_not_found'),$paymentId, $orderId));
         } elseif (!$payment->getPaid()) {
             $this->failure($this->language->get('log_text_error_payment_capture'));
-        } elseif ($payment->getStatus() === \YaMoney\Model\PaymentStatus::CANCELED) {
+        } elseif ($payment->getStatus() === \YandexCheckout\Model\PaymentStatus::CANCELED) {
             $this->failure(sprintf($this->language->get('log_text_status_canceled'), $paymentId, $orderId ));
-        } elseif ($payment->getStatus() !== \YaMoney\Model\PaymentStatus::SUCCEEDED) {
+        } elseif ($payment->getStatus() !== \YandexCheckout\Model\PaymentStatus::SUCCEEDED) {
             $this->getModel()->log('info', 'Confirm order#' . $orderId . ' with payment ' . $payment->getId());
             $this->getModel()->confirmOrder($orderId, $payment);
-            if ($payment->getStatus() === \YaMoney\Model\PaymentStatus::WAITING_FOR_CAPTURE) {
-                $res = $this->getModel()->capturePayment($payment, false);
-                if ($res->getStatus() === \YaMoney\Model\PaymentStatus::SUCCEEDED) {
-                    $this->getModel()->confirmOrderPayment(
-                        $orderId, $res, $this->getModel()->getKassaModel()->getSuccessOrderStatusId()
-                    );
-                }
+            if ($payment->getStatus() === \YandexCheckout\Model\PaymentStatus::WAITING_FOR_CAPTURE) {
+                $payment = $this->getModel()->capturePayment($payment, false);
             }
+        }
+        if ($payment->getStatus() === \YandexCheckout\Model\PaymentStatus::SUCCEEDED) {
+            $this->getModel()->confirmOrderPayment(
+                $orderId, $payment, $this->getModel()->getKassaModel()->getSuccessOrderStatusId()
+            );
         }
         $this->response->redirect($this->url->link('checkout/success', '', true));
     }
@@ -376,17 +379,22 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             header('HTTP/1.1 400 Invalid json object in body');
             return;
         }
+
+        $this->getModel()->log('info', 'Notification: ' . $source);
+
         try {
-            $object = new YaMoney\Model\Notification\NotificationWaitingForCapture($json);
+            $notification = ($json['event'] === YandexCheckout\Model\NotificationEventType::PAYMENT_SUCCEEDED)
+                ? new NotificationSucceeded($json)
+                : new NotificationWaitingForCapture($json);
         } catch (\Exception $e) {
             $this->getModel()->log('error', 'Invalid notification object - ' . $e->getMessage());
             header('HTTP/1.1 400 Invalid object in body');
             return;
         }
-        $orderId = $this->getModel()->findOrderIdByPayment($object->getObject());
-        $this->getModel()->log('info', sprintf($this->language->get('text_capture_init'), $object->getObject()->getId(), $orderId));
+        $orderId = $this->getModel()->findOrderIdByPayment($notification->getObject());
+        $this->getModel()->log('info', sprintf($this->language->get('text_capture_init'), $notification->getObject()->getId(), $orderId));
         if ($orderId <= 0) {
-            $this->getModel()->log('error', 'Order not exists for payment ' . $object->getObject()->getId());
+            $this->getModel()->log('error', 'Order not exists for payment ' . $notification->getObject()->getId());
             header('HTTP/1.1 404 Order not exists');
             return;
         }
@@ -397,14 +405,20 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             header('HTTP/1.1 405 Invalid order payment method');
             exit();
         } elseif ($orderInfo['order_status_id'] <= 0) {
-            $this->getModel()->confirmOrder($orderId, $object->getObject());
+            $this->getModel()->confirmOrder($orderId, $notification->getObject());
         }
 
-        $result = $this->getModel()->capturePayment($object->getObject());
+        $result = null;
+        if ($notification instanceof NotificationWaitingForCapture) {
+            $result = $this->getModel()->capturePayment($notification->getObject());
+        } elseif ($notification instanceof NotificationSucceeded) {
+            $result = $this->getModel()->fetchPaymentInfo($notification->getObject()->getId());;
+        }
+
         if ($result === null) {
             header('HTTP/1.1 400 Payment capture error');
             $this->getModel()->log('error', 'Payment not captured: capture result is null');
-        } elseif ($result->getStatus() !== \YaMoney\Model\PaymentStatus::SUCCEEDED) {
+        } elseif ($result->getStatus() !== \YandexCheckout\Model\PaymentStatus::SUCCEEDED) {
             header('HTTP/1.1 400 Invalid payment status');
             $this->getModel()->log('error', 'Payment not captured: invalid payment status "' . $result->getStatus() . '"');
         } else {

@@ -2,7 +2,7 @@
 
 namespace YandexMoneyModule\Model;
 
-use YaMoney\Model\PaymentMethodType;
+use YandexCheckout\Model\PaymentMethodType;
 
 class KassaModel extends AbstractPaymentModel
 {

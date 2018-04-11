@@ -1,8 +1,8 @@
 <?php
 
-namespace YaMoney\Model;
+namespace YandexCheckout\Model;
 
-use YaMoney\Common\AbstractObject;
+use YandexCheckout\Common\AbstractObject;
 
 /**
  * RefundError - Отказ в проведении возврата платежа

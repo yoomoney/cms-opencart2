@@ -10,7 +10,7 @@
 class ControllerExtensionPaymentYandexMoney extends Controller
 {
     const MODULE_NAME = 'yandex_money';
-    const MODULE_VERSION = '1.0.8';
+    const MODULE_VERSION = '1.0.9';
 
     public $fields_metrika = array(
         'yandex_money_metrika_active',
@@ -514,7 +514,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             if ($this->request->get['update_statuses'] == 2) {
                 foreach ($paymentObjects as $payment) {
                     $this->getModel()->log('info', 'Check payment#'.$payment->getId());
-                    if ($payment['status'] === \YaMoney\Model\PaymentStatus::WAITING_FOR_CAPTURE) {
+                    if ($payment['status'] === \YandexCheckout\Model\PaymentStatus::WAITING_FOR_CAPTURE) {
                         $this->getModel()->log('info', 'Capture payment#'.$payment->getId());
                         if ($this->getModel()->capturePayment($payment, false)) {
                             $orderId   = $orderIds[$payment->getId()];
@@ -1331,7 +1331,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         $data['refunds']           = $this->getModel()->getOrderRefunds($orderInfo['order_id']);
         $data['refundable_amount'] = $amount;
         foreach ($data['refunds'] as $refund) {
-            if ($refund['status'] !== \YaMoney\Model\RefundStatus::CANCELED) {
+            if ($refund['status'] !== \YandexCheckout\Model\RefundStatus::CANCELED) {
                 $data['refundable_amount'] -= $refund['amount'];
                 if ($data['refundable_amount'] < 0) {
                     $data['refundable_amount'] = 0;
@@ -1368,7 +1368,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
     }
 
     /**
-     * @param \YaMoney\Model\PaymentInterface $payment
+     * @param \YandexCheckout\Model\PaymentInterface $payment
      * @param array $order
      * @param float $amount
      * @param string $comment
