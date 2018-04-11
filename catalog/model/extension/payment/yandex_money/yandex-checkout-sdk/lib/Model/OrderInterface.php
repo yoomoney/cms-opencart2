@@ -1,11 +1,11 @@
 <?php
 
-namespace YaMoney\Model;
+namespace YandexCheckout\Model;
 
 /**
  * Interface OrderInterface
  *
- * @package YaMoney\Model
+ * @package YandexCheckout\Model
  *
  * @property-read AmountInterface $amount
  * @property-read ReceiptInterface $receipt Данные фискального чека 54-ФЗ

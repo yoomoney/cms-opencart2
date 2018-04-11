@@ -31,12 +31,12 @@
             <img src="<?php echo $image_base_path . '/' . $method; ?>.png" alt="<?php echo $language->get($key); ?>" />
             <?php echo $language->get($key); $first = false; ?>
         </label>
-        <?php if ($method == \YaMoney\Model\PaymentMethodType::QIWI) : ?>
+        <?php if ($method == \YandexCheckout\Model\PaymentMethodType::QIWI) : ?>
         <div id="payment-qiwi" class="additional" style="display: none;">
             <label for="qiwi-phone"><?php echo $language->get('text_payment_method_qiwi_phone'); ?></label><br />
             <input name="qiwiPhone" id="qiwi-phone" value="" />
         </div>
-        <?php elseif ($method == \YaMoney\Model\PaymentMethodType::ALFABANK) : ?>
+        <?php elseif ($method == \YandexCheckout\Model\PaymentMethodType::ALFABANK) : ?>
         <div id="payment-alfabank" class="additional" style="display: none;">
             <label for="alfa-login"><?php echo $language->get('text_payment_method_alfa_login'); ?></label><br />
             <input name="alfaLogin" id="alfa-login" value="" />

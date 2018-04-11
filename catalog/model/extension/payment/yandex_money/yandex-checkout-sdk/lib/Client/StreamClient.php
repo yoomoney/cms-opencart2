@@ -1,16 +1,16 @@
 <?php
 
-namespace YaMoney\Client;
+namespace YandexCheckout\Client;
 
 
 use Psr\Log\LoggerInterface;
-use YaMoney\Common\Exceptions\ApiConnectionException;
-use YaMoney\Common\Exceptions\AuthorizeException;
-use YaMoney\Common\ResponseObject;
+use YandexCheckout\Common\Exceptions\ApiConnectionException;
+use YandexCheckout\Common\Exceptions\AuthorizeException;
+use YandexCheckout\Common\ResponseObject;
 
 /**
  * Class StreamClient
- * @package YaMoney\Client
+ * @package YandexCheckout\Client
  */
 class StreamClient implements ApiClientInterface
 {

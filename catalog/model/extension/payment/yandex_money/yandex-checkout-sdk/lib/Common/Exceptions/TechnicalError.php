@@ -1,6 +1,6 @@
 <?php
 
-namespace YaMoney\Common\Exceptions;
+namespace YandexCheckout\Common\Exceptions;
 
 
 class TechnicalError extends ApiException

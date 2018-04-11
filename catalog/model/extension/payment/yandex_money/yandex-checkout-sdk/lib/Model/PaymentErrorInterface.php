@@ -1,11 +1,11 @@
 <?php
 
-namespace YaMoney\Model;
+namespace YandexCheckout\Model;
 
 /**
  * Interface PaymentErrorInterface
  * 
- * @package YaMoney\Model
+ * @package YandexCheckout\Model
  * 
  * @property-read string $code Код ошибки
  * @property-read string $description Дополнительное текстовое пояснение ошибки

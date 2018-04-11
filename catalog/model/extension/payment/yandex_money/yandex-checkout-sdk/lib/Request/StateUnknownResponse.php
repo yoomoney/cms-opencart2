@@ -1,18 +1,18 @@
 <?php
 
-namespace YaMoney\Request;
+namespace YandexCheckout\Request;
 
-use YaMoney\Common\AbstractObject;
-use YaMoney\Common\Exceptions\EmptyPropertyValueException;
-use YaMoney\Common\Exceptions\InvalidPropertyValueException;
-use YaMoney\Common\Exceptions\InvalidPropertyValueTypeException;
+use YandexCheckout\Common\AbstractObject;
+use YandexCheckout\Common\Exceptions\EmptyPropertyValueException;
+use YandexCheckout\Common\Exceptions\InvalidPropertyValueException;
+use YandexCheckout\Common\Exceptions\InvalidPropertyValueTypeException;
 
 /**
  * Запрос принят в обработку но результат его выполнения неизвестен.
  * Клиенту следует повторить запрос с теми же аргументами спустя рекомедуемое время повтора.
  * Тело ответа содержит пустой object.
  *
- * @package YaMoney\Request
+ * @package YandexCheckout\Request
  *
  * @property int $retryAfter Рекомендуемое время спустя которое следует повторить запрос
  */

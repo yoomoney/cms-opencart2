@@ -10,7 +10,7 @@ require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'yandex_money' . DIRECTOR
  */
 class ModelExtensionPaymentYandexMoney extends Model
 {
-    const MODULE_VERSION = '1.0.8';
+    const MODULE_VERSION = '1.0.9';
 
     private $kassaModel;
     private $walletModel;
@@ -69,7 +69,7 @@ class ModelExtensionPaymentYandexMoney extends Model
     protected function getClient()
     {
         if ($this->client === null) {
-            $this->client = new \YaMoney\Client\YandexMoneyApi();
+            $this->client = new \YandexCheckout\Client\YandexMoneyApi();
             $this->client->setAuth(
                 $this->getKassaModel()->getShopId(),
                 $this->getKassaModel()->getPassword()
@@ -111,7 +111,7 @@ class ModelExtensionPaymentYandexMoney extends Model
     /**
      * @param int $orderId
      * @param string $paymentMethod
-     * @return \YaMoney\Model\PaymentInterface
+     * @return \YandexCheckout\Model\PaymentInterface
      */
     public function createPayment($orderId, $paymentMethod)
     {
@@ -131,11 +131,11 @@ class ModelExtensionPaymentYandexMoney extends Model
         }
 
         try {
-            $builder = \YaMoney\Request\Payments\CreatePaymentRequest::builder();
+            $builder = \YandexCheckout\Request\Payments\CreatePaymentRequest::builder();
             $builder->setAmount($amount)
                 ->setCurrency('RUB')
                 ->setClientIp($_SERVER['REMOTE_ADDR'])
-                ->setCapture(false)
+                ->setCapture(true)
                 ->setMetadata(array(
                     'order_id' => $orderId,
                     'cms_name' => 'ya_api_ycms_opencart',
@@ -143,17 +143,17 @@ class ModelExtensionPaymentYandexMoney extends Model
                 ));
 
             $confirmation = array(
-                'type' => \YaMoney\Model\ConfirmationType::REDIRECT,
+                'type' => \YandexCheckout\Model\ConfirmationType::REDIRECT,
                 'returnUrl' => $returnUrl,
             );
             if (!$this->getKassaModel()->getEPL()) {
-                if ($paymentMethod === \YaMoney\Model\PaymentMethodType::ALFABANK) {
+                if ($paymentMethod === \YandexCheckout\Model\PaymentMethodType::ALFABANK) {
                     $data = array(
                         'type' => $paymentMethod,
                         'login' => trim($_GET['alphaLogin']),
                     );
-                    $confirmation = \YaMoney\Model\ConfirmationType::EXTERNAL;
-                } elseif ($paymentMethod === \YaMoney\Model\PaymentMethodType::QIWI) {
+                    $confirmation = \YandexCheckout\Model\ConfirmationType::EXTERNAL;
+                } elseif ($paymentMethod === \YandexCheckout\Model\PaymentMethodType::QIWI) {
                     $data = array(
                         'type' => $paymentMethod,
                         'phone' => preg_replace('/[^\d]/', '', $_GET['qiwiPhone']),
@@ -213,24 +213,24 @@ class ModelExtensionPaymentYandexMoney extends Model
         }
 
         try {
-            $builder = \YaMoney\Request\Payments\CreatePaymentRequest::builder();
+            $builder = \YandexCheckout\Request\Payments\CreatePaymentRequest::builder();
             $builder->setAmount($amount)
                 ->setCurrency('RUB')
                 ->setClientIp($_SERVER['REMOTE_ADDR'])
-                ->setCapture(false);
+                ->setCapture(true);
 
             $confirmation = array(
-                'type' => \YaMoney\Model\ConfirmationType::REDIRECT,
+                'type' => \YandexCheckout\Model\ConfirmationType::REDIRECT,
                 'returnUrl' => $returnUrl,
             );
             if (!$this->getKassaModel()->getEPL() && !empty($paymentMethod)) {
-                if ($paymentMethod === \YaMoney\Model\PaymentMethodType::ALFABANK) {
+                if ($paymentMethod === \YandexCheckout\Model\PaymentMethodType::ALFABANK) {
                     $data = array(
                         'type' => $paymentMethod,
                         'login' => trim($_GET['alphaLogin']),
                     );
-                    $confirmation = \YaMoney\Model\ConfirmationType::EXTERNAL;
-                } elseif ($paymentMethod === \YaMoney\Model\PaymentMethodType::QIWI) {
+                    $confirmation = \YandexCheckout\Model\ConfirmationType::EXTERNAL;
+                } elseif ($paymentMethod === \YandexCheckout\Model\PaymentMethodType::QIWI) {
                     $data = array(
                         'type' => $paymentMethod,
                         'phone' => preg_replace('/[^\d]/', '', $_GET['qiwiPhone']),
@@ -282,7 +282,7 @@ class ModelExtensionPaymentYandexMoney extends Model
     {
         $payment = $this->fetchPaymentInfo($paymentId);
         if ($payment !== null) {
-            if ($payment->getStatus() !== \YaMoney\Model\PaymentStatus::PENDING) {
+            if ($payment->getStatus() !== \YandexCheckout\Model\PaymentStatus::PENDING) {
                 $this->updatePaymentInDatabase($payment);
             }
         }
@@ -291,7 +291,7 @@ class ModelExtensionPaymentYandexMoney extends Model
 
     /**
      * @param int $orderId
-     * @param \YaMoney\Model\PaymentInterface $payment
+     * @param \YandexCheckout\Model\PaymentInterface $payment
      */
     public function confirmOrder($orderId, $payment)
     {
@@ -303,7 +303,7 @@ class ModelExtensionPaymentYandexMoney extends Model
 
     /**
      * @param int $orderId
-     * @param $payment
+     * @param \YandexCheckout\Model\PaymentInterface $payment
      * @param $statusId
      */
     public function confirmOrderPayment($orderId, $payment, $statusId)
@@ -323,9 +323,9 @@ class ModelExtensionPaymentYandexMoney extends Model
 
 
     /**
-     * @param \YaMoney\Model\PaymentInterface $payment
+     * @param \YandexCheckout\Model\PaymentInterface $payment
      * @param bool $fetchPaymentInfo
-     * @return \YaMoney\Model\PaymentInterface
+     * @return \YandexCheckout\Model\PaymentInterface
      */
     public function capturePayment($payment, $fetchPaymentInfo = true)
     {
@@ -336,9 +336,9 @@ class ModelExtensionPaymentYandexMoney extends Model
             }
             $payment = $tmp;
         }
-        if ($payment->getStatus() === \YaMoney\Model\PaymentStatus::WAITING_FOR_CAPTURE) {
+        if ($payment->getStatus() === \YandexCheckout\Model\PaymentStatus::WAITING_FOR_CAPTURE) {
             try {
-                $builder = \YaMoney\Request\Payments\Payment\CreateCaptureRequest::builder();
+                $builder = \YandexCheckout\Request\Payments\Payment\CreateCaptureRequest::builder();
                 $builder->setAmount($payment->getAmount());
                 $request = $builder->build();
             } catch (InvalidArgumentException $e) {
@@ -386,7 +386,7 @@ class ModelExtensionPaymentYandexMoney extends Model
     }
 
     /**
-     * @param \YaMoney\Model\PaymentInterface $payment
+     * @param \YandexCheckout\Model\PaymentInterface $payment
      * @return int
      */
     public function findOrderIdByPayment($payment)
@@ -452,7 +452,7 @@ class ModelExtensionPaymentYandexMoney extends Model
     }
 
     /**
-     * @param \YaMoney\Request\Payments\CreatePaymentRequestBuilder $builder
+     * @param \YandexCheckout\Request\Payments\CreatePaymentRequestBuilder $builder
      * @param array $orderInfo
      */
     private function addReceipt($builder, $orderInfo)
@@ -500,7 +500,7 @@ class ModelExtensionPaymentYandexMoney extends Model
 
     /**
      * @param string $paymentId
-     * @return \YaMoney\Model\PaymentInterface|null
+     * @return \YandexCheckout\Model\PaymentInterface|null
      */
     public function fetchPaymentInfo($paymentId)
     {
@@ -551,7 +551,7 @@ class ModelExtensionPaymentYandexMoney extends Model
     }
 
     /**
-     * @param \YaMoney\Model\PaymentInterface $payment
+     * @param \YandexCheckout\Model\PaymentInterface $payment
      * @param int $orderId
      */
     private function insertPayment($payment, $orderId)
@@ -583,7 +583,7 @@ class ModelExtensionPaymentYandexMoney extends Model
     }
 
     /**
-     * @param \YaMoney\Model\PaymentInterface $payment
+     * @param \YandexCheckout\Model\PaymentInterface $payment
      */
     private function updatePaymentInDatabase($payment)
     {

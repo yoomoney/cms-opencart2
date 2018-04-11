@@ -194,14 +194,14 @@ class YandexMoneyKassaModel extends \YandexMoneyModule\Model\KassaModel
      */
     public function checkConnection($logger = null)
     {
-        $client = new \YaMoney\Client\YandexMoneyApi();
+        $client = new \YandexCheckout\Client\YandexMoneyApi();
         $client->setAuth($this->getShopId(), $this->getPassword());
         if ($logger !== null) {
             $client->setLogger($this);
         }
         try {
             $payment = $client->getPaymentInfo('00000000-0000-0000-0000-000000000001');
-        } catch (\YaMoney\Common\Exceptions\NotFoundException $e) {
+        } catch (\YandexCheckout\Common\Exceptions\NotFoundException $e) {
             return true;
         } catch (Exception $e) {
             return false;

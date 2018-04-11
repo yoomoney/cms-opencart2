@@ -1,6 +1,6 @@
 <?php
 
-namespace YaMoney\Common;
+namespace YandexCheckout\Common;
 
 interface RequestObjectInterface
 {

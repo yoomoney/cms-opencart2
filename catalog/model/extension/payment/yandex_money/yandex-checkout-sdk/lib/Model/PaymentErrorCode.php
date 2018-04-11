@@ -1,8 +1,8 @@
 <?php
 
-namespace YaMoney\Model;
+namespace YandexCheckout\Model;
 
-use YaMoney\Common\AbstractEnum;
+use YandexCheckout\Common\AbstractEnum;
 
 class PaymentErrorCode extends AbstractEnum
 {
