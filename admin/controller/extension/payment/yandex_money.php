@@ -10,7 +10,7 @@
 class ControllerExtensionPaymentYandexMoney extends Controller
 {
     const MODULE_NAME = 'yandex_money';
-    const MODULE_VERSION = '1.0.9';
+    const MODULE_VERSION = '1.0.10';
 
     public $fields_metrika = array(
         'yandex_money_metrika_active',
