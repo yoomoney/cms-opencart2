@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 $_['module_title'] = 'Y.CMS 2.0';
 $_['heading_title'] = $_['module_title'];
@@ -10,6 +10,7 @@ $_['kassa_breadcrumbs_extension'] = 'Extensions';
 $_['kassa_breadcrumbs_home'] = 'Home';
 $_['kassa_breadcrumbs_logs'] = 'Logs';
 $_['kassa_text_success'] = 'Success';
+$_['kassa_text_success_message'] = 'The settings have been saved';
 $_['kassa_page_title'] = 'Yandex.Checkout settings';
 $_['kassa_breadcrumbs_heading_title'] = 'Yandex.Checkout payment module\'s logs';
 $_['kassa_test_mode_description'] = 'You have enabled the test mode. Check the payment making process and contact Yandex.Checkout\'s manager. They will provide you with shopId the Secret key. <a href="https://yandex.ru/support/checkout/payments/api.html#api__04" target="_blank">Manual</a>';
@@ -335,6 +336,16 @@ $_['updater_restore'] = 'Restore';
 $_['updater_delete'] = 'Delete';
 $_['updater_delete_message'] = 'Do you really want to delete the backup copy of this module version ';
 $_['updater_restore_message'] = 'Do you really want to restore the module from the backup copy of this version';
+
+$_['invoice_sum_text'] = 'К оплате %s руб.';
+$_['invoice_greeting'] = 'Здравствуйте';
+$_['invoice_thanks'] = 'Магазин %s благодарит вас за заказ и просит оплатить счет №&nbsp;%s.';
+$_['invoice_receipt_header'] = 'В вашем заказе';
+$_['invoice_currency'] = 'руб';
+$_['invoice_yandex_text'] = 'Заплатить через Яндекс';
+$_['invoice_sum_label'] = 'К оплате';
+$_['invoice_footer_text'] = 'Счет выставлен через';
+$_['invoice_footer_text_ycms'] = 'модуль Y.CMS';
 
 $_['kassa_show_url_link'] = 'Show the link to the Yandex.Checkout\'s website';
 $_['kassa_show_url_link_description'] = 'The link will be dispalyed in your website\'s footer';
