@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 $_['heading_title'] = 'Yandex.Checkout (bank cards, Yandex.Money, online banking, cash, direct carrier billing, etc.)';
 

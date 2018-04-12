@@ -144,7 +144,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
                 $this->session->data['success']         = $this->language->get('kassa_text_success');
                 $this->session->data['last-active-tab'] = $data['lastActiveTab'];
                 if (isset($this->request->post['language_reload'])) {
-                    $this->session->data['success-message'] = 'Настройки были сохранены';
+                    $this->session->data['success-message'] = $this->language->get('kassa_text_success_message');
                     $this->response->redirect(
                         $this->url->link($prefix.'payment/'.self::MODULE_NAME, 'token='.$this->session->data['token'],
                             true)
@@ -1217,6 +1217,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
 
         $link_img = ($this->request->server['HTTPS']) ? HTTPS_CATALOG : HTTP_CATALOG;
         $data     = array(
+            'language'      => $this->language,
             'shop_name'     => $order_info['store_name'],
             'shop_url'      => $order_info['store_url'],
             'shop_logo'     => 'cid:'.basename($logo),
@@ -1526,10 +1527,12 @@ class ControllerExtensionPaymentYandexMoney extends Controller
                 case 'remove':
                     if (!empty($this->request->post['file_name'])) {
                         if ($this->getModel()->removeBackup($this->request->post['file_name'])) {
-                            $this->session->data['flash_message'] = sprintf($this->language->get('updater_backup_deleted_message'), $this->request->post['file_name']);
+                            $this->session->data['flash_message'] = sprintf($this->language->get('updater_backup_deleted_message'),
+                                $this->request->post['file_name']);
                             $this->response->redirect($link);
                         }
-                        $data['errors'][] = sprintf($this->language->get('updater_error_delete_backup'),$this->request->post['file_name'], $logs);
+                        $data['errors'][] = sprintf($this->language->get('updater_error_delete_backup'),
+                            $this->request->post['file_name'], $logs);
                     }
                     break;
             }

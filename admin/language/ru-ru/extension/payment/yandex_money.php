@@ -10,6 +10,7 @@ $_['kassa_breadcrumbs_extension'] = 'Расширения';
 $_['kassa_breadcrumbs_home'] = 'Главная';
 $_['kassa_breadcrumbs_logs'] = 'Журнал сообщений';
 $_['kassa_text_success'] = 'Success';
+$_['kassa_text_success_message'] = 'Настройки были сохранены'.
 $_['kassa_page_title'] = 'Настройки Яндекс.Кассы';
 $_['kassa_breadcrumbs_heading_title'] = 'Журнал сообщений платежного модуля Яндекс.Деньги';
 $_['kassa_test_mode_description'] = 'Вы включили тестовый режим приема платежей. Проверьте, как проходит оплата, и напишите менеджеру Кассы. Он выдаст рабочие shopId и Секретный ключ. <a href="https://yandex.ru/support/checkout/payments/api.html#api__04" target="_blank">Инструкция</a>';
@@ -387,8 +388,6 @@ $_['updater_restore'] = 'Восстановить';
 $_['updater_delete'] = 'Удалить';
 $_['updater_delete_message'] = 'Вы действительно хотите удалить бэкап модуля версии ';
 $_['updater_restore_message'] = 'Вы действительно хотите восстановить модуль из бэкапа версии';
-
-
 
 $_['invoice_sum_text'] = 'К оплате %s руб.';
 $_['invoice_greeting'] = 'Здравствуйте';
