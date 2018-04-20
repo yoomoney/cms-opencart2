@@ -10,7 +10,7 @@
 class ControllerExtensionPaymentYandexMoney extends Controller
 {
     const MODULE_NAME = 'yandex_money';
-    const MODULE_VERSION = '1.0.10';
+    const MODULE_VERSION = '1.0.11';
 
     public $fields_metrika = array(
         'yandex_money_metrika_active',
@@ -1035,8 +1035,8 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         return $this->goCurl(
             'p',
             'grant_type=authorization_code&code='.$this->request->get['code']
-            .'&client_id='.$this->config->get('yandex_money__pokupki_idapp')
-            .'&client_secret='.$this->config->get('yandex_money__pokupki_pw')
+            .'&client_id='.$this->config->get('yandex_money_pokupki_idapp')
+            .'&client_secret='.$this->config->get('yandex_money_pokupki_pw')
         );
     }
 
