@@ -29,6 +29,7 @@ $_['kassa_password_error_required'] = 'Необходимо указать се�
 $_['kassa_payment_mode_label'] = 'Выбор способа оплаты';
 $_['kassa_payment_mode_kassa_label'] = 'На стороне Кассы';
 $_['kassa_use_yandex_button_label'] = 'Назвать кнопку оплаты «Заплатить через Яндекс»';
+$_['kassa_use_installments_button_label'] = 'Добавить кнопку «Заплатить по частям»';
 $_['kassa_payment_mode_shop_label'] = 'На стороне магазина';
 
 $_['kassa_payment_method_bank_card'] = 'Банковские карты';
@@ -39,6 +40,7 @@ $_['kassa_payment_method_alfabank'] = 'Альфа-Клик';
 $_['kassa_payment_method_webmoney'] = 'Webmoney';
 $_['kassa_payment_method_yandex_money'] = 'Яндекс.Деньги';
 $_['kassa_payment_method_mobile'] = 'Баланс мобильного';
+$_['kassa_payment_method_installments'] = 'Заплатить по частям';
 
 $_['kassa_payment_method_error_required'] = 'Пожалуйста, выберите хотя бы один способ из списка';
 

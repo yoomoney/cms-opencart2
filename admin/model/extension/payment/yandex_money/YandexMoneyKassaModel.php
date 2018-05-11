@@ -1,7 +1,7 @@
 <?php
 
 $prefix = version_compare(VERSION, '2.3.0') >= 0 ? 'extension/' : '';
-require_once DIR_CATALOG . 'model/'.$prefix.'payment/yandex_money/autoload.php';
+require_once DIR_CATALOG.'model/'.$prefix.'payment/yandex_money/autoload.php';
 
 class YandexMoneyKassaModel extends \YandexMoneyModule\Model\KassaModel
 {
@@ -12,16 +12,17 @@ class YandexMoneyKassaModel extends \YandexMoneyModule\Model\KassaModel
 
     /**
      * YandexMoneyKassaModel constructor.
+     *
      * @param \Config $config
      */
     public function __construct($config)
     {
         parent::__construct($config);
 
-        $this->invoiceEnable = (bool)$config->get('yandex_money_kassa_invoice');
+        $this->invoiceEnable  = (bool)$config->get('yandex_money_kassa_invoice');
         $this->invoiceSubject = $config->get('yandex_money_kassa_invoice_subject');
         $this->invoiceMessage = $config->get('yandex_money_kassa_invoice_message');
-        $this->invoiceLogo = (bool)$config->get('yandex_money_kassa_invoice_logo');
+        $this->invoiceLogo    = (bool)$config->get('yandex_money_kassa_invoice_logo');
     }
 
     public function setIsEnabled($value)
@@ -49,6 +50,11 @@ class YandexMoneyKassaModel extends \YandexMoneyModule\Model\KassaModel
         $this->useYandexButton = $value ? true : false;
     }
 
+    public function setUseInstallmentsButton($value)
+    {
+        $this->useInstallmentsButton = (bool) $value;
+    }
+
     public function setPaymentMethodFlag($paymentMethod, $value)
     {
         if (array_key_exists($paymentMethod, $this->paymentMethods)) {
@@ -71,7 +77,7 @@ class YandexMoneyKassaModel extends \YandexMoneyModule\Model\KassaModel
 
     public function setTaxRates($taxRates)
     {
-        $all = $this->getTaxRateList();
+        $all            = $this->getTaxRateList();
         $this->taxRates = array();
         foreach ($taxRates as $shopTaxRateId => $taxRate) {
             if (in_array($taxRate, $all)) {
@@ -190,6 +196,7 @@ class YandexMoneyKassaModel extends \YandexMoneyModule\Model\KassaModel
 
     /**
      * @param null|\Psr\Log\LoggerInterface $logger
+     *
      * @return bool
      */
     public function checkConnection($logger = null)
@@ -206,6 +213,7 @@ class YandexMoneyKassaModel extends \YandexMoneyModule\Model\KassaModel
         } catch (Exception $e) {
             return false;
         }
+
         return true;
     }
 

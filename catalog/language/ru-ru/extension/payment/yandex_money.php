@@ -14,6 +14,7 @@ $_['text_method_webmoney'] = 'Webmoney';
 $_['text_method_alfabank'] = 'Альфа-Клик';
 $_['text_method_sberbank'] = 'Сбербанк Онлайн';
 $_['text_method_qiwi'] = 'QIWI Wallet';
+$_['text_method_installments'] = 'Заплатить по частям (%s ₽ в месяц)';
 
 $_['text_payment_method_qiwi_phone'] = 'Телефон, который привязан к Qiwi Wallet';
 $_['text_payment_method_alfa_login'] = 'Укажите логин, и мы выставим счет в Альфа-Клике. После этого останется подтвердить платеж на сайте интернет-банка.';
@@ -44,4 +45,4 @@ $_['text_get_payment_id_failed'] = 'Не удалось получить ID пл
 $_['text_capture_init'] = 'Проведение платежа %s заказа №%s';
 $_['text_failure_status'] = 'Не удалось провести платёж';
 $_['text_success_status'] = 'Заказ №%s был создан';
-$_[''] = '';
+$_['yamoney_pay_button_text'] = '<span>Заплатить</span>через Яндекс';
