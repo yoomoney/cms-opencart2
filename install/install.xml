@@ -2,7 +2,7 @@
 <modification>
     <name>Y.CMS 2.0 for Opencart 2.0.x - 2.3.x</name>
     <code>ycms.2.0</code>
-    <version>1.0.11</version>
+    <version>1.0.12</version>
     <author>Yandex.Money</author>
     <!-- Вставка кнопки в историю заказов-->
     <file path="catalog/controller/account/order.php">
@@ -278,6 +278,64 @@
             <add position="after">
 
             </add>
+        </operation>
+    </file>
+    <!-- Вставка скрипта кнопки "Заплатить по частям" -->
+    <file path="catalog/view/theme/*/template/common/header.tpl" error="skip">
+        <operation>
+            <search><![CDATA[</head]]></search>
+            <add position="before">
+                <![CDATA[<script src="https://static.yandex.net/kassa/pay-in-parts/ui/v1/"></script>]]></add>
+        </operation>
+    </file>
+
+    <file path="catalog/controller/product/product.php" error="skip">
+        <operation>
+            <search trim="true"><![CDATA[if ($product_info) {]]></search>
+            <add position="after"><![CDATA[
+                $enableCreditInEpl = $this->config->get('yandex_money_kassa_payment_mode') === 'kassa'
+                    && $this->config->get('yandex_money_kassa_use_installments_button');
+                $enableCreditInShopSide = $this->config->get('yandex_money_kassa_payment_mode') === 'shop'
+                    && $this->config->get('yandex_money_kassa_payment_method_installments');
+                $showInstallmentsInfo = $this->config->get('yandex_money_kassa_enabled') && ($enableCreditInEpl || $enableCreditInShopSide);
+
+                $data['yamoney_showInstallmentsInfo'] = $showInstallmentsInfo;
+                $data['yamoney_shop_id'] = $this->config->get('yandex_money_kassa_shop_id');
+                $data['yamoney_language_code'] = $this->language->get('code');
+            ]]></add>
+        </operation>
+        <operation>
+            <search trim="true"><![CDATA[$data['price'] = $this->currency->format($this->tax->calculate($product_info['price'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);]]></search>
+            <add position="after"><![CDATA[
+                $data['cost'] = sprintf('%.2f',$this->tax->calculate($product_info['price'], $product_info['tax_class_id'], $this->config->get('config_tax')));
+            ]]></add>
+        </operation>
+    </file>
+
+    <file path="catalog/view/theme/default/template/product/product.tpl" error="skip">
+        <operation>
+            <search><![CDATA[<?php if ($options) { ?>]]></search>
+            <add position="before"><![CDATA[
+                <?php if($yamoney_showInstallmentsInfo): ?>
+                    <ul class="list-unstyled"><li class="installments-info"></li></ul>
+                <?php endif; ?>
+            ]]></add>
+        </operation>
+        <operation>
+            <search><![CDATA[<?php echo $footer; ?>]]></search>
+            <add position="before"><![CDATA[
+                <script>
+                    const yamoneyCheckoutCreditUI = YandexCheckoutCreditUI({
+                        shopId: '<?= $yamoney_shop_id;?>',
+                        sum: '<?= $cost;?>',
+                        language: '<?= $yamoney_language_code;?>'
+                    });
+                    const yamoneyCheckoutCreditButton = yamoneyCheckoutCreditUI({
+                        type: 'info',
+                        domSelector: '.installments-info'
+                    });
+                </script>
+            ]]></add>
         </operation>
     </file>
 </modification>

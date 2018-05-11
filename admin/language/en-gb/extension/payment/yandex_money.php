@@ -29,6 +29,7 @@ $_['kassa_password_error_required'] = 'You are required to specify the secret ke
 $_['kassa_payment_mode_label'] = 'Select payment method';
 $_['kassa_payment_mode_kassa_label'] = 'On Yandex.Checkout\'s site';
 $_['kassa_use_yandex_button_label'] = 'Use a button with \'Pay with Yandex\' text';
+$_['kassa_use_installments_button_label'] = 'Add the Installments payment method to checkout page';
 $_['kassa_payment_mode_shop_label'] = 'On the store\'s site';
 
 $_['kassa_payment_method_bank_card'] = 'Bank cards';
@@ -39,6 +40,7 @@ $_['kassa_payment_method_alfabank'] = 'Alfa-Click';
 $_['kassa_payment_method_webmoney'] = 'Webmoney';
 $_['kassa_payment_method_yandex_money'] = 'Yandex.Money';
 $_['kassa_payment_method_mobile'] = 'Direct carrier billing';
+$_['kassa_payment_method_installments'] = 'Installments';
 
 $_['kassa_payment_method_error_required'] = 'Please select at least one option from the list';
 

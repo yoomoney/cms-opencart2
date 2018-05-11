@@ -10,7 +10,7 @@
 class ControllerExtensionPaymentYandexMoney extends Controller
 {
     const MODULE_NAME = 'yandex_money';
-    const MODULE_VERSION = '1.0.11';
+    const MODULE_VERSION = '1.0.12';
 
     public $fields_metrika = array(
         'yandex_money_metrika_active',
@@ -364,6 +364,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             'button_save',
             'button_cancel',
             'pokupki_text_status',
+            'kassa_use_installments_button_label'
         );
         foreach ($arLang as $lang_name) {
             $data[$lang_name] = $this->language->get($lang_name);
@@ -711,6 +712,8 @@ class ControllerExtensionPaymentYandexMoney extends Controller
 
         $value = isset($request->post['yandex_money_kassa_use_yandex_button']) ? $request->post['yandex_money_kassa_use_yandex_button'] : 'off';
         $kassa->setUseYandexButton($value === 'on');
+        $value = isset($request->post['yandex_money_kassa_use_installments_button']) ? $request->post['yandex_money_kassa_use_installments_button'] : 'off';
+        $kassa->setUseInstallmentsButton($value === 'on');
         $request->post['yandex_money_kassa_use_yandex_button'] = $kassa->useYandexButton();
 
         $selected = false;

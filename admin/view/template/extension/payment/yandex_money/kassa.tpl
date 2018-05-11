@@ -65,6 +65,11 @@
                     <input type="checkbox" name="yandex_money_kassa_use_yandex_button" value="on" id="kassa-use-yandex-button" class="form-check-input"<?php echo $kassa->useYandexButton() ? ' checked' : ''; ?> />
                     <?php echo $language->get('kassa_use_yandex_button_label'); ?>
                 </label>
+                <br>
+                <label class="form-check-label">
+                    <input type="checkbox" name="yandex_money_kassa_use_installments_button" value="on" id="kassa-use-installments-button" class="form-check-input"<?php echo $kassa->useInstallmentsButton() ? ' checked' : ''; ?> />
+                    <?php echo $language->get('kassa_use_installments_button_label'); ?>
+                </label>
             </div>
             <div class="col-sm-10 col-sm-offset-2">
                 <label class="form-check-label">
