@@ -282,9 +282,6 @@ class ModelExtensionPaymentYandexMoney extends Model
         }
         $sql = 'UPDATE `'.DB_PREFIX.'ya_money_payment` SET `status` = \''
                .$this->db->escape($refund->getStatus()).'\'';
-        if ($refund->getAuthorizedAt() !== null) {
-            $sql .= ', `authorized_at` = \''.$refund->getAuthorizedAt()->format('Y-m-d H:i:s').'\'';
-        }
         $sql .= ' WHERE `refund_id` = \''.$this->db->escape($refund->getId()).'\'';
         $this->db->escape($sql);
     }
@@ -434,7 +431,6 @@ class ModelExtensionPaymentYandexMoney extends Model
     {
         $sql = 'INSERT INTO `'.DB_PREFIX.'ya_money_refunds`('
                .'`refund_id`, `order_id`, `payment_id`, `status`, `amount`, `currency`, `created_at`'
-               .($refund->getAuthorizedAt() !== null ? ',`authorized_at`' : '')
                .') VALUES ('
                ."'".$this->db->escape($refund->getId())."',"
                .(int)$orderId.","
@@ -443,7 +439,6 @@ class ModelExtensionPaymentYandexMoney extends Model
                ."'".$this->db->escape($refund->getAmount()->getValue())."',"
                ."'".$this->db->escape($refund->getAmount()->getCurrency())."',"
                ."'".$this->db->escape($refund->getCreatedAt()->format('Y-m-d H:i:s'))."'"
-               .($refund->getAuthorizedAt() !== null ? (", '".$this->db->escape($refund->getCreatedAt()->format('Y-m-d H:i:s'))."'") : '')
                .')';
         $this->db->query($sql);
     }

@@ -570,7 +570,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         $enabled                = $this->config->get('yandex_money_market_available');
         $marketAvailabilityMode = $this->config->get('yandex_money_market_set_available');
         $simple                 = $this->config->get('yandex_money_market_prostoy');
-        $length                 = new \Cart\Length($this->registry);
+        $length                 = new \Length($this->registry);
         foreach ($products as $product) {
             if ($enabled && $product['quantity'] < 1) {
                 continue;
