@@ -46,3 +46,5 @@ $_['text_get_payment_id_failed'] = 'Could not get payment ID for order №';
 $_['text_capture_init'] = 'Capture payment %s for order №%s';
 $_['text_failure_status'] = 'Could not capture payment';
 $_['text_success_status'] = 'Order №%s was created';
+
+$_['kassa_default_payment_description'] = 'Payment for order No. %order_id%';

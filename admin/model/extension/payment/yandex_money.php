@@ -5,6 +5,7 @@ class ModelExtensionPaymentYandexMoney extends Model
     private $kassaModel;
     private $walletModel;
     private $billingModel;
+    private $metrikaModel;
 
     private $backupDirectory = 'yandex_money/backup';
     private $versionDirectory = 'yandex_money/updates';
@@ -102,35 +103,39 @@ class ModelExtensionPaymentYandexMoney extends Model
 
     /**
      * @param int $offset
+     *
      * @return array
      */
     public function findPayments($offset = 0)
     {
-        $res = $this->db->query('SELECT * FROM `' . DB_PREFIX . 'ya_money_payment` ORDER BY `order_id` DESC LIMIT ' . (int)$offset . ', 20');
+        $res = $this->db->query('SELECT * FROM `'.DB_PREFIX.'ya_money_payment` ORDER BY `order_id` DESC LIMIT '.(int)$offset.', 20');
         if ($res->num_rows) {
             return $res->rows;
         }
+
         return array();
     }
 
     public function countPayments()
     {
-        $res = $this->db->query('SELECT COUNT(*) AS `count` FROM `' . DB_PREFIX . 'ya_money_payment`');
+        $res = $this->db->query('SELECT COUNT(*) AS `count` FROM `'.DB_PREFIX.'ya_money_payment`');
         if ($res->num_rows) {
             return $res->row['count'];
         }
+
         return 0;
     }
 
     /**
      * @param $payments
+     *
      * @return \YandexCheckout\Model\PaymentInterface[]
      */
     public function updatePaymentsStatuses($payments)
     {
         $result = array();
 
-        $client = $this->getClient();
+        $client   = $this->getClient();
         $statuses = array(
             \YandexCheckout\Model\PaymentStatus::PENDING,
             \YandexCheckout\Model\PaymentStatus::WAITING_FOR_CAPTURE,
@@ -140,11 +145,13 @@ class ModelExtensionPaymentYandexMoney extends Model
                 try {
                     $paymentObject = $client->getPaymentInfo($payment['payment_id']);
                     if ($paymentObject === null) {
-                        $this->updatePaymentStatus($payment['payment_id'], \YandexCheckout\Model\PaymentStatus::CANCELED);
+                        $this->updatePaymentStatus($payment['payment_id'],
+                            \YandexCheckout\Model\PaymentStatus::CANCELED);
                     } else {
                         $result[] = $paymentObject;
                         if ($paymentObject->getStatus() !== $payment['status']) {
-                            $this->updatePaymentStatus($payment['payment_id'], $paymentObject->getStatus(), $paymentObject->getCapturedAt());
+                            $this->updatePaymentStatus($payment['payment_id'], $paymentObject->getStatus(),
+                                $paymentObject->getCapturedAt());
                         }
                     }
                 } catch (\Exception $e) {
@@ -152,22 +159,25 @@ class ModelExtensionPaymentYandexMoney extends Model
                 }
             }
         }
+
         return $result;
     }
 
     /**
      * @param \YandexCheckout\Model\PaymentInterface $payment
      * @param bool $fetchPayment
+     *
      * @return bool
      */
-    public function capturePayment($payment, $fetchPayment = true)
+    public function capturePayment($payment, $fetchPayment = true, $amount = null)
     {
         if ($fetchPayment) {
             $client = $this->getClient();
             try {
                 $payment = $client->getPaymentInfo($payment->getId());
             } catch (Exception $e) {
-                $this->log('error', 'Payment ' . $payment->getId() . ' not fetched from API in capture method');
+                $this->log('error', 'Payment '.$payment->getId().' not fetched from API in capture method');
+
                 return false;
             }
         }
@@ -179,20 +189,16 @@ class ModelExtensionPaymentYandexMoney extends Model
         $client = $this->getClient();
         try {
             $builder = \YandexCheckout\Request\Payments\Payment\CreateCaptureRequest::builder();
-            $builder->setAmount($payment->getAmount());
-            $key = uniqid('', true);
-            $tries = 0;
+            if (is_null($amount)) {
+                $builder->setAmount($amount);
+            } else {
+                $builder->setAmount($payment->getAmount());
+            }
+
+
             $request = $builder->build();
-            do {
-                $result = $client->capturePayment($request, $payment->getId(), $key);
-                if ($result === null) {
-                    $tries++;
-                    if ($tries > 3) {
-                        break;
-                    }
-                    sleep(2);
-                }
-            } while ($result === null);
+            $result  = $client->capturePayment($request, $payment->getId());
+
             if ($result === null) {
                 throw new RuntimeException('Failed to capture payment after 3 retries');
             }
@@ -200,10 +206,28 @@ class ModelExtensionPaymentYandexMoney extends Model
                 $this->updatePaymentStatus($payment->getId(), $result->getStatus(), $result->getCapturedAt());
             }
         } catch (Exception $e) {
-            $this->log('error', 'Failed to capture payment: ' . $e->getMessage());
+            $this->log('error', 'Failed to capture payment: '.$e->getMessage());
+
             return false;
         }
+
         return true;
+    }
+
+    public function cancelPayment($payment)
+    {
+        try {
+            $response = $this->getClient()->cancelPayment($payment->getId());
+        } catch (Exception $e) {
+            $this->log('error', 'Failed to capture payment: '.$e->getMessage());
+            $response = null;
+        }
+        if ($response !== null) {
+            $payment = $response;
+            $this->updatePaymentStatus($payment->getId(), $payment->getStatus(), $payment->getCapturedAt());
+        }
+
+        return $payment;
     }
 
     /**
@@ -214,10 +238,10 @@ class ModelExtensionPaymentYandexMoney extends Model
      */
     public function confirmOrderPayment($orderId, $orderInfo, $payment, $statusId)
     {
-        $sql = 'UPDATE `' . DB_PREFIX . 'order_history` SET `comment` = \'Платёж подтверждён\' WHERE `order_id` = '
-            . (int)$orderId . ' AND `order_status_id` <= 1';
-        $comment = 'Номер транзакции: ' . $payment->getId() . '. Сумма: ' . $payment->getAmount()->getValue()
-            . ' ' . $payment->getAmount()->getCurrency();
+        $sql     = 'UPDATE `'.DB_PREFIX.'order_history` SET `comment` = \'Платёж подтверждён\' WHERE `order_id` = '
+                   .(int)$orderId.' AND `order_status_id` <= 1';
+        $comment = 'Номер транзакции: '.$payment->getId().'. Сумма: '.$payment->getAmount()->getValue()
+                   .' '.$payment->getAmount()->getCurrency();
         $this->db->query($sql);
 
         $orderInfo['order_status_id'] = $statusId;
@@ -227,27 +251,27 @@ class ModelExtensionPaymentYandexMoney extends Model
     public function updateOrderStatus($order_id, $order_info, $comment = '')
     {
         if ($order_info && $order_info['order_status_id']) {
-            $sql = "UPDATE `" . DB_PREFIX . "order` SET order_status_id = '" . (int)$order_info['order_status_id']
-                . "', date_modified = NOW() WHERE order_id = '" . (int)$order_id . "'";
+            $sql = "UPDATE `".DB_PREFIX."order` SET order_status_id = '".(int)$order_info['order_status_id']
+                   ."', date_modified = NOW() WHERE order_id = '".(int)$order_id."'";
             $this->db->query($sql);
 
-            $sql = "INSERT INTO " . DB_PREFIX . "order_history SET order_id = '" . (int)$order_id
-                . "', order_status_id = '" . (int)$order_info['order_status_id'] . "', notify = 0, comment = '"
-                . $this->db->escape($comment) . "', date_added = NOW()";
+            $sql = "INSERT INTO ".DB_PREFIX."order_history SET order_id = '".(int)$order_id
+                   ."', order_status_id = '".(int)$order_info['order_status_id']."', notify = 0, comment = '"
+                   .$this->db->escape($comment)."', date_added = NOW()";
             $this->db->query($sql);
         }
     }
 
     private function updatePaymentStatus($paymentId, $status, $capturedAt = null)
     {
-        $sql = 'UPDATE `' . DB_PREFIX . 'ya_money_payment` SET `status` = \'' . $status . '\'';
+        $sql = 'UPDATE `'.DB_PREFIX.'ya_money_payment` SET `status` = \''.$status.'\'';
         if ($capturedAt !== null) {
-            $sql .= ', `captured_at`=\'' . $capturedAt->format('Y-m-d H:i:s') . '\'';
+            $sql .= ', `captured_at`=\''.$capturedAt->format('Y-m-d H:i:s').'\'';
         }
         if ($status !== \YandexCheckout\Model\PaymentStatus::CANCELED && $status !== \YandexCheckout\Model\PaymentStatus::PENDING) {
             $sql .= ', `paid`=\'Y\'';
         }
-        $sql .= ' WHERE `payment_id`=\'' . $paymentId . '\'';
+        $sql .= ' WHERE `payment_id`=\''.$paymentId.'\'';
         $this->db->query($sql);
     }
 
@@ -333,53 +357,17 @@ class ModelExtensionPaymentYandexMoney extends Model
         return $this->billingModel;
     }
 
-    public function carrierList()
+    /**
+     * @return YandexMoneyMetrikaModel
+     */
+    public function getMetrikaModel()
     {
-        $prefix = version_compare(VERSION, '2.3.0') >= 0 ? 'extension/' : '';
-        $types  = array(
-            'POST'     => $this->language->get('pokupki_carrier_post'),
-            'PICKUP'   => $this->language->get('pokupki_carrier_pickup'),
-            'DELIVERY' => $this->language->get('pokupki_carrier_delivery'),
-        );
-        $this->load->model('extension/extension');
-        $extensions = $this->model_extension_extension->getInstalled('shipping');
-        foreach ($extensions as $key => $value) {
-            if (!file_exists(DIR_APPLICATION.'controller/shipping/'.$value.'.php')) {
-                unset($extensions[$key]);
-            }
-        }
-        $data['extensions'] = array();
-        $files              = glob(DIR_APPLICATION.'controller/shipping/*.php');
-        if ($files) {
-            foreach ($files as $file) {
-                $extension = basename($file, '.php');
-                if (in_array($extension, $extensions)) {
-                    $this->load->language($prefix.'shipping/'.$extension);
-                    $data['extensions'][] = array(
-                        'name'       => $this->language->get('heading_title'),
-                        'sort_order' => $this->config->get($extension.'_sort_order'),
-                        'installed'  => in_array($extension, $extensions),
-                        'ext'        => $extension,
-                    );
-                }
-            }
-        }
-        $html      = '';
-        $save_data = $this->config->get('yandex_money_pokupki_carrier');
-        foreach ($data['extensions'] as $row) {
-            $html .= '<div class="form-group">
-                <label class="col-sm-4 control-label" for="yandex_money_pokupki_carrier">'.$row['name'].'</label>
-                <div class="col-sm-8">
-                    <select name="yandex_money_pokupki_carrier['.$row['ext'].']" id="yandex_money_pokupki_carrier" class="form-control">';
-            foreach ($types as $t => $t_name) {
-                $html .= '<option value="'.$t.'" '.((isset($save_data[$row['ext']]) && $save_data[$row['ext']] == $t) ? 'selected="selected"' : '').'>'.$t_name.'</option>';
-            }
-            $html .= '</select>
-                </div>
-            </div>';
+        if ($this->metrikaModel === null) {
+            require_once dirname(__FILE__).DIRECTORY_SEPARATOR.'yandex_money'.DIRECTORY_SEPARATOR.'YandexMoneyMetrikaModel.php';
+            $this->metrikaModel = new YandexMoneyMetrikaModel();
         }
 
-        return $html;
+        return $this->metrikaModel;
     }
 
     public function refundPayment($payment, $order, $amount, $comment)
@@ -398,18 +386,7 @@ class ModelExtensionPaymentYandexMoney extends Model
         }
 
         try {
-            $key   = 'refund-'.$order['order_id'].'-'.microtime(true);
-            $tries = 0;
-            do {
-                $response = $this->getClient()->createRefund($request, $key);
-                if ($response === null) {
-                    $tries++;
-                    if ($tries >= 3) {
-                        break;
-                    }
-                    sleep(2);
-                }
-            } while ($response === null);
+            $response = $this->getClient()->createRefund($request);
         } catch (Exception $e) {
             $this->log('error', 'Failed to create refund: '.$e->getMessage());
 

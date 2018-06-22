@@ -1,5 +1,7 @@
 <?php
 
+use YandexCheckout\Model\Payment;
+
 require_once dirname(__FILE__).DIRECTORY_SEPARATOR.'yandex_money'.DIRECTORY_SEPARATOR.'autoload.php';
 
 /**
@@ -10,7 +12,7 @@ require_once dirname(__FILE__).DIRECTORY_SEPARATOR.'yandex_money'.DIRECTORY_SEPA
  */
 class ModelExtensionPaymentYandexMoney extends Model
 {
-    const MODULE_VERSION = '1.0.13';
+    const MODULE_VERSION = '1.0.14';
 
     private $kassaModel;
     private $walletModel;
@@ -138,11 +140,14 @@ class ModelExtensionPaymentYandexMoney extends Model
         }
 
         try {
-            $builder = \YandexCheckout\Request\Payments\CreatePaymentRequest::builder();
+            $builder      = \YandexCheckout\Request\Payments\CreatePaymentRequest::builder();
+            $captureValue = $this->getKassaModel()->getCaptureValue($paymentMethod);
+            $description  = $this->generatePaymentDescription($orderInfo);
             $builder->setAmount($amount)
                     ->setCurrency('RUB')
                     ->setClientIp($_SERVER['REMOTE_ADDR'])
-                    ->setCapture(true)
+                    ->setCapture($captureValue)
+                    ->setDescription($description)
                     ->setMetadata(array(
                         'order_id'       => $orderId,
                         'cms_name'       => 'ya_api_ycms_opencart',
@@ -281,14 +286,13 @@ class ModelExtensionPaymentYandexMoney extends Model
 
     /**
      * @param int $orderId
-     * @param \YandexCheckout\Model\PaymentInterface $payment
      */
-    public function confirmOrder($orderId, $payment)
+    public function confirmOrder($orderId)
     {
         $this->load->model('checkout/order');
         $url     = $this->url->link($this->getPrefix().'payment/yandex_money/repay', 'order_id='.$orderId, true);
         $comment = '<a href="'.$url.'" class="button">'.$this->language->get('text_repay').'</a>';
-        $this->model_checkout_order->addOrderHistory($orderId, 1, $comment, true);
+        $this->model_checkout_order->addOrderHistory($orderId, 1, $comment);
     }
 
     /**
@@ -303,8 +307,7 @@ class ModelExtensionPaymentYandexMoney extends Model
         $this->model_checkout_order->addOrderHistory(
             $orderId,
             $statusId,
-            'Платёж номер "'.$payment->getId().'" подтверждён',
-            true
+            'Платёж номер "'.$payment->getId().'" подтверждён'
         );
         $sql = 'UPDATE `'.DB_PREFIX.'order_history` SET `comment` = \'Платёж подтверждён\' WHERE `order_id` = '
                .(int)$orderId.' AND `order_status_id` <= 1';
@@ -315,10 +318,11 @@ class ModelExtensionPaymentYandexMoney extends Model
     /**
      * @param \YandexCheckout\Model\PaymentInterface $payment
      * @param bool $fetchPaymentInfo
+     * @param null|int $amount
      *
      * @return \YandexCheckout\Model\PaymentInterface
      */
-    public function capturePayment($payment, $fetchPaymentInfo = true)
+    public function capturePayment($payment, $fetchPaymentInfo = true, $amount = null)
     {
         if ($fetchPaymentInfo) {
             $tmp = $this->fetchPaymentInfo($payment->getId());
@@ -330,7 +334,11 @@ class ModelExtensionPaymentYandexMoney extends Model
         if ($payment->getStatus() === \YandexCheckout\Model\PaymentStatus::WAITING_FOR_CAPTURE) {
             try {
                 $builder = \YandexCheckout\Request\Payments\Payment\CreateCaptureRequest::builder();
-                $builder->setAmount($payment->getAmount());
+                if (is_null($amount)) {
+                    $builder->setAmount($payment->getAmount());
+                } else {
+                    $builder->setAmount($amount);
+                }
                 $request = $builder->build();
             } catch (InvalidArgumentException $e) {
                 $this->log('error', 'Failed to create capture payment request: '.$e->getMessage());
@@ -505,32 +513,41 @@ class ModelExtensionPaymentYandexMoney extends Model
 
     public function getMetricsJavaScript($id)
     {
+        if (!$this->config->get('yandex_money_metrika_code')) {
+            return '';
+        }
+
         $this->load->model('checkout/order');
         $order              = $this->model_checkout_order->getOrder($id);
         $product_array      = $this->getOrderProducts($id);
-        $ret                = array();
-        $data               = '';
-        $ret['order_price'] = $order['total'].' '.$order['currency_code'];
-        $ret['order_id']    = $order['order_id'];
-        $ret['currency']    = $order['currency_code'];
-        $ret['payment']     = $order['payment_method'];
-        $products           = array();
+
+        $products = array();
         foreach ($product_array as $k => $product) {
             $products[$k]['id']       = $product['product_id'];
             $products[$k]['name']     = $product['name'];
-            $products[$k]['quantity'] = $product['quantity'];
-            $products[$k]['price']    = $product['price'];
+            $products[$k]['quantity'] = (int)$product['quantity'];
+            $products[$k]['price']    = (float)$product['price'];
         }
 
-        $ret['goods'] = $products;
-        if ($this->config->get('ya_metrika_order')) {
-            $data = '<script>
-                $(window).load(function() {
-                    metrikaReach(\'metrikaOrder\', '.json_encode($ret).');
-                });
-                </script>
-            ';
-        }
+        $ecommerce = array(
+            'currencyCode' => $order['currency_code'],
+            'purchase'     => array(
+                'actionField' => array(
+                    'id'      => $order['order_id'],
+                    'revenue' => $order['total'],
+                ),
+                'products'    => $products,
+            ),
+        );
+
+        $ecommerce['goods'] = $products;
+
+        $data = '<script type="text/javascript">
+            $(window).on("load", function() {
+                window.dataLayer = window.dataLayer || [];
+                dataLayer.push({ecommerce: '.json_encode($ecommerce).'});
+            });
+            </script>';
 
         return $data;
     }
@@ -600,6 +617,32 @@ class ModelExtensionPaymentYandexMoney extends Model
         }
 
         return $this->_prefix;
+    }
+
+    /**
+     * @param $orderInfo
+     *
+     * @return string
+     */
+    private function generatePaymentDescription($orderInfo)
+    {
+        $this->load->language($this->getPrefix().'payment/yandex_money');
+
+        $descriptionTemplate = $this->getKassaModel()->getPaymentDescription();
+        if (!$descriptionTemplate) {
+            $descriptionTemplate = $this->language->get('kassa_default_payment_description');
+        }
+        $replace = array();
+        foreach ($orderInfo as $key => $value) {
+            if (is_scalar($value)) {
+                $replace['%'.$key.'%'] = $value;
+            }
+        }
+        $description = strtr($descriptionTemplate, $replace);
+
+        $description = (string)mb_substr($description, 0, Payment::MAX_LENGTH_DESCRIPTION);
+
+        return $description;
     }
 }
 

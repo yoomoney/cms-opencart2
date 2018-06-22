@@ -176,19 +176,22 @@
 
         });
         //--></script>
-
-    <script>
-        const yamoneyCheckoutCreditUI = YandexCheckoutCreditUI({
-            shopId: '<?= $shopId?>',
-            sum: '<?= $sum?>',
-            language: '<?= $language->get("code")?>'
-        });
-        const yamoneyCheckoutCreditButton = yamoneyCheckoutCreditUI({
-            type: 'button',
-            theme: 'default',
-            domSelector: '.installment-wrapper'
-        });
-    </script>
+    <?php if ($kassa->useInstallmentsButton()): ?>
+        <script>
+            if (typeof YandexCheckoutCreditUI !== "undefined") {
+                const yamoneyCheckoutCreditUI = YandexCheckoutCreditUI({
+                    shopId: '<?= $shopId?>',
+                    sum: '<?= $sum?>',
+                    language: '<?= $language->get("code")?>'
+                });
+                const yamoneyCheckoutCreditButton = yamoneyCheckoutCreditUI({
+                    type: 'button',
+                    theme: 'default',
+                    domSelector: '.installment-wrapper'
+                });
+            }
+        </script>
+    <?php endif; ?>
     <?php if ($fullView) : ?>
     <?php echo $content_bottom; ?>
 </div>

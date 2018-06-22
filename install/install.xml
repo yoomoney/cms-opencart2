@@ -2,7 +2,7 @@
 <modification>
     <name>Y.CMS 2.0 for Opencart 2.0.x - 2.3.x</name>
     <code>ycms.2.0</code>
-    <version>1.0.13</version>
+    <version>1.0.14</version>
     <author>Yandex.Money</author>
     <!-- Вставка кнопки в историю заказов-->
     <file path="catalog/controller/account/order.php">
@@ -97,6 +97,7 @@
                 'email'          => (isset($result['email']) && $this->config->get('yandex_money_kassa_enabled')) ? $result['email'] : '',
                 'refund_amount'  => (isset($result['refund_amount']) ? $result['refund_amount'] : ''),
                 'refund_url'     => (isset($result['payment_code']) && $result['payment_code'] == 'yandex_money') ? $this->url->link($prefix . 'payment/yandex_money/refund', 'order_id='.$result['order_id'].'&token='.$this->session->data['token'], true) : '',
+                'capture_url'    => (isset($result['payment_code']) && $result['payment_code'] == 'yandex_money') ? $this->url->link($prefix . 'payment/yandex_money/capture', 'order_id='.$result['order_id'].'&token='.$this->session->data['token'], true) : '',
             ]]></add>
         </operation>
         <operation>
@@ -123,6 +124,11 @@
                 <?php if (isset($order['payment_status']) && $order['payment_status'] === 'succeeded') : ?>
                 <a href="<?php echo $order['refund_url']; ?>" data-toggle="tooltip" title="Возвраты" class="btn btn-success">
                     <i class="fa fa-repeat"></i>
+                </a>
+                <?php endif; ?>
+                <?php if (isset($order['payment_status']) && $order['payment_status'] === 'waiting_for_capture') : ?>
+                <a href="<?php echo $order['capture_url']; ?>" data-toggle="tooltip" title="Подтверждение платежа" class="btn btn-success">
+                    <i class="fa fa-check"></i>
                 </a>
                 <?php endif; ?>$4]]></add>
         </operation>
@@ -227,34 +233,17 @@
         <operation>
             <search><![CDATA[<footer]]></search>
             <add position="before"><![CDATA[
-            <?php if (isset ($yandex_money_metrika_active) && $yandex_money_metrika_active){ ?>
+            <?php if (isset($yandex_money_metrika_active) && $yandex_money_metrika_active){ ?>
                 <?php echo $yandex_metrika; ?>
                 <script type="text/javascript">
-                    var old_addCart = cart.add;
+                    window.dataLayer = window.dataLayer || [];
+                    var opencartCartAdd = cart.add;
                     cart.add = function (product_id, quantity)
                     {
-                        var params_cart = new Array();
-                        params_cart['name'] = 'product id = '+product_id;
-                        params_cart['quantity'] = quantity;
-                        params_cart['price'] = 0;
-                        old_addCart(product_id, quantity);
-                        metrikaReach('metrikaCart', params_cart);
-                    }
-    
-                    $('#button-cart').on('click', function() {
-                        var params_cart = new Array();
-                        params_cart['name'] = 'product id = '+ $('#product input[name="product_id"]').val();
-                        params_cart['quantity'] = $('#product input[name="quantity"]').val();
-                        params_cart['price'] = 0;
-                        metrikaReach('metrikaCart', params_cart);
-                    });
-    
-                    function metrikaReach(goal_name, params) {
-                    for (var i in window) {
-                        if (/^yaCounter\d+/.test(i)) {
-                            window[i].reachGoal(goal_name, params);
-                        }
-                    }
+                        var eCommerceData = {ecommerce: {add: {products: [{id: product_id, quantity: parseInt(quantity)}]}}}
+                        dataLayer.push(eCommerceData);
+                        opencartCartAdd(product_id, quantity);
+                    };
                 }
                 </script>
             <?php } ?>]]></add>
@@ -324,17 +313,38 @@
         <operation>
             <search><![CDATA[<?php echo $footer; ?>]]></search>
             <add position="before"><![CDATA[
-                <script>
-                    const yamoneyCheckoutCreditUI = YandexCheckoutCreditUI({
-                        shopId: '<?= $yamoney_shop_id;?>',
-                        sum: '<?= $cost;?>',
-                        language: '<?= $yamoney_language_code;?>'
+                <?php if($yamoney_showInstallmentsInfo): ?>
+                    <script>
+                        if (typeof YandexCheckoutCreditUI !== "undefined") {
+                            const yamoneyCheckoutCreditUI = YandexCheckoutCreditUI({
+                                shopId: '<?= $yamoney_shop_id;?>',
+                                sum: '<?= $cost;?>',
+                                language: '<?= $yamoney_language_code;?>'
+                            });
+                            const yamoneyCheckoutCreditButton = yamoneyCheckoutCreditUI({
+                                type: 'info',
+                                domSelector: '.installments-info'
+                            });
+                        }
+                    </script>
+                <?php endif; ?>
+            ]]></add>
+        </operation>
+        <operation>
+            <search><![CDATA[<?php echo $footer; ?>]]></search>
+            <add position="before"><![CDATA[
+                <script type="text/javascript"><!--
+                    $(window).on("load", function () {
+                        window.dataLayer = window.dataLayer || [];
+                        dataLayer.push({ecommerce: {detail: {products: [{
+                            id: "<?= $product_id; ?>",
+                            name: "<?= $heading_title; ?>",
+                            price: parseFloat("0"+"<?= $price ?: 0; ?>".replace(/[^.\d]+/g,"")),
+                            brand: "<?= $manufacturer; ?>",
+                            variant: "<?= $model; ?>"
+                        }]}}});
                     });
-                    const yamoneyCheckoutCreditButton = yamoneyCheckoutCreditUI({
-                        type: 'info',
-                        domSelector: '.installments-info'
-                    });
-                </script>
+                //--></script>
             ]]></add>
         </operation>
     </file>
