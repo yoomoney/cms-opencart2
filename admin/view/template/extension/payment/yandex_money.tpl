@@ -42,7 +42,6 @@ echo $column_left;
             <li<?php echo ($lastActiveTab == 'tab-billing' ? ' class="active"' : ''); ?>><a href="#tab-billing" data-toggle="tab"><?php echo $language->get('billing_tab_header'); ?></a></li>
             <li<?php echo ($lastActiveTab == 'tab-metrika' ? ' class="active"' : ''); ?>><a href="#tab-metrika" data-toggle="tab"><?php echo $language->get('metrika_tab_header'); ?></a></li>
             <li<?php echo ($lastActiveTab == 'tab-market' ? ' class="active"' : ''); ?>><a href="#tab-market" data-toggle="tab"><?php echo $language->get('market_tab_header'); ?></a></li>
-            <li<?php echo ($lastActiveTab == 'tab-orders' ? ' class="active"' : ''); ?>><a href="#tab-orders" data-toggle="tab"><?php echo $language->get('orders_tab_header'); ?></a></li>
             <li<?php echo ($lastActiveTab == 'tab-update' ? ' class="active"' : ''); ?>><a href="#tab-update" data-toggle="tab"><?php echo $language->get('update_tab_header'); ?></a></li>
         </ul>
         <form action="<?php echo $action; ?>" method="post" enctype="multipart/form-data" id="form-payment-yandex-money" class="form-horizontal">
@@ -66,9 +65,6 @@ echo $column_left;
                 </div>
                 <div class="tab-pane<?php echo ($lastActiveTab == 'tab-update' ? ' active' : ''); ?>" id="tab-update">
                     <?php include dirname(__FILE__) . '/yandex_money/update.tpl'; ?>
-                </div>
-                <div class="tab-pane<?php echo ($lastActiveTab == 'tab-orders' ? ' active' : ''); ?>" id="tab-orders">
-                    <?php include dirname(__FILE__) . '/yandex_money/orders.tpl'; ?>
                 </div>
             </div>
         </form>

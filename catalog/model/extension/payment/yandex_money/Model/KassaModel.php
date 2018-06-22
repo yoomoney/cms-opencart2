@@ -23,7 +23,11 @@ class KassaModel extends AbstractPaymentModel
     protected $testMode;
     protected $showInFooter;
     protected $useInstallmentsButton;
-
+    protected $enableHoldMode;
+    protected $holdOrderStatus;
+    protected $paymentDescription;
+    protected $orderCanceledStatus;
+    
     /**
      * KassaModel constructor.
      *
@@ -38,6 +42,10 @@ class KassaModel extends AbstractPaymentModel
         $this->epl                   = $this->getConfigValue('payment_mode') !== 'shop';
         $this->useYandexButton       = (bool)$this->getConfigValue('use_yandex_button');
         $this->useInstallmentsButton = (bool)$this->getConfigValue('use_installments_button');
+        $this->enableHoldMode        = (bool)$this->getConfigValue('enable_hold_mode');
+        $this->holdOrderStatus       = $this->getConfigValue('hold_order_status');
+        $this->paymentDescription    = $this->getConfigValue('payment_description');
+        $this->orderCanceledStatus   = $this->getConfigValue('cancel_order_status');
 
         $this->testMode = false;
         if ($this->enabled && strncmp('test_', $this->password, 5) === 0) {
@@ -196,5 +204,42 @@ class KassaModel extends AbstractPaymentModel
         $this->paymentMethods = $paymentMethods;
 
         return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getEnableHoldMode()
+    {
+        return $this->enableHoldMode;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getHoldOrderStatusId()
+    {
+        return $this->holdOrderStatus;
+    }
+
+    public function getCaptureValue($paymentMethod)
+    {
+        return !($this->enableHoldMode && in_array($paymentMethod, array('', PaymentMethodType::BANK_CARD)));
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPaymentDescription()
+    {
+        return $this->paymentDescription;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getOrderCanceledStatus()
+    {
+        return $this->orderCanceledStatus;
     }
 }

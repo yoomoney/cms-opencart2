@@ -91,6 +91,55 @@
         </div>
 
         <div class="form-group">
+            <label class="col-sm-2 control-label" for="kassa-payment-description"><?php echo $language->get('kassa_payment_description_label'); ?></label>
+            <div class="col-sm-10">
+                <input type="text" name="yandex_money_kassa_payment_description" value="<?php echo $kassa->getPaymentDescription(); ?>" placeholder="<?php echo $language->get('kassa_default_payment_description'); ?>" id="kassa-payment-description" class="form-control" />
+                <p class="help-block"><?php echo $language->get('kassa_payment_description_description'); ?></p>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-sm-10 col-sm-offset-2">
+                <label>
+                    <input type="checkbox" id="kassa-enable-hold-mode" name="yandex_money_kassa_enable_hold_mode" value="on"<?php echo $kassa->getEnableHoldMode() ? ' checked' : ''; ?> />
+                    <?php echo $language->get('kassa_hold_setting_label'); ?>
+                </label>
+                <p class="help-block"><?php echo $language->get('kassa_hold_setting_description'); ?></p>
+            </div>
+
+
+            <div class="statuses-wrapper">
+                <div class="col-sm-2 control-label" for="kassa-statuses-label">
+                </div>
+                <div id="kassa-statuses-label" class="col-sm-10">
+                    <label> <?php echo $language->get('kassa_statuses_description_label'); ?> </label>
+                </div>
+
+                <label class="col-sm-2 control-label" for="kassa-success-order-status">
+                    <?php echo $language->get('kassa_hold_order_status_label'); ?>
+                </label>
+
+                <div class="col-sm-10" style="margin-bottom: 10px;">
+                    <select id="kassa-hold-order-status" name="yandex_money_kassa_hold_order_status" class="form-control">
+                        <?php foreach ($orderStatuses as $id => $name) : ?>
+                        <option value="<?php echo $id; ?>"<?php echo $kassa->getHoldOrderStatusId() == $id ? ' selected' : ''; ?>><?php echo $name; ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <label class="col-sm-2 control-label" for="kassa-success-order-status">
+                    <?php echo $language->get('kassa_cancel_order_status_label'); ?>
+                </label>
+                <div class="col-sm-10">
+                    <select id="kassa-cancel-order-status" name="yandex_money_kassa_cancel_order_status" class="form-control">
+                        <?php foreach ($orderStatuses as $id => $name) : ?>
+                        <option value="<?php echo $id; ?>"<?php echo $kassa->getOrderCanceledStatus() == $id ? ' selected' : ''; ?>><?php echo $name; ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
             <label class="col-sm-2 control-label" for="kassa-display-name"><?php echo $language->get('kassa_display_name_label'); ?></label>
             <div class="col-sm-10">
                 <input type="text" name="yandex_money_kassa_display_name" value="<?php echo $kassa->getDisplayName(); ?>" placeholder="<?php echo $language->get('kassa_display_name_label'); ?>" id="kassa-display-name" class="form-control" />
@@ -319,10 +368,19 @@ jQuery(document).ready(function () {
         }
     }
 
+    function toggleStatuses(value) {
+        if (value) {
+            jQuery('.statuses-wrapper').slideDown();
+        } else {
+            jQuery('.statuses-wrapper').slideUp();
+        }
+    }
+
     var form = document.getElementById('form-payment-yandex-money');
     togglePaymentMode(form.yandex_money_kassa_payment_mode.value);
     toggleSendReceipt(form.yandex_money_kassa_send_receipt.checked);
     toggleInvoice(form.yandex_money_kassa_invoice.checked);
+    toggleStatuses(form.yandex_money_kassa_enable_hold_mode.checked);
 
     jQuery('input[name=yandex_money_kassa_payment_mode]').click(function () {
         togglePaymentMode(form.yandex_money_kassa_payment_mode.value)
@@ -334,6 +392,10 @@ jQuery(document).ready(function () {
 
     jQuery('#kassa-invoice').bind('change', function () {
         toggleInvoice(this.checked);
+    });
+
+    jQuery('#kassa-enable-hold-mode').bind('change', function () {
+        toggleStatuses(this.checked);
     });
 });
 
