@@ -2,7 +2,7 @@
 <modification>
     <name>Y.CMS 2.0 for Opencart 2.0.x - 2.3.x</name>
     <code>ycms.2.0</code>
-    <version>1.0.14</version>
+    <version>1.0.15</version>
     <author>Yandex.Money</author>
     <!-- Вставка кнопки в историю заказов-->
     <file path="catalog/controller/account/order.php">
@@ -207,6 +207,7 @@
             <add position="after"><![CDATA[$data['yandex_metrika'] = $this->config->get('yandex_money_metrika_code') ? html_entity_decode($this->config->get('yandex_money_metrika_code'), ENT_QUOTES, 'UTF-8') : '';
             $data['yandex_money_metrika_active'] = $this->config->get('yandex_money_metrika_active') ? true : false;
             $data['yandex_money_kassa_show_in_footer'] = $this->config->get('yandex_money_kassa_enabled') && $this->config->get('yandex_money_kassa_show_in_footer');
+            $data['yandex_money_product_info_url'] = 'index.php?route='.(version_compare(VERSION, "2.3.0", '>=')?"extension/":"").'payment/yandex_money/productInfo';
             ]]></add>
         </operation>
     </file>
@@ -237,14 +238,28 @@
                 <?php echo $yandex_metrika; ?>
                 <script type="text/javascript">
                     window.dataLayer = window.dataLayer || [];
-                    var opencartCartAdd = cart.add;
-                    cart.add = function (product_id, quantity)
-                    {
-                        var eCommerceData = {ecommerce: {add: {products: [{id: product_id, quantity: parseInt(quantity)}]}}}
-                        dataLayer.push(eCommerceData);
-                        opencartCartAdd(product_id, quantity);
-                    };
-                }
+                    function sendEcommerceAdd(id, quantity) {
+                       $.ajax({
+                            url: "<?= $yandex_money_product_info_url; ?>",
+                            type: 'post',
+                            data: 'id=' + id,
+                            dataType: 'json',
+                            success: function(json) {
+                                json.quantity = quantity;
+                                dataLayer.push({ecommerce: {add: {products: [json]}}});
+                            }
+                        });
+                    }
+                    $(window).on("load", function () {
+                        var opencartCartAdd = cart.add;
+                        cart.add = function (product_id, quantity) {
+                            opencartCartAdd(product_id, quantity);
+                            sendEcommerceAdd(product_id, typeof(quantity) !== 'undefined' ? parseInt(quantity) : 1);
+                        };
+                        $('#button-cart').on('click', function() {
+                            sendEcommerceAdd($('#product input[name="product_id"]').val(), parseInt($('#product input[name="quantity"]').val()));
+                        });
+                    });
                 </script>
             <?php } ?>]]></add>
         </operation>

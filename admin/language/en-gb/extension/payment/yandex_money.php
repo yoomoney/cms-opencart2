@@ -213,11 +213,11 @@ $_['market_out']     = 'Upload';
 $_['market_out_all'] = 'All products';
 $_['market_out_sel'] = 'Selected categories';
 
-$_['market_dostup']   = 'Terms of delivery to pickup location';
-$_['market_dostup_1'] = 'Up to 2 days for all products';
-$_['market_dostup_2'] = 'Up to 2 days for products in stock';
-$_['market_dostup_3'] = 'Fixed individually';
-$_['market_dostup_4'] = 'Pickup is not available';
+$_['market_dostup']   = 'Доступность';
+$_['market_dostup_1'] = 'Все доступны';
+$_['market_dostup_2'] = 'Доступны если > 0, остальные на заказ';
+$_['market_dostup_3'] = 'Если = 0, не выгружать';
+$_['market_dostup_4'] = 'Все на заказ';
 
 $_['market_s_name']                = 'Store name';
 $_['market_d_cost']                = 'Price of delivery in home region';

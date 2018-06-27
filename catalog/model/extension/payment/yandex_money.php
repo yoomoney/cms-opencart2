@@ -12,7 +12,7 @@ require_once dirname(__FILE__).DIRECTORY_SEPARATOR.'yandex_money'.DIRECTORY_SEPA
  */
 class ModelExtensionPaymentYandexMoney extends Model
 {
-    const MODULE_VERSION = '1.0.14';
+    const MODULE_VERSION = '1.0.15';
 
     private $kassaModel;
     private $walletModel;
@@ -513,8 +513,10 @@ class ModelExtensionPaymentYandexMoney extends Model
 
     public function getMetricsJavaScript($id)
     {
-        if (!$this->config->get('yandex_money_metrika_code')) {
-            return '';
+        if (!$this->config->get('yandex_money_metrika_active')
+            || !$this->config->get('yandex_money_metrika_code')
+        ) {
+             return '';
         }
 
         $this->load->model('checkout/order');
@@ -539,8 +541,6 @@ class ModelExtensionPaymentYandexMoney extends Model
                 'products'    => $products,
             ),
         );
-
-        $ecommerce['goods'] = $products;
 
         $data = '<script type="text/javascript">
             $(window).on("load", function() {

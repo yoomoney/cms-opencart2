@@ -10,8 +10,8 @@ $_['kassa_breadcrumbs_extension']     = 'Расширения';
 $_['kassa_breadcrumbs_home']          = 'Главная';
 $_['kassa_breadcrumbs_logs']          = 'Журнал сообщений';
 $_['kassa_text_success']              = 'Success';
-$_['kassa_text_success_message']      = 'Настройки были сохранены'.
-                                        $_['kassa_page_title'] = 'Настройки Яндекс.Кассы';
+$_['kassa_text_success_message']      = 'Настройки были сохранены';
+$_['kassa_page_title']                = 'Настройки Яндекс.Кассы';
 $_['kassa_breadcrumbs_heading_title'] = 'Журнал сообщений платежного модуля Яндекс.Деньги';
 $_['kassa_test_mode_description']     = 'Вы включили тестовый режим приема платежей. Проверьте, как проходит оплата, и напишите менеджеру Кассы. Он выдаст рабочие shopId и Секретный ключ. <a href="https://yandex.ru/support/checkout/payments/api.html#api__04" target="_blank">Инструкция</a>';
 
@@ -213,11 +213,11 @@ $_['market_out']     = 'Выгружать';
 $_['market_out_all'] = 'Все товары';
 $_['market_out_sel'] = 'Выбранные категории';
 
-$_['market_dostup']   = 'Срок доставки в пункт самовывоза';
-$_['market_dostup_1'] = 'До 2 дней для всех товаров';
-$_['market_dostup_2'] = 'До 2 дней для товаров в наличии';
-$_['market_dostup_3'] = 'Определяется индивидуально';
-$_['market_dostup_4'] = 'Самовывоза нет';
+$_['market_dostup']   = 'Доступность';
+$_['market_dostup_1'] = 'Все доступны';
+$_['market_dostup_2'] = 'Доступны если > 0, остальные на заказ';
+$_['market_dostup_3'] = 'Если = 0, не выгружать';
+$_['market_dostup_4'] = 'Все на заказ';
 
 $_['market_s_name']                = 'Название магазина';
 $_['market_d_cost']                = 'Стоимость доставки в домашнем регионе';

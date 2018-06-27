@@ -557,6 +557,25 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         $this->response->setOutput($this->payment($order, true));
     }
 
+    public function productInfo()
+    {
+        $productId = !empty($this->request->post['id']) ?
+            $this->request->post['id']
+            : 0;
+
+        $this->load->model('catalog/product');
+        $product     = $this->model_catalog_product->getProduct($productId);
+        $productInfo = array(
+            'id'      => $product['product_id'],
+            'name'    => (string)$product['name'],
+            'price'   => (float)$product['price'],
+            'brand'   => (string)$product['manufacturer'],
+            'variant' => (string)$product['model'],
+        );
+
+        $this->response->setOutput(json_encode($productInfo));
+    }
+
     public function market()
     {
         $this->load->model('catalog/product');
