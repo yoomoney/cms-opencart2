@@ -126,7 +126,7 @@ $_['metrika_tab_header'] = 'Yadnex.Metrica';
 $_['market_tab_header']  = 'Yandex.Market';
 
 $_['wallet_page_title']         = 'Yadnex.Money settings';
-$_['wallet_header_description'] = '';
+$_['wallet_header_description'] = 'Для работы с модулем нужно открыть <a href=\'https://money.yandex.ru/new\' target=\'_blank\'>кошелек</a> на Яндексе.';
 $_['wallet_version_string']     = 'Module version';
 
 $_['wallet_enable_label']              = 'Enable payment acceptance to the Yandex.Money Wallet';
@@ -134,20 +134,18 @@ $_['wallet_account_id_label']          = 'Wallet number';
 $_['wallet_account_id_description']    = '';
 $_['wallet_account_id_error_required'] = 'Specify Wallet number';
 
-$_['wallet_application_id_label']          = 'App ID';
-$_['wallet_application_id_description']    = '';
-$_['wallet_application_id_error_required'] = 'Specify App ID';
+
 
 $_['wallet_password_label']          = 'Codeword';
-$_['wallet_password_description']    = 'You will be provided with an ID and a codeword after registering the app at the Yandex.Money website';
+$_['wallet_password_description']    = 'You will be provided with an ID and a codeword <a href=\'https://money.yandex.ru/myservices/online.xml\' target=\'_blank\'>from the notification settings page</a> at the Yandex.Money website';
 $_['wallet_password_error_required'] = 'Specify the codeword';
 
 $_['wallet_display_name_label']       = 'Payment service title';
 $_['wallet_display_name_description'] = 'This title will be shown to the customer';
 $_['wallet_default_display_name']     = 'Yandex.Checkout (bank cards, Wallet)';
 
-$_['wallet_notification_url_label']       = '';
-$_['wallet_notification_url_description'] = 'Copy this link to the Redirect URI field on the <a href=\'https://sp-money.yandex.ru/myservices/new.xml\' target=\'_blank\'>app registration page</a>';
+$_['wallet_notification_url_label']       = 'RedirectURL';
+$_['wallet_notification_url_description'] = 'Copy this link to the Redirect URI field on the <a href=\'https://money.yandex.ru/myservices/online.xml\' target=\'_blank\'>from the notification settings page</a> at Yandex.Money website.';
 
 $_['wallet_before_redirect_label'] = 'When the user proceeds to checkout';
 $_['wallet_create_order_label']    = 'Create an unpaid order in the dashboard';
@@ -157,7 +155,7 @@ $_['wallet_success_order_status_label']       = 'Order status after the payment'
 $_['wallet_success_order_status_description'] = '';
 
 $_['wallet_minimum_payment_amount_label']       = 'Minimum order amount';
-$_['wallet_minimum_payment_amount_description'] = 'Order amount required to make a payment via Yandex.Checkout';
+$_['wallet_minimum_payment_amount_description'] = 'Order amount required to make a payment';
 
 $_['wallet_geo_zone_label']       = 'Area of display';
 $_['wallet_geo_zone_description'] = 'Geographical area displaying the payment method';

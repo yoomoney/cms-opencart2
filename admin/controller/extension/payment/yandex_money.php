@@ -11,7 +11,7 @@ use YandexCheckout\Model\PaymentStatus;
 class ControllerExtensionPaymentYandexMoney extends Controller
 {
     const MODULE_NAME = 'yandex_money';
-    const MODULE_VERSION = '1.0.15';
+    const MODULE_VERSION = '1.0.16';
 
     public $fields_metrika = array(
         'yandex_money_metrika_active',
@@ -788,13 +788,6 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         $request->post['yandex_money_wallet_account_id'] = $value;
         if ($enabled && empty($value)) {
             $this->error['wallet_account_id'] = $this->language->get('wallet_account_id_error_required');
-        }
-
-        $value = isset($request->post['yandex_money_wallet_application_id']) ? trim($request->post['yandex_money_wallet_application_id']) : '';
-        $wallet->setApplicationId($value);
-        $request->post['yandex_money_wallet_application_id'] = $value;
-        if ($enabled && empty($value)) {
-            $this->error['wallet_application_id'] = $this->language->get('wallet_application_id_error_required');
         }
 
         $value = isset($request->post['yandex_money_wallet_password']) ? trim($request->post['yandex_money_wallet_password']) : '';

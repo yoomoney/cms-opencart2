@@ -30,17 +30,6 @@
             </div>
         </div>
         <div class="form-group required">
-            <label class="col-sm-2 control-label" for="wallet-application-id"><?php echo $language->get('wallet_application_id_label'); ?></label>
-            <div class="col-sm-10">
-                <input type="text" name="yandex_money_wallet_application_id" value="<?php echo $wallet->getApplicationId(); ?>" placeholder="<?php echo $language->get('wallet_application_id_label'); ?>" id="wallet-application-id" class="form-control" />
-                <?php if (!empty($error_wallet_application_id)) : ?>
-                <div class="text-danger"><?php echo $error_wallet_application_id; ?></div>
-                <?php else: ?>
-                <p class="help-block"><?php echo $language->get('wallet_application_id_description'); ?></p>
-                <?php endif; ?>
-            </div>
-        </div>
-        <div class="form-group required">
             <label class="col-sm-2 control-label" for="wallet-password"><?php echo $language->get('wallet_password_label'); ?></label>
             <div class="col-sm-10">
                 <input type="text" name="yandex_money_wallet_password" value="<?php echo $wallet->getPassword(); ?>" placeholder="<?php echo $language->get('wallet_password_label'); ?>" id="wallet-password" class="form-control" />
