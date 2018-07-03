@@ -94,24 +94,24 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         );
         $data['shopId'] = $shopId;
         $data['sum']    = $amount;
-
-        if (self::INSTALLMENTS_MIN_AMOUNT > $amount) {
-            /** @var \YandexMoneyModule\Model\KassaModel $model */
-            $paymentMethods = $model->getPaymentMethods();
-            unset($paymentMethods[\YandexCheckout\Model\PaymentMethodType::INSTALLMENTS]);
-            $model->setPaymentMethods($paymentMethods);
-        } else {
-            $monthlyInstallment = \YandexMoneyModule\InstallmentsApi::creditPreSchedule($shopId, $amount);
-            if (!isset($monthlyInstallment['amount'])) {
-                $errorMessage = \YandexMoneyModule\InstallmentsApi::getLastError() ?: 'Unknown error. Could not get installment amount';
-                $this->getModel()->log('error', $errorMessage);
+        if($this->getModel()->getKassaModel()->isEnabled()) {
+            if (self::INSTALLMENTS_MIN_AMOUNT > $amount) {
+                /** @var \YandexMoneyModule\Model\KassaModel $model */
+                $paymentMethods = $model->getPaymentMethods();
+                unset($paymentMethods[\YandexCheckout\Model\PaymentMethodType::INSTALLMENTS]);
+                $model->setPaymentMethods($paymentMethods);
             } else {
-                $installmentLabel = sprintf($this->language->get('text_method_installments'),
-                    $monthlyInstallment['amount']);
-                $data['language']->set('text_method_installments', $installmentLabel);
+                $monthlyInstallment = \YandexMoneyModule\InstallmentsApi::creditPreSchedule($shopId, $amount);
+                if (!isset($monthlyInstallment['amount'])) {
+                    $errorMessage = \YandexMoneyModule\InstallmentsApi::getLastError() ?: 'Unknown error. Could not get installment amount';
+                    $this->getModel()->log('error', $errorMessage);
+                } else {
+                    $installmentLabel = sprintf($this->language->get('text_method_installments'),
+                        $monthlyInstallment['amount']);
+                    $data['language']->set('text_method_installments', $installmentLabel);
+                }
             }
         }
-
 
         $data['fullView'] = false;
 
