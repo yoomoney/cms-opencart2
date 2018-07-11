@@ -11,7 +11,7 @@ use YandexCheckout\Model\PaymentStatus;
 class ControllerExtensionPaymentYandexMoney extends Controller
 {
     const MODULE_NAME = 'yandex_money';
-    const MODULE_VERSION = '1.0.16';
+    const MODULE_VERSION = '1.0.17';
 
     public $fields_metrika = array(
         'yandex_money_metrika_active',
@@ -146,7 +146,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
                     );
                 }
 
-                $metrika_code   = $settings['yandex_money_metrika_code'];
+                $metrika_code = $settings['yandex_money_metrika_code'];
                 if (empty($metrika_code) && !empty($metrika_o2auth)) {
                     $this->updateCounterCode();
                 }
@@ -956,12 +956,12 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             $data['yandex_money_market_lnk_yml'] = HTTP_CATALOG.'index.php?route='.$prefix.'payment/yandex_money/market';
         }
 
-        $data['yandex_money_metrika_callback']     = str_replace(
+        $data['yandex_money_metrika_callback'] = str_replace(
             'http://',
             'https://',
             $this->url->link($prefix.'payment/yandex_money/checkOAuth', 'token='.$this->session->data['token'])
         );
-        $data['mod_status']                        = $this->config->get('yandex_money_status');
+        $data['mod_status']                    = $this->config->get('yandex_money_status');
 
         return $data;
     }
@@ -984,6 +984,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
 
     /**
      * @param array $post
+     *
      * @return bool
      */
     private function isUpdatedCounterSettings($post)
@@ -995,7 +996,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             'yandex_money_metrika_pw',
             'yandex_money_metrika_clickmap',
             'yandex_money_metrika_webvizor',
-            'yandex_money_metrika_hash'
+            'yandex_money_metrika_hash',
         );
         foreach ($counterParams as $param) {
             if ($post[$param] != $settings[$param]) {
@@ -1059,6 +1060,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
 
     /**
      * @param string $post
+     *
      * @return string
      */
     private function checkOAuthToken($post)
@@ -1280,7 +1282,8 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         if ($this->request->server['REQUEST_METHOD'] == 'POST' && isset($this->request->post['kassa_capture_amount'])) {
             $action = $this->request->post['action'];
             if ($action == 'capture') {
-                $orderInfo = $this->updateOrder($orderModel, $orderInfo);
+                //@ToDo расскоментировать при появлении частичного подтверждения.
+                //$orderInfo = $this->updateOrder($orderModel, $orderInfo);
                 $amount    = $this->request->post['kassa_capture_amount'];
                 if ($this->getModel()->capturePayment($payment, true, $amount)) {
                     $data['success'] = $this->language->get('capture_payment_success_message');
@@ -1390,21 +1393,29 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         require_once(DIR_CATALOG.'model/checkout/order.php');
         require_once(DIR_CATALOG.'model/account/customer.php');
         require_once(DIR_CATALOG.'model/account/order.php');
-        require_once(DIR_CATALOG.'model/extension/total/voucher.php');
-        require_once(DIR_CATALOG.'model/extension/total/sub_total.php');
-        require_once(DIR_CATALOG.'model/extension/total/shipping.php');
-        require_once(DIR_CATALOG.'model/extension/total/tax.php');
-        require_once(DIR_CATALOG.'model/extension/total/total.php');
+        require_once(DIR_CATALOG.'model/'.$this->getPrefix().'total/voucher.php');
+        require_once(DIR_CATALOG.'model/'.$this->getPrefix().'total/sub_total.php');
+        require_once(DIR_CATALOG.'model/'.$this->getPrefix().'total/shipping.php');
+        require_once(DIR_CATALOG.'model/'.$this->getPrefix().'total/tax.php');
+        require_once(DIR_CATALOG.'model/'.$this->getPrefix().'total/total.php');
 
         $this->registry->set('model_checkout_order', new ModelCheckoutOrder($this->registry));
-        $this->registry->set('model_account_customer', new ModelAccountCustomer($this->registry));
         $this->registry->set('model_account_order', new ModelAccountOrder($this->registry));
-        $this->registry->set('model_extension_total_voucher', new ModelExtensionTotalVoucher($this->registry));
-        $this->registry->set('model_extension_total_sub_total', new ModelExtensionTotalSubTotal($this->registry));
-        $this->registry->set('model_extension_total_shipping', new ModelExtensionTotalShipping($this->registry));
-        $this->registry->set('model_extension_total_tax', new ModelExtensionTotalTax($this->registry));
-        $this->registry->set('model_extension_total_total', new ModelExtensionTotalTotal($this->registry));
 
+        if (version_compare(VERSION, '2.3.0') >= 0) {
+            $this->registry->set('model_account_customer', new ModelAccountCustomer($this->registry));
+            $this->registry->set('model_extension_total_voucher', new ModelExtensionTotalVoucher($this->registry));
+            $this->registry->set('model_extension_total_sub_total', new ModelExtensionTotalSubTotal($this->registry));
+            $this->registry->set('model_extension_total_shipping', new ModelExtensionTotalShipping($this->registry));
+            $this->registry->set('model_extension_total_tax', new ModelExtensionTotalTax($this->registry));
+            $this->registry->set('model_extension_total_total', new ModelExtensionTotalTotal($this->registry));
+        } else {
+            $this->registry->set('model_extension_total_voucher', new ModelTotalVoucher($this->registry));
+            $this->registry->set('model_extension_total_sub_total', new ModelTotalSubTotal($this->registry));
+            $this->registry->set('model_extension_total_shipping', new ModelTotalShipping($this->registry));
+            $this->registry->set('model_extension_total_tax', new ModelTotalTax($this->registry));
+            $this->registry->set('model_extension_total_total', new ModelTotalTotal($this->registry));
+        }
 
         $quantity = $this->request->post['quantity'];
 
