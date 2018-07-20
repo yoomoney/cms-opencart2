@@ -11,7 +11,7 @@ use YandexCheckout\Model\PaymentStatus;
 class ControllerExtensionPaymentYandexMoney extends Controller
 {
     const MODULE_NAME = 'yandex_money';
-    const MODULE_VERSION = '1.0.17';
+    const MODULE_VERSION = '1.0.18';
 
     public $fields_metrika = array(
         'yandex_money_metrika_active',
@@ -111,8 +111,12 @@ class ControllerExtensionPaymentYandexMoney extends Controller
                 $isUpdatedCounterSettings = $this->isUpdatedCounterSettings($this->request->post);
                 $settings                 = $this->model_setting_setting->getSetting(self::MODULE_NAME);
                 $newSettings              = array_merge(array(
-                    'yandex_money_metrika_o2auth' => $settings['yandex_money_metrika_o2auth'],
-                    'yandex_money_metrika_code'   => $settings['yandex_money_metrika_code'],
+                    'yandex_money_metrika_o2auth' => isset($settings['yandex_money_metrika_o2auth'])
+                        ? $settings['yandex_money_metrika_o2auth']
+                        : '',
+                    'yandex_money_metrika_code'   => isset($settings['yandex_money_metrika_code'])
+                        ? $settings['yandex_money_metrika_code']
+                        : '',
                 ), $this->request->post);
                 if (!empty($newSettings['yandex_money_market_categories'])) {
                     $newSettings['yandex_money_market_categories'] = implode(',',
@@ -999,6 +1003,9 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             'yandex_money_metrika_hash',
         );
         foreach ($counterParams as $param) {
+            if (!isset($settings[$param])) {
+                continue;
+            }
             if ($post[$param] != $settings[$param]) {
                 return true;
             }
