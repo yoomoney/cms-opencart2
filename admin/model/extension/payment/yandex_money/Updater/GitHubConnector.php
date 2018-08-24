@@ -157,7 +157,7 @@ class GitHubConnector
             throw new RuntimeException('Invalid archive type "' . $type . '"');
         }
 
-        $fileName = rtrim($downloadDir, '/') . '/' . $version . '.' . $ext;
+        $fileName = rtrim($downloadDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $version . '.' . $ext;
         $file = fopen($fileName, 'w');
         if (!$file) {
             return null;

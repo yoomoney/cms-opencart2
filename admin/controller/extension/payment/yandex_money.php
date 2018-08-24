@@ -11,7 +11,7 @@ use YandexCheckout\Model\PaymentStatus;
 class ControllerExtensionPaymentYandexMoney extends Controller
 {
     const MODULE_NAME = 'yandex_money';
-    const MODULE_VERSION = '1.0.18';
+    const MODULE_VERSION = '1.0.19';
 
     public $fields_metrika = array(
         'yandex_money_metrika_active',
@@ -895,13 +895,12 @@ class ControllerExtensionPaymentYandexMoney extends Controller
 
     private function getShopTaxRates()
     {
-        /** @var ModelLocalisationTaxRate $model */
-        $this->load->model('localisation/tax_rate');
-        $model = $this->model_localisation_tax_rate;
+        $this->load->model('localisation/tax_class');
+        $model = $this->model_localisation_tax_class;
 
         $result = array();
-        foreach ($model->getTaxRates() as $taxRate) {
-            $result[$taxRate['tax_rate_id']] = $taxRate['name'];
+        foreach ($model->getTaxClasses() as $taxRate) {
+            $result[$taxRate['tax_class_id']] = $taxRate['title'];
         }
 
         return $result;
