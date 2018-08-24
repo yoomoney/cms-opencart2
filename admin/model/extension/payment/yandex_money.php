@@ -438,7 +438,7 @@ class ModelExtensionPaymentYandexMoney extends Model
         $result = array();
 
         $this->preventDirectories();
-        $dir = DIR_DOWNLOAD.'/'.$this->backupDirectory;
+        $dir = DIR_DOWNLOAD.$this->backupDirectory;
 
         $handle = opendir($dir);
         while (($entry = readdir($handle)) !== false) {
@@ -449,7 +449,7 @@ class ModelExtensionPaymentYandexMoney extends Model
             if ($ext === 'zip') {
                 $backup            = array(
                     'name' => pathinfo($entry, PATHINFO_FILENAME).'.zip',
-                    'size' => $this->formatSize(filesize($dir.'/'.$entry)),
+                    'size' => $this->formatSize(filesize($dir.DIRECTORY_SEPARATOR.$entry)),
                 );
                 $parts             = explode('-', $backup['name'], 3);
                 $backup['version'] = $parts[0];
@@ -470,13 +470,13 @@ class ModelExtensionPaymentYandexMoney extends Model
 
         $sourceDirectory = dirname(realpath(DIR_CATALOG));
         $reader          = new \YandexMoney\Updater\ProjectStructure\ProjectStructureReader();
-        $root            = $reader->readFile(dirname(__FILE__).'/yandex_money/'.$this->getMapFileName(),
+        $root            = $reader->readFile(dirname(__FILE__).DIRECTORY_SEPARATOR.'yandex_money'.DIRECTORY_SEPARATOR.$this->getMapFileName(),
             $sourceDirectory);
 
         $rootDir  = $version.'-'.time();
         $fileName = $rootDir.'-'.uniqid('', true).'.zip';
 
-        $dir = DIR_DOWNLOAD.'/'.$this->backupDirectory;
+        $dir = DIR_DOWNLOAD.$this->backupDirectory;
         if (!file_exists($dir)) {
             if (!mkdir($dir)) {
                 $this->log('error', 'Failed to create backup directory: '.$dir);
@@ -486,7 +486,7 @@ class ModelExtensionPaymentYandexMoney extends Model
         }
 
         try {
-            $fileName = $dir.'/'.$fileName;
+            $fileName = $dir.DIRECTORY_SEPARATOR.$fileName;
             $archive  = new \YandexMoney\Updater\Archive\BackupZip($fileName, $rootDir);
             $archive->backup($root);
         } catch (Exception $e) {
@@ -503,7 +503,7 @@ class ModelExtensionPaymentYandexMoney extends Model
         $this->loadClasses();
         $this->preventDirectories();
 
-        $fileName = DIR_DOWNLOAD.'/'.$this->backupDirectory.'/'.$fileName;
+        $fileName = DIR_DOWNLOAD.$this->backupDirectory.DIRECTORY_SEPARATOR.$fileName;
         if (!file_exists($fileName)) {
             $this->log('error', 'File "'.$fileName.'" not exists');
 
@@ -530,7 +530,7 @@ class ModelExtensionPaymentYandexMoney extends Model
     {
         $this->preventDirectories();
 
-        $fileName = DIR_DOWNLOAD.'/'.$this->backupDirectory.'/'.str_replace(array('/', '\\'), array('', ''), $fileName);
+        $fileName = DIR_DOWNLOAD.$this->backupDirectory.DIRECTORY_SEPARATOR.str_replace(array('/', '\\'), array('', ''), $fileName);
         if (!file_exists($fileName)) {
             $this->log('error', 'File "'.$fileName.'" not exists');
 
@@ -551,7 +551,7 @@ class ModelExtensionPaymentYandexMoney extends Model
         $this->loadClasses();
         $this->preventDirectories();
 
-        $file = DIR_DOWNLOAD.'/'.$this->downloadDirectory.'/version_log.txt';
+        $file = DIR_DOWNLOAD.$this->downloadDirectory.DIRECTORY_SEPARATOR.'version_log.txt';
 
         if ($useCache) {
             if (file_exists($file)) {
@@ -594,7 +594,7 @@ class ModelExtensionPaymentYandexMoney extends Model
         $this->loadClasses();
         $this->preventDirectories();
 
-        $dir = DIR_DOWNLOAD.'/'.$this->versionDirectory;
+        $dir = DIR_DOWNLOAD.$this->versionDirectory;
         if (!file_exists($dir)) {
             if (!mkdir($dir)) {
                 $this->log('error', sprintf($this->language->log('updater_error_create_directory'), $dir));
@@ -602,7 +602,7 @@ class ModelExtensionPaymentYandexMoney extends Model
                 return false;
             }
         } elseif ($useCache) {
-            $fileName = $dir.'/'.$tag.'.zip';
+            $fileName = $dir.DIRECTORY_SEPARATOR.$tag.'.zip';
             if (file_exists($fileName)) {
                 return $fileName;
             }
@@ -647,12 +647,12 @@ class ModelExtensionPaymentYandexMoney extends Model
     {
         $connector = new GitHubConnector();
 
-        $dir          = DIR_DOWNLOAD.'/'.$this->downloadDirectory;
-        $newChangeLog = $dir.'/CHANGELOG-'.$newVersion.'.md';
+        $dir          = DIR_DOWNLOAD.$this->downloadDirectory;
+        $newChangeLog = $dir.DIRECTORY_SEPARATOR.'CHANGELOG-'.$newVersion.'.md';
         if (!file_exists($newChangeLog)) {
             $fileName = $connector->downloadLatestChangeLog($this->repository, $dir);
             if (!empty($fileName)) {
-                rename($dir.'/'.$fileName, $newChangeLog);
+                rename($dir.DIRECTORY_SEPARATOR.$fileName, $newChangeLog);
             }
         }
 
@@ -660,7 +660,7 @@ class ModelExtensionPaymentYandexMoney extends Model
         if (!file_exists($oldChangeLog)) {
             $fileName = $connector->downloadLatestChangeLog($this->repository, $dir);
             if (!empty($fileName)) {
-                rename($dir.'/'.$fileName, $oldChangeLog);
+                rename($dir.DIRECTORY_SEPARATOR.$fileName, $oldChangeLog);
             }
         }
 
@@ -696,17 +696,17 @@ class ModelExtensionPaymentYandexMoney extends Model
         if (!class_exists('GitHubConnector')) {
             $path = dirname(__FILE__).DIRECTORY_SEPARATOR.'yandex_money'.DIRECTORY_SEPARATOR.'Updater'.DIRECTORY_SEPARATOR;
             require_once $path.'GitHubConnector.php';
-            require_once $path.'ProjectStructure/EntryInterface.php';
-            require_once $path.'ProjectStructure/DirectoryEntryInterface.php';
-            require_once $path.'ProjectStructure/FileEntryInterface.php';
-            require_once $path.'ProjectStructure/AbstractEntry.php';
-            require_once $path.'ProjectStructure/DirectoryEntry.php';
-            require_once $path.'ProjectStructure/FileEntry.php';
-            require_once $path.'ProjectStructure/ProjectStructureReader.php';
-            require_once $path.'ProjectStructure/ProjectStructureWriter.php';
-            require_once $path.'ProjectStructure/RootDirectory.php';
-            require_once $path.'Archive/BackupZip.php';
-            require_once $path.'Archive/RestoreZip.php';
+            require_once $path.'ProjectStructure'.DIRECTORY_SEPARATOR.'EntryInterface.php';
+            require_once $path.'ProjectStructure'.DIRECTORY_SEPARATOR.'DirectoryEntryInterface.php';
+            require_once $path.'ProjectStructure'.DIRECTORY_SEPARATOR.'FileEntryInterface.php';
+            require_once $path.'ProjectStructure'.DIRECTORY_SEPARATOR.'AbstractEntry.php';
+            require_once $path.'ProjectStructure'.DIRECTORY_SEPARATOR.'DirectoryEntry.php';
+            require_once $path.'ProjectStructure'.DIRECTORY_SEPARATOR.'FileEntry.php';
+            require_once $path.'ProjectStructure'.DIRECTORY_SEPARATOR.'ProjectStructureReader.php';
+            require_once $path.'ProjectStructure'.DIRECTORY_SEPARATOR.'ProjectStructureWriter.php';
+            require_once $path.'ProjectStructure'.DIRECTORY_SEPARATOR.'RootDirectory.php';
+            require_once $path.'Archive'.DIRECTORY_SEPARATOR.'BackupZip.php';
+            require_once $path.'Archive'.DIRECTORY_SEPARATOR.'RestoreZip.php';
         }
     }
 
@@ -717,9 +717,9 @@ class ModelExtensionPaymentYandexMoney extends Model
 
     private function preventDirectories()
     {
-        $this->checkDirectory(DIR_DOWNLOAD.'/'.$this->downloadDirectory);
-        $this->checkDirectory(DIR_DOWNLOAD.'/'.$this->backupDirectory);
-        $this->checkDirectory(DIR_DOWNLOAD.'/'.$this->versionDirectory);
+        $this->checkDirectory(DIR_DOWNLOAD.$this->downloadDirectory);
+        $this->checkDirectory(DIR_DOWNLOAD.$this->backupDirectory);
+        $this->checkDirectory(DIR_DOWNLOAD.$this->versionDirectory);
     }
 
     private function checkDirectory($directoryName)

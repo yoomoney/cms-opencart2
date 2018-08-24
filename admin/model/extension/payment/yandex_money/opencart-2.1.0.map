@@ -6,7 +6,6 @@ f:admin/model/extension/payment/yandex_money.php:admin/model/payment/yandex_mone
 d:admin/view/template/extension/payment/yandex_money:admin/view/template/payment/yandex_money
 f:admin/view/template/extension/payment/yandex_money.tpl:admin/view/template/payment/yandex_money.tpl
 f:catalog/{controller,model}/extension/payment/yandex_money.php:catalog/{controller,model}/payment/yandex_money.php
-d:catalog/controller/extension/yandex_market:catalog/controller/yandex_market
 f:catalog/view/theme/default/template/extension/payment/yandex_money_failure_status.tpl:catalog/view/theme/default/template/payment/yandex_money_failure_status.tpl
 f:catalog/view/theme/default/template/extension/payment/yandex_money_success_status.tpl:catalog/view/theme/default/template/payment/yandex_money_success_status.tpl
 d:catalog/view/theme/default/template/extension/payment/yandex_money:catalog/view/theme/default/template/payment/yandex_money
