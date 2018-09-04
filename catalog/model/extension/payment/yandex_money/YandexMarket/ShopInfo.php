@@ -63,18 +63,18 @@ class ShopInfo
     private $email;
 
     /**
-     * @var array Список курсов валют магазина.
+     * @var Currency[] Список курсов валют магазина.
      *
      * @required
      */
-    private $currencies;
+    private $currencies = array();
 
     /**
      * @var array Список категорий магазина.
      *
      * @required
      */
-    private $categories;
+    private $categories = array();
 
     /**
      * Стоимость и сроки курьерской доставки по своему региону.
@@ -115,7 +115,7 @@ class ShopInfo
      *
      * @required
      */
-    private $offers;
+    private $offers = array();
 
     /**
      * @var CategoryTreeBuilder
@@ -299,7 +299,7 @@ class ShopInfo
     }
 
     /**
-     * @return array
+     * @return Currency[]
      */
     public function getCurrencies()
     {
@@ -312,30 +312,30 @@ class ShopInfo
     public function getDefaultCurrencyId()
     {
         $first = null;
-        foreach ($this->currencies as $currencyCode => $rate) {
+        foreach ($this->currencies as $currency) {
             if ($first === null) {
-                $first = $currencyCode;
+                $first = $currency->getId();
             }
-            if ($rate == 1) {
-                return $currencyCode;
+            if ($currency->getRate() == 1) {
+                return $currency->getId();
             }
         }
         return $first;
     }
 
     /**
-     * @param string $currencyCode
-     * @param int $currencyRate
+     * @param Currency $currency
      * @return ShopInfo
      */
-    public function addCurrency($currencyCode, $currencyRate = 1)
+    public function addCurrency(Currency $currency)
     {
-        $this->currencies[$currencyCode] = $currencyRate;
+        $this->currencies[] = $currency;
         return $this;
     }
 
     /**
      * @return ProductCategory[]
+     * @throws \Exception
      */
     public function getCategories()
     {
@@ -415,18 +415,22 @@ class ShopInfo
     /**
      * @param int $productId
      * @param int $categoryId
-     * @param string $name
      * @return Offer|null
      */
-    public function addOffer($productId, $categoryId, $name)
+    public function createOffer($productId, $categoryId)
     {
         if (!array_key_exists($categoryId, $this->categories)) {
             return null;
         }
         $category = $this->categories[$categoryId];
-        $offer = new Offer($this, $productId, $category);
-        $offer->setName($name);
+        return new Offer($this, $productId, $category);
+    }
+
+    /**
+     * @param Offer $offer
+     */
+    public function addOffer(Offer $offer)
+    {
         $this->offers[$offer->getId()] = $offer;
-        return $offer;
     }
 }

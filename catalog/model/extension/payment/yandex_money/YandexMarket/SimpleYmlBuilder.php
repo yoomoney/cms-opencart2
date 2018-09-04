@@ -2,7 +2,7 @@
 
 namespace YandexMoneyModule\YandexMarket;
 
-class SimpleYmlBuilder extends AbstractYmlBuilder
+class SimpleYmlBuilder extends YmlBuilder
 {
 
 }

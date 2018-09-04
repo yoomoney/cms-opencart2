@@ -116,16 +116,29 @@ class Offer extends Object
     private $downloadable;
     private $groupId;
     private $rec;
+    private $vat;
+    private $customTags;
+    private $customTagsJoin;
 
     public function __construct(ShopInfo $shop, $offerId, ProductCategory $category)
     {
-        $this->shop = $shop;
-        $this->id = $offerId;
-        $this->category = $category;
-        $this->available = true;
+        $this->shop       = $shop;
+        $this->id         = $offerId;
+        $this->category   = $category;
+        $this->available  = true;
         $this->parameters = array();
-        $this->outlets = array();
-        $this->pictures = array();
+        $this->outlets    = array();
+        $this->pictures   = array();
+        $this->customTags = array();
+    }
+
+    public function __clone()
+    {
+        $parameters = array();
+        foreach ($this->parameters as $name => $parameter) {
+            $parameters[$name] = clone $parameter;
+        }
+        $this->parameters = $parameters;
     }
 
     /**
@@ -138,6 +151,19 @@ class Offer extends Object
     public function getId()
     {
         return $this->id;
+    }
+
+
+    /**
+     * Устанавливает идентификатор товарного предложения
+     *
+     * @param string $value Идентификатор товарного предложения
+     * @return Offer Инстанс текущего объекта
+     */
+    public function setId($value)
+    {
+        $this->id = $value;
+        return $this;
     }
 
     /**
@@ -160,6 +186,14 @@ class Offer extends Object
     public function getName()
     {
         return $this->name;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasName()
+    {
+        return $this->name !== null;
     }
 
     /**
@@ -302,6 +336,26 @@ class Offer extends Object
     }
 
     /**
+     * @param $value
+     * @return $this
+     */
+    public function incPrice($value)
+    {
+        $this->price += round($value, 2);
+        return $this;
+    }
+
+    /**
+     * @param $value
+     * @return $this
+     */
+    public function decPrice($value)
+    {
+        $this->price -= round($value, 2);
+        return $this;
+    }
+
+    /**
      * Возвращает цену товара
      *
      * @return double Цена товара
@@ -323,6 +377,26 @@ class Offer extends Object
     public function setOldPrice($value)
     {
         $this->oldPrice = round($value, 2);
+        return $this;
+    }
+
+    /**
+     * @param $value
+     * @return $this
+     */
+    public function incOldPrice($value)
+    {
+        $this->oldPrice += round($value, 2);
+        return $this;
+    }
+
+    /**
+     * @param $value
+     * @return $this
+     */
+    public function decOldPrice($value)
+    {
+        $this->oldPrice -= round($value, 2);
         return $this;
     }
 
@@ -403,6 +477,7 @@ class Offer extends Object
      */
     public function addPicture($value)
     {
+        $value = str_replace(array('&amp;', ' '), array('&', '%20'), $value);
         $this->pictures[] = mb_substr(trim($value), 0, 512, 'utf-8');
         return $this;
     }
@@ -465,7 +540,7 @@ class Offer extends Object
      */
     public function hasDelivery()
     {
-        return $this->delivery === null;
+        return $this->delivery !== null;
     }
 
     /**
@@ -830,7 +905,7 @@ class Offer extends Object
      */
     public function getParameters()
     {
-        return array_values($this->parameters);
+        return $this->parameters;
     }
 
     /**
@@ -842,9 +917,8 @@ class Offer extends Object
     public function addParameter($name, $value, $unit = null)
     {
         if (!array_key_exists($name, $this->parameters)) {
-            $this->parameters[$name] = new ParameterList($name, $unit);
+            $this->parameters[$name] = new ParameterList($name, $value, $unit);
         }
-        $this->parameters[$name]->addValue($value);
         return $this;
     }
 
@@ -889,15 +963,20 @@ class Offer extends Object
      */
     public function setWeight($weight, $unit = 'kg')
     {
-        $unit = strtolower($unit);
+        $unit       = strtolower($unit);
         $multiplier = 1.0;
         if ($unit !== 'kg' && $unit !== 'кг') {
             $multipliers = array(
-                'g' => 0.001, 'г' => 0.001,
-                't' => 1000.0, 'т' => 1000.0,
-                'ct' => 0.0002, 'кар' => 0.0002,
-                'lb' => 0.45359237, 'фт' => 0.45359237,
-                'oz' => 0.028349523, 'унц' => 0.028349523,
+                'g'   => 0.001,
+                'г'   => 0.001,
+                't'   => 1000.0,
+                'т'   => 1000.0,
+                'ct'  => 0.0002,
+                'кар' => 0.0002,
+                'lb'  => 0.45359237,
+                'фт'  => 0.45359237,
+                'oz'  => 0.028349523,
+                'унц' => 0.028349523,
             );
             if (array_key_exists($unit, $multipliers)) {
                 $multiplier = $multipliers[$unit];
@@ -935,15 +1014,20 @@ class Offer extends Object
      */
     public function setDimensions($length, $width, $height, $unit = 'cm')
     {
-        $unit = strtolower($unit);
+        $unit       = strtolower($unit);
         $multiplier = 1.0;
         if ($unit !== 'cm' && $unit !== 'см') {
             $multipliers = array(
-                'mm' => 0.1, 'мм' => 0.1,
-                'm' => 100.0, 'м' => 100.0,
-                'in' => 2.54, 'д' => 2.54,
-                'ft' => 30.48, 'фут' => 30.48,
-                'yard' => 91.44, 'ярд' => 91.44,
+                'mm'   => 0.1,
+                'мм'   => 0.1,
+                'm'    => 100.0,
+                'м'    => 100.0,
+                'in'   => 2.54,
+                'д'    => 2.54,
+                'ft'   => 30.48,
+                'фут'  => 30.48,
+                'yard' => 91.44,
+                'ярд'  => 91.44,
             );
             if (array_key_exists($unit, $multipliers)) {
                 $multiplier = $multipliers[$unit];
@@ -1092,4 +1176,69 @@ class Offer extends Object
     {
         return !empty($this->model);
     }
+
+    /**
+     * @return string
+     */
+    public function getVat()
+    {
+        return $this->vat;
+    }
+
+    /**
+     * @param string $vat
+     */
+    public function setVat($vat)
+    {
+        $this->vat = $vat;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasVat()
+    {
+        return !is_null($this->vat);
+    }
+
+    /**
+     * @return string[][]
+     */
+    public function getCustomTags()
+    {
+        if ($this->customTagsJoin) {
+            $customTags = array();
+            foreach ($this->customTags as $tag => $values) {
+                $customTags[$tag] = array(join(' ', $values));
+            }
+            return $customTags;
+        }
+
+        return $this->customTags;
+    }
+
+    /**
+     * @param string $tag
+     * @param string $value
+     * @param bool $join
+     * @return Offer
+     */
+    public function addCustomTag($tag, $value, $join)
+    {
+        if (!isset($this->customTags[$tag]) || !in_array($value, $this->customTags[$tag])) {
+            $this->customTags[$tag][] = $value;
+        }
+        $this->customTagsJoin = $this->customTagsJoin || $join;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasCustomTags()
+    {
+        return !empty($this->customTags);
+    }
+
+
 }
