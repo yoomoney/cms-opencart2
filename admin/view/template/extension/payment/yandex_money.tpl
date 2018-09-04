@@ -25,11 +25,6 @@ echo $column_left;
     </div>
 
     <div class="container-fluid">
-        <?php if (!empty($error_warning)) : ?>
-        <div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> <?php echo $error_warning; ?>
-            <button type="button" class="close" data-dismiss="alert">&times;</button>
-        </div>
-        <?php endif; ?>
         <?php if (!empty($successMessage)) : ?>
         <div class="alert alert-success"><i class="fa fa-exclamation-circle"></i> <?php echo $successMessage; ?>
             <button type="button" class="close" data-dismiss="alert">&times;</button>

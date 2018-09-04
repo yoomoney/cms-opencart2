@@ -6,37 +6,59 @@ class ParameterList
 {
     private $name;
     private $unit;
-    private $values;
+    private $value;
 
-    public function __construct($name, $unit = null)
+    /**
+     * ParameterList constructor.
+     * @param string $name
+     * @param string $value
+     * @param string|null $unit
+     */
+    public function __construct($name, $value, $unit = null)
     {
-        $this->name = $name;
-        $this->unit = $unit;
-        $this->values = array();
+        $this->name  = $name;
+        $this->unit  = $unit;
+        $this->value = $value;
     }
 
+    /**
+     * @return string
+     */
     public function getName()
     {
         return $this->name;
     }
 
+    /**
+     * @return string
+     */
     public function getUnit()
     {
         return $this->unit;
     }
 
+    /**
+     * @return bool
+     */
     public function hasUnit()
     {
         return !empty($this->unit);
     }
 
-    public function addValue($value)
+    /**
+     * @param string|integer $value
+     */
+    public function setValue($value)
     {
-        $this->values[$value] = true;
+        $this->value = $value;
     }
 
-    public function getValues()
+    /**
+     * @return string|integer
+     */
+    public function getValue()
     {
-        return array_keys($this->values);
+        return $this->value;
     }
+
 }

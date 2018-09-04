@@ -6,6 +6,7 @@ class ModelExtensionPaymentYandexMoney extends Model
     private $walletModel;
     private $billingModel;
     private $metrikaModel;
+    private $market;
 
     private $backupDirectory = 'yandex_money/backup';
     private $versionDirectory = 'yandex_money/updates';
@@ -747,6 +748,28 @@ class ModelExtensionPaymentYandexMoney extends Model
         ) {
             return 'opencart-2.1.0.map';
         }
+    }
+
+    /**
+     * @return YandexMoneyMarketModel
+     */
+    public function getMarket()
+    {
+        if ($this->market === null) {
+            require_once dirname(__FILE__).DIRECTORY_SEPARATOR.'yandex_money'.DIRECTORY_SEPARATOR.'YandexMoneyMarketModel.php';
+            $this->load->model('localisation/stock_status');
+            $this->load->model('localisation/tax_class');
+            $this->load->model('catalog/category');
+            $this->load->language('catalog/product');
+            $this->market = new YandexMoneyMarketModel($this->config, $this->db, $this->language,
+                $this->model_localisation_stock_status,
+                $this->model_catalog_option,
+                $this->model_localisation_tax_class,
+                $this->model_catalog_category
+            );
+        }
+
+        return $this->market;
     }
 }
 

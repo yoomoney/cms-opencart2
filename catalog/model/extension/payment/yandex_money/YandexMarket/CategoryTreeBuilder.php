@@ -52,6 +52,7 @@ class CategoryTreeBuilder
 
     /**
      * @return CategoryTreeBuilder
+     * @throws \Exception
      */
     public function build()
     {
@@ -76,6 +77,7 @@ class CategoryTreeBuilder
 
     /**
      * @return ProductCategory[]
+     * @throws \Exception
      */
     public function getRootCategories()
     {
