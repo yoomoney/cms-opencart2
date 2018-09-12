@@ -14,7 +14,7 @@ $_['text_method_webmoney'] = 'Webmoney';
 $_['text_method_alfabank'] = 'Alfa-Click';
 $_['text_method_sberbank'] = 'Sberbank Online';
 $_['text_method_qiwi'] = 'QIWI Wallet';
-$_['text_method_installments'] = 'Installments (%s ₽ per month))';
+$_['text_method_installments'] = 'Installments (%s ₽ per month)';
 
 $_['text_payment_method_qiwi_phone'] = 'Phone number linked to QIWI Wallet';
 $_['text_payment_method_alfa_login'] = 'Specify the login, and we\'ll send the bill in Alfa-Click. All you have do after that is confirm the payment online at the bank\'s website.';

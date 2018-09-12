@@ -30,6 +30,7 @@ $_['kassa_payment_mode_label']            = 'Select payment method';
 $_['kassa_payment_mode_kassa_label']      = 'On Yandex.Checkout\'s site';
 $_['kassa_use_yandex_button_label']       = 'Use a button with \'Pay with Yandex\' text';
 $_['kassa_use_installments_button_label'] = 'Add the Installments payment method to checkout page';
+$_['kassa_add_installments_block_label']  = 'Add the information block about Installments to product descriptions';
 $_['kassa_payment_mode_shop_label']       = 'On the store\'s site';
 
 $_['kassa_payment_method_bank_card']    = 'Bank cards';

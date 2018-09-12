@@ -67,8 +67,14 @@
                 </label>
                 <br>
                 <label class="form-check-label">
-                    <input type="checkbox" name="yandex_money_kassa_use_installments_button" value="on" id="kassa-use-installments-button" class="form-check-input"<?php echo $kassa->useInstallmentsButton() ? ' checked' : ''; ?> />
+                    <input type="checkbox" name="yandex_money_kassa_use_installments_button" value="on" class="form-check-input"<?php echo $kassa->useInstallmentsButton() ? ' checked' : ''; ?> />
                     <?php echo $language->get('kassa_use_installments_button_label'); ?>
+                </label>
+                <br>
+                <label class="form-check-label" style="margin-left: 20px;">
+                    <input type="checkbox" name="yandex_money_kassa_add_installments_block" value="on"
+                           class="form-check-input"<?php echo $kassa->getAddInstallmentsBlock() ? ' checked' : ''; ?> />
+                    <?php echo $language->get('kassa_add_installments_block_label'); ?>
                 </label>
             </div>
             <div class="col-sm-10 col-sm-offset-2">
@@ -84,6 +90,11 @@
                     <?php echo $language->get($name); ?>
                 </label><br />
                 <?php endforeach; ?>
+                <label class="form-check-label" style="margin-left: 20px;">
+                    <input type="checkbox" name="yandex_money_kassa_add_installments_block" value="on"
+                           class="form-check-input"<?php echo $kassa->getAddInstallmentsBlock() ? ' checked' : ''; ?> />
+                    <?php echo $language->get('kassa_add_installments_block_label'); ?>
+                </label>
                 <?php if (!empty($error_kassa_payment_method)) : ?>
                 <div class="text-danger"><?php echo $error_kassa_payment_method; ?></div>
                 <?php endif; ?>
@@ -109,9 +120,7 @@
 
 
             <div class="statuses-wrapper">
-                <div class="col-sm-2 control-label" for="kassa-statuses-label">
-                </div>
-                <div id="kassa-statuses-label" class="col-sm-10">
+                <div class="col-sm-10 col-sm-offset-2">
                     <label> <?php echo $language->get('kassa_statuses_description_label'); ?> </label>
                 </div>
 
@@ -396,6 +405,13 @@ jQuery(document).ready(function () {
 
     jQuery('#kassa-enable-hold-mode').bind('change', function () {
         toggleStatuses(this.checked);
+    });
+
+    jQuery('input[name=yandex_money_kassa_add_installments_block]').on('change', function () {
+        var checked = this.checked;
+        jQuery('input[name=yandex_money_kassa_add_installments_block]').each(function() {
+            this.checked = checked;
+        });
     });
 });
 
