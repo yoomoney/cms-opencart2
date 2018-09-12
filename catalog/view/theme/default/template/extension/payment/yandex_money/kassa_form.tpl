@@ -176,7 +176,7 @@
 
         });
         //--></script>
-    <?php if ($kassa->useInstallmentsButton()): ?>
+    <?php if ($kassa->showInstallmentsBlock()): ?>
         <script>
             if (typeof YandexCheckoutCreditUI !== "undefined") {
                 const yamoneyCheckoutCreditUI = YandexCheckoutCreditUI({
@@ -184,7 +184,7 @@
                     sum: '<?= $sum?>',
                     language: '<?= $language->get("code")?>'
                 });
-                const yamoneyCheckoutCreditButton = yamoneyCheckoutCreditUI({
+                yamoneyCheckoutCreditUI({
                     type: 'button',
                     theme: 'default',
                     domSelector: '.installment-wrapper'

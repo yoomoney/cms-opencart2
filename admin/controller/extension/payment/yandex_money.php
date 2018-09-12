@@ -11,7 +11,7 @@ use YandexCheckout\Model\PaymentStatus;
 class ControllerExtensionPaymentYandexMoney extends Controller
 {
     const MODULE_NAME = 'yandex_money';
-    const MODULE_VERSION = '1.1.0';
+    const MODULE_VERSION = '1.1.1';
 
     public $fields_metrika = array(
         'yandex_money_metrika_active',
@@ -284,6 +284,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             'button_save',
             'button_cancel',
             'kassa_use_installments_button_label',
+            'kassa_add_installments_block_label',
         );
         foreach ($arLang as $lang_name) {
             $data[$lang_name] = $this->language->get($lang_name);
