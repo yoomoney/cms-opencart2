@@ -12,7 +12,7 @@ require_once dirname(__FILE__).DIRECTORY_SEPARATOR.'yandex_money'.DIRECTORY_SEPA
  */
 class ModelExtensionPaymentYandexMoney extends Model
 {
-    const MODULE_VERSION = '1.1.2';
+    const MODULE_VERSION = '1.1.3';
 
     private $kassaModel;
     private $walletModel;
