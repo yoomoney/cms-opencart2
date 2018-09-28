@@ -31,6 +31,14 @@ echo $column_left;
         </div>
         <?php endif; ?>
 
+        <?php if ($is_needed_show_nps): ?>
+        <div class="alert alert-success ya_nps_block success yandex_money_nps_block"><i class="fa fa-exclamation-circle"></i>
+            <?php echo $nps_block_text; ?>
+            <button type="button" class="close yandex_money_nps_close"  data-dismiss="alert"
+                    data-link="<?php echo $callback_off_nps; ?>">&times;</button>
+        </div>
+        <?php endif; ?>
+
         <ul class="nav nav-tabs">
             <li<?php echo ($lastActiveTab == 'tab-kassa' ? ' class="active"' : ''); ?>><a href="#tab-kassa" data-toggle="tab"><?php echo $language->get('kassa_tab_header'); ?></a></li>
             <li<?php echo ($lastActiveTab == 'tab-wallet' ? ' class="active"' : ''); ?>><a href="#tab-wallet" data-toggle="tab"><?php echo $language->get('wallet_tab_header'); ?></a></li>
@@ -40,6 +48,7 @@ echo $column_left;
             <li<?php echo ($lastActiveTab == 'tab-update' ? ' class="active"' : ''); ?>><a href="#tab-update" data-toggle="tab"><?php echo $language->get('update_tab_header'); ?></a></li>
         </ul>
         <form action="<?php echo $action; ?>" method="post" enctype="multipart/form-data" id="form-payment-yandex-money" class="form-horizontal">
+            <input type="hidden" name="yandex_money_nps_prev_vote_time" value="<?php echo $yandex_money_nps_prev_vote_time; ?>">
             <input type="hidden" name="language_reload" value="1" />
             <input type="hidden" name="last_active_tab" id="last-active-tab" value="<?php echo $lastActiveTab; ?>" />
             <div class="tab-content bootstrap">
@@ -82,6 +91,22 @@ jQuery(document).ready(function () {
     $('ul.nav-tabs li').on('shown.bs.tab', function (e) {
         currentTabInput.value = e.target.getAttribute('href').substr(1);
     });
+
+    function yandex_money_nps_close() {
+        $.ajax({url: $('.yandex_money_nps_close').data('link')})
+            .done(function () {
+                $('.yandex_money_nps_block').slideUp();
+                $('input[name=yandex_money_nps_prev_vote_time]').val('<?php echo $yandex_money_nps_current_vote_time; ?>');
+            });
+    }
+
+    function yandex_money_nps_goto() {
+        window.open('https://yandex.ru/poll/6JLRa1j44WnTx9UVc6k94g');
+        yandex_money_nps_close();
+    }
+
+    $('.yandex_money_nps_link').on('click', yandex_money_nps_goto);
+    $('.yandex_money_nps_close').on('click', yandex_money_nps_close);
 });
 </script>
 

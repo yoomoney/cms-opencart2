@@ -419,3 +419,5 @@ $_['kassa_payment_description_label']       = 'Transaction data';
 $_['kassa_payment_description_description'] = 'Full description of the transaction that the user will see during the checkout process. You can find it in your Yandex.Checkout Merchant Profile. For example, "Payment for order No. 72 by user@yandex.ru".
 Limitations: no more than 128 symbols';
 $_['kassa_default_payment_description']     = 'Payment for order No. %order_id%';
+
+$_['nps_text'] = '';
