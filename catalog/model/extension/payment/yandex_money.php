@@ -1,6 +1,7 @@
 <?php
 
 use YandexCheckout\Model\Payment;
+use YandexCheckout\Model\PaymentMethodType;
 
 require_once dirname(__FILE__).DIRECTORY_SEPARATOR.'yandex_money'.DIRECTORY_SEPARATOR.'autoload.php';
 
@@ -12,7 +13,7 @@ require_once dirname(__FILE__).DIRECTORY_SEPARATOR.'yandex_money'.DIRECTORY_SEPA
  */
 class ModelExtensionPaymentYandexMoney extends Model
 {
-    const MODULE_VERSION = '1.1.3';
+    const MODULE_VERSION = '1.2.0';
 
     private $kassaModel;
     private $walletModel;
@@ -75,7 +76,7 @@ class ModelExtensionPaymentYandexMoney extends Model
     protected function getClient()
     {
         if ($this->client === null) {
-            $this->client = new \YandexCheckout\Client\YandexMoneyApi();
+            $this->client = new \YandexCheckout\Client();
             $this->client->setAuth(
                 $this->getKassaModel()->getShopId(),
                 $this->getKassaModel()->getPassword()
@@ -304,11 +305,41 @@ class ModelExtensionPaymentYandexMoney extends Model
     {
         $this->log('info', 'Confirm captured payment '.$payment->getId().' with status '.$statusId);
         $this->load->model('checkout/order');
-        $this->model_checkout_order->addOrderHistory(
-            $orderId,
-            $statusId,
-            'Платёж номер "'.$payment->getId().'" подтверждён'
-        );
+
+        if ($payment->getPaymentMethod()->getType() == PaymentMethodType::B2B_SBERBANK) {
+            $payerBankDetails = $payment->getPaymentMethod()->getPayerBankDetails();
+
+            $fields      = array(
+                'fullName'   => 'Полное наименование организации',
+                'shortName'  => 'Сокращенное наименование организации',
+                'adress'     => 'Адрес организации',
+                'inn'        => 'ИНН организации',
+                'kpp'        => 'КПП организации',
+                'bankName'   => 'Наименование банка организации',
+                'bankBranch' => 'Отделение банка организации',
+                'bankBik'    => 'БИК банка организации',
+                'account'    => 'Номер счета организации',
+            );
+            $message     = '';
+
+            foreach ($fields as $field => $caption) {
+                if (isset($requestData[$field])) {
+                    $message .= $caption.': '.$payerBankDetails->offsetGet($field).'\n';
+                }
+            }
+
+            $this->model_checkout_order->addOrderHistory(
+                $orderId,
+                $statusId,
+                'Платёж номер "'.$payment->getId().'" подтверждён \n' . $message
+            );
+        } else {
+            $this->model_checkout_order->addOrderHistory(
+                $orderId,
+                $statusId,
+                'Платёж номер "'.$payment->getId().'" подтверждён'
+            );
+        }
         $sql = 'UPDATE `'.DB_PREFIX.'order_history` SET `comment` = \'Платёж подтверждён\' WHERE `order_id` = '
                .(int)$orderId.' AND `order_status_id` <= 1';
         $this->db->query($sql);
