@@ -102,6 +102,76 @@
         </div>
 
         <div class="form-group">
+            <label class="col-sm-2 control-label" for="kassa-display-name"><?php echo $language->get('b2b_sberbank_label'); ?></label>
+            <div class="col-sm-10">
+                <label>
+                    <input type="checkbox" id="kassa-b2b-sberbank-on" name="yandex_money_kassa_b2b_sberbank_enabled" value="on"<?php echo $kassa->getB2bSberbankEnabled() ? ' checked' : ''; ?> />
+                    <?php echo $language->get('b2b_sberbank_on_label'); ?>
+                </label>
+            </div>
+
+            <div class="col-sm-10 col-sm-offset-2">
+                <div class="form-group">
+                    <label class="col-sm-2 control-label"
+                           for="b2b-sberbank-description-template"><?= $language->get('b2b_sberbank_label') ?></label>
+                    <div class="col-sm-10">
+                        <input type="text" name="yandex_money_kassa_b2b_sberbank_payment_purpose"
+                               value="<?= $kassa->getB2bSberbankPaymentPurpose() ?>"
+                               placeholder="<?= $language->get('kassa_default_payment_description') ?>"
+                               id="_b2b_sberbank_payment_purpose" class="form-control"/>
+                        <p class="help-block"><?= $language->get('b2b_sberbank_template_help'); ?></p>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-2 control-label" for="kassa-b2b-tax-rate-default">
+                        <?php echo $language->get('b2b_sberbank_vat_default_label'); ?>
+                    </label>
+                    <div class="col-sm-10">
+                        <select id="kassa-b2b-tax-rate-default" name="yandex_money_kassa_b2b_tax_rate_default" class="form-control">
+                            <?php foreach ($b2bTaxRates as $id => $name) : ?>
+                            <option value="<?php echo $id; ?>"<?php echo $kassa->getB2bSberbankDefaultTaxRate() == $id ? ' selected' : ''; ?>><?php echo $name; ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                        <p class="help-block"><?php echo $language->get('b2b_sberbank_vat_default_help'); ?></p>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">
+                        <?php echo $language->get('b2b_sberbank_vat_label'); ?>
+                    </label>
+                    <div class="col-sm-10">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th><?php echo $language->get('b2b_sberbank_vat_cms_label'); ?></th>
+                                <th><?php echo $language->get('b2b_sberbank_vat_sbbol_label'); ?></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <?php foreach ($shopTaxRates as $id => $name) : ?>
+                            <tr>
+                                <td>
+                                    <label class="control-label" for="kassa-tax-rate-<?php echo $id; ?>"><?php echo $name; ?></td>
+                                <td>
+                                    <select id="kassa-b2b-tax-rate-<?php echo $id; ?>" name="yandex_money_kassa_b2b_tax_rates[<?php echo $id; ?>]" class="form-control">
+                                        <?php $v = $kassa->getB2bTaxRateId($id); foreach ($b2bTaxRates as $taxRateId => $taxRateName) : ?>
+                                        <option value="<?php echo $taxRateId; ?>"<?php echo $v == $taxRateId ? ' selected' : ''; ?>><?php echo $taxRateName; ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                        <p class="help-block"><?php echo $language->get('b2b_sberbank_tax_message'); ?></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
             <label class="col-sm-2 control-label" for="kassa-payment-description"><?php echo $language->get('kassa_payment_description_label'); ?></label>
             <div class="col-sm-10">
                 <input type="text" name="yandex_money_kassa_payment_description" value="<?php echo $kassa->getPaymentDescription(); ?>" placeholder="<?php echo $language->get('kassa_default_payment_description'); ?>" id="kassa-payment-description" class="form-control" />
@@ -164,55 +234,56 @@
                 </label>
             </div>
         </div>
-        <div class="form-group receipt-only">
-            <div class="col-sm-10 col-sm-offset-2">
-                <h4><?php echo $language->get('kassa_send_receipt_tax_rate_title'); ?></h4>
+        <div class="col-sm-10 col-sm-offset-2">
+            <div class="form-group receipt-only">
+                <div class="col-sm-10 col-sm-offset-2">
+                    <h4><?php echo $language->get('kassa_send_receipt_tax_rate_title'); ?></h4>
+                </div>
+            </div>
+            <div class="form-group receipt-only">
+                <label class="col-sm-2 control-label" for="kassa-tax-rate-default">
+                    <?php echo $language->get('kassa_tax_rate_default_label'); ?>
+                </label>
+                <div class="col-sm-10">
+                    <select id="kassa-tax-rate-default" name="yandex_money_kassa_tax_rate_default" class="form-control">
+                        <?php foreach ($kassaTaxRates as $id => $name) : ?>
+                        <option value="<?php echo $id; ?>"<?php echo $kassa->getDefaultTaxRate() == $id ? ' selected' : ''; ?>><?php echo $name; ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                    <p class="help-block"><?php echo $language->get('kassa_tax_rate_default_description'); ?></p>
+                </div>
+            </div>
+            <div class="form-group receipt-only">
+                <label class="col-sm-2 control-label">
+                    <?php echo $language->get('kassa_tax_rate_table_caption'); ?>
+                </label>
+                <div class="col-sm-10">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th><?php echo $language->get('kassa_shop_tax_rate_header'); ?></th>
+                            <th><?php echo $language->get('kassa_kassa_tax_rate_header'); ?></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <?php foreach ($shopTaxRates as $id => $name) : ?>
+                        <tr>
+                            <td>
+                                <label class="control-label" for="kassa-tax-rate-<?php echo $id; ?>"><?php echo $name; ?></td>
+                            <td>
+                                <select id="kassa-tax-rate-<?php echo $id; ?>" name="yandex_money_kassa_tax_rates[<?php echo $id; ?>]" class="form-control">
+                                    <?php $v = $kassa->getTaxRateId($id); foreach ($kassaTaxRates as $taxRateId => $taxRateName) : ?>
+                                    <option value="<?php echo $taxRateId; ?>"<?php echo $v == $taxRateId ? ' selected' : ''; ?>><?php echo $taxRateName; ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
-        <div class="form-group receipt-only">
-            <label class="col-sm-2 control-label" for="kassa-tax-rate-default">
-                <?php echo $language->get('kassa_tax_rate_default_label'); ?>
-            </label>
-            <div class="col-sm-10">
-                <select id="kassa-tax-rate-default" name="yandex_money_kassa_tax_rate_default" class="form-control">
-                    <?php foreach ($kassaTaxRates as $id => $name) : ?>
-                    <option value="<?php echo $id; ?>"<?php echo $kassa->getDefaultTaxRate() == $id ? ' selected' : ''; ?>><?php echo $name; ?></option>
-                    <?php endforeach; ?>
-                </select>
-                <p class="help-block"><?php echo $language->get('kassa_tax_rate_default_description'); ?></p>
-            </div>
-        </div>
-        <div class="form-group receipt-only">
-            <label class="col-sm-2 control-label">
-                <?php echo $language->get('kassa_tax_rate_table_caption'); ?>
-            </label>
-            <div class="col-sm-10">
-                <table class="table">
-                    <thead>
-                    <tr>
-                        <th><?php echo $language->get('kassa_shop_tax_rate_header'); ?></th>
-                        <th><?php echo $language->get('kassa_kassa_tax_rate_header'); ?></th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <?php foreach ($shopTaxRates as $id => $name) : ?>
-                    <tr>
-                        <td>
-                            <label class="control-label" for="kassa-tax-rate-<?php echo $id; ?>"><?php echo $name; ?></td>
-                        <td>
-                            <select id="kassa-tax-rate-<?php echo $id; ?>" name="yandex_money_kassa_tax_rates[<?php echo $id; ?>]" class="form-control">
-                                <?php $v = $kassa->getTaxRateId($id); foreach ($kassaTaxRates as $taxRateId => $taxRateName) : ?>
-                                <option value="<?php echo $taxRateId; ?>"<?php echo $v == $taxRateId ? ' selected' : ''; ?>><?php echo $taxRateName; ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </td>
-                    </tr>
-                    <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
         <div class="form-group">
             <label class="col-sm-2 control-label" for="kassa-notification-url">
                 <?php echo $language->get('kassa_notification_url_label'); ?>

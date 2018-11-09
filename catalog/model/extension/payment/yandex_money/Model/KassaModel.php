@@ -2,6 +2,8 @@
 
 namespace YandexMoneyModule\Model;
 
+use YandexCheckout\Model\PaymentData\B2b\Sberbank\VatDataRate;
+use YandexCheckout\Model\PaymentData\B2b\Sberbank\VatDataType;
 use YandexCheckout\Model\PaymentMethodType;
 
 class KassaModel extends AbstractPaymentModel
@@ -28,6 +30,10 @@ class KassaModel extends AbstractPaymentModel
     protected $paymentDescription;
     protected $orderCanceledStatus;
     protected $addInstallmentsBlock;
+    protected $b2bSberbankEnabled;
+    protected $b2bSberbankPaymentPurpose;
+    protected $b2bSberbankDefaultTaxRate;
+    protected $b2bTaxRates;
 
     /**
      * KassaModel constructor.
@@ -58,7 +64,7 @@ class KassaModel extends AbstractPaymentModel
         foreach (PaymentMethodType::getEnabledValues() as $value) {
             $property = 'payment_method_'.$value;
             $enabled  = (bool)$this->getConfigValue($property);
-            if (!$this->testMode || array_key_exists($value, self::$_enabledTestMethods)) {
+            if ($value != PaymentMethodType::B2B_SBERBANK && (!$this->testMode || array_key_exists($value, self::$_enabledTestMethods))) {
                 $this->paymentMethods[$value] = $enabled;
             }
         }
@@ -81,6 +87,11 @@ class KassaModel extends AbstractPaymentModel
         $this->clearCartAfterOrderCreation = $this->getConfigValue('clear_cart_before_redirect');
 
         $this->showInFooter = $this->getConfigValue('show_in_footer');
+
+        $this->b2bSberbankEnabled        = $this->getConfigValue('b2b_sberbank_enabled');
+        $this->b2bSberbankPaymentPurpose = $this->getConfigValue('b2b_sberbank_payment_purpose');
+        $this->b2bSberbankDefaultTaxRate = $this->getConfigValue('b2b_tax_rate_default');
+        $this->b2bTaxRates               = $this->getConfigValue('b2b_tax_rates');
     }
 
     public function isTestMode()
@@ -155,6 +166,11 @@ class KassaModel extends AbstractPaymentModel
         return array(1, 2, 3, 4, 5, 6);
     }
 
+    public function getB2bRateList()
+    {
+        return array(VatDataType::UNTAXED, VatDataRate::RATE_7, VatDataRate::RATE_10, VatDataRate::RATE_18);
+    }
+
     public function getDefaultTaxRate()
     {
         return $this->defaultTaxRate;
@@ -167,6 +183,15 @@ class KassaModel extends AbstractPaymentModel
         }
 
         return $this->defaultTaxRate;
+    }
+
+    public function getB2bTaxRateId($shopTaxRateId)
+    {
+        if (isset($this->b2bTaxRates[$shopTaxRateId])) {
+            return $this->b2bTaxRates[$shopTaxRateId];
+        }
+
+        return $this->b2bSberbankDefaultTaxRate;
     }
 
     public function getTaxRates()
@@ -253,5 +278,37 @@ class KassaModel extends AbstractPaymentModel
     public function getOrderCanceledStatus()
     {
         return $this->orderCanceledStatus;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getB2bSberbankEnabled()
+    {
+        return $this->b2bSberbankEnabled == 'on';
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getB2bSberbankPaymentPurpose()
+    {
+        return $this->b2bSberbankPaymentPurpose;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getB2bSberbankDefaultTaxRate()
+    {
+        return $this->b2bSberbankDefaultTaxRate;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getB2bTaxRates()
+    {
+        return $this->b2bTaxRates;
     }
 }

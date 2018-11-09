@@ -11,7 +11,7 @@ use YandexCheckout\Model\PaymentStatus;
 class ControllerExtensionPaymentYandexMoney extends Controller
 {
     const MODULE_NAME = 'yandex_money';
-    const MODULE_VERSION = '1.1.3';
+    const MODULE_VERSION = '1.2.0';
 
     /**
      * @var integer
@@ -102,6 +102,16 @@ class ControllerExtensionPaymentYandexMoney extends Controller
                 ), $this->request->post);
                 $this->model_setting_setting->editSetting(self::MODULE_NAME, $newSettings);
 
+                if ($this->request->post['yandex_money_status'] && $this->request->post['yandex_money_kassa_b2b_sberbank_enabled'] == 'on') {
+                    $this->model_setting_setting->editSetting('yandex_money_b2b_sberbank', array(
+                        'yandex_money_b2b_sberbank_status' => true,
+                    ));
+                } else {
+                    $this->model_setting_setting->editSetting('yandex_money_b2b_sberbank', array(
+                        'yandex_money_b2b_sberbank_status' => false,
+                    ));
+                }
+
                 if (empty($newSettings['yandex_money_metrika_number'])
                     || empty($newSettings['yandex_money_metrika_idapp'])
                     || empty($newSettings['yandex_money_metrika_pw'])
@@ -158,6 +168,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         $data['module_version'] = self::MODULE_VERSION;
         $data['breadcrumbs']    = $this->getBreadCrumbs();
         $data['kassaTaxRates']  = $this->getKassaTaxRates();
+        $data['b2bTaxRates']    = $this->getB2bTaxRates();
         $data['shopTaxRates']   = $this->getShopTaxRates();
         $data['orderStatuses']  = $this->getAvailableOrderStatuses();
         $data['geoZones']       = $this->getAvailableGeoZones();
@@ -320,8 +331,8 @@ class ControllerExtensionPaymentYandexMoney extends Controller
 
         $this->load->model('localisation/currency');
 
-        $data                    = array_merge($data, $this->initForm($array_init));
-        $data                    = array_merge($data, $this->initErrors());
+        $data = array_merge($data, $this->initForm($array_init));
+        $data = array_merge($data, $this->initErrors());
 
         $market                       = $this->getModel()->getMarket();
         $data['market']               = $market;
@@ -345,15 +356,18 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             $data['market_status'] = array_merge($data['market_status'], $this->session->data['market_status']);
         }
 
-        $data['yandex_money_nps_prev_vote_time'] = $this->config->get('yandex_money_nps_prev_vote_time');
+        $data['yandex_money_nps_prev_vote_time']    = $this->config->get('yandex_money_nps_prev_vote_time');
         $data['yandex_money_nps_current_vote_time'] = time();
-        $data['callback_off_nps'] = $this->url->link($prefix.'payment/'.self::MODULE_NAME.'/vote_nps', 'token='.$this->session->data['token'], true);
-        $data['nps_block_text'] = sprintf($this->language->get('nps_text'), '<a href="#" onclick="return false;" class="yandex_money_nps_link">', '</a>');
-        $isTimeForVote = $data['yandex_money_nps_current_vote_time'] > (int)$data['yandex_money_nps_prev_vote_time']
-            + $this->npsRetryAfterDays * 86400;
-        $data['is_needed_show_nps'] = $isTimeForVote
-            && substr($this->getModel()->getKassaModel()->getPassword(), 0, 5) === 'live_'
-            && $data['nps_block_text'];
+        $data['callback_off_nps']                   = $this->url->link($prefix.'payment/'.self::MODULE_NAME.'/vote_nps',
+            'token='.$this->session->data['token'], true);
+        $data['nps_block_text']                     = sprintf($this->language->get('nps_text'),
+            '<a href="#" onclick="return false;" class="yandex_money_nps_link">', '</a>');
+        $isTimeForVote                              = $data['yandex_money_nps_current_vote_time'] > (int)$data['yandex_money_nps_prev_vote_time']
+                                                                                                    + $this->npsRetryAfterDays * 86400;
+        $data['is_needed_show_nps']                 = $isTimeForVote
+                                                      && substr($this->getModel()->getKassaModel()->getPassword(), 0,
+                5) === 'live_'
+                                                      && $data['nps_block_text'];
 
         $this->response->setOutput($this->load->view($this->getTemplatePath(), $data));
     }
@@ -361,7 +375,8 @@ class ControllerExtensionPaymentYandexMoney extends Controller
     /**
      * Экшен для сохранения времени голосования в NPS
      */
-    public function vote_nps() {
+    public function vote_nps()
+    {
         $this->load->model('setting/setting');
         $this->model_setting_setting->editSettingValue('yandex_money', 'yandex_money_nps_prev_vote_time', time());
     }
@@ -877,6 +892,17 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         return $result;
     }
 
+    private function getB2bTaxRates()
+    {
+        $result = array();
+        foreach ($this->getModel()->getKassaModel()->getB2bRateList() as $taxRateId) {
+            $key                = 'b2b_tax_rate_'.$taxRateId.'_label';
+            $result[$taxRateId] = $this->language->get($key);
+        }
+
+        return $result;
+    }
+
     private function getAvailableGeoZones()
     {
         $this->load->model('localisation/geo_zone');
@@ -1057,7 +1083,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
     private function initErrors()
     {
         $this->language->load($this->getPrefix().'payment/yandex_money');
-        $data   = array();
+        $data                  = array();
         $data['market_status'] = array();
         foreach ($this->getModel()->getMarket()->checkConfig() as $errorMessage) {
             $data['market_status'][] = $this->errors_alert($this->language->get($errorMessage));
@@ -1244,7 +1270,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             if ($action == 'capture') {
                 //@ToDo расскоментировать при появлении частичного подтверждения.
                 //$orderInfo = $this->updateOrder($orderModel, $orderInfo);
-                $amount    = $this->request->post['kassa_capture_amount'];
+                $amount = $this->request->post['kassa_capture_amount'];
                 if ($this->getModel()->capturePayment($payment, true, $amount)) {
                     $data['success'] = $this->language->get('capture_payment_success_message');
                 } else {
