@@ -283,6 +283,58 @@
                     </table>
                 </div>
             </div>
+
+            <div class="form-group receipt-only">
+                <label class="col-sm-2 control-label" >
+                    <?php echo $language->get('kassa_default_payment_mode_label'); ?>
+                </label>
+                <div class="col-sm-10">
+                    <select id="kassa-default-payment-mode" name="yandex_money_kassa_default_payment_mode" class="form-control">
+                        <?php foreach ($kassa->getPaymentModeEnum() as $id => $name) : ?>
+                        <option value="<?php echo $id; ?>"<?php echo $kassa->getDefaultPaymentMode() == $id ? ' selected' : ''; ?>><?php echo $name; ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group receipt-only">
+                <label class="col-sm-2 control-label">
+                    <?php echo $language->get('kassa_default_payment_subject_label'); ?>
+                </label>
+                <div class="col-sm-10">
+                    <select id="kassa-default-payment-subject" name="yandex_money_kassa_default_payment_subject" class="form-control">
+                        <?php foreach ($kassa->getPaymentSubjectEnum() as $id => $name) : ?>
+                        <option value="<?php echo $id; ?>"<?php echo $kassa->getDefaultPaymentSubject() == $id ? ' selected' : ''; ?>><?php echo $name; ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group receipt-only">
+                <label class="col-sm-2 control-label">
+                    <?php echo $language->get('kassa_default_delivery_payment_mode_label'); ?>
+                </label>
+                <div class="col-sm-10">
+                    <select id="kassa-tax-rate-default" name="yandex_money_kassa_default_delivery_payment_mode" class="form-control">
+                        <?php foreach ($kassa->getPaymentModeEnum() as $id => $name) : ?>
+                        <option value="<?php echo $id; ?>"<?php echo $kassa->getDefaultDeliveryPaymentMode() == $id ? ' selected' : ''; ?>><?php echo $name; ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group receipt-only">
+                <label class="col-sm-2 control-label">
+                    <?php echo $language->get('kassa_default_delivery_payment_subject_label'); ?>
+                </label>
+                <div class="col-sm-10">
+                    <select id="kassa-tax-rate-default" name="yandex_money_kassa_default_delivery_payment_subject" class="form-control">
+                        <?php foreach ($kassa->getPaymentSubjectEnum() as $id => $name) : ?>
+                        <option value="<?php echo $id; ?>"<?php echo $kassa->getDefaultDeliveryPaymentSubject() == $id ? ' selected' : ''; ?>><?php echo $name; ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </div>
         </div>
         <div class="form-group">
             <label class="col-sm-2 control-label" for="kassa-notification-url">

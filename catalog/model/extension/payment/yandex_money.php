@@ -13,7 +13,7 @@ require_once dirname(__FILE__).DIRECTORY_SEPARATOR.'yandex_money'.DIRECTORY_SEPA
  */
 class ModelExtensionPaymentYandexMoney extends Model
 {
-    const MODULE_VERSION = '1.2.0';
+    const MODULE_VERSION = '1.2.1';
 
     private $kassaModel;
     private $walletModel;
@@ -309,7 +309,7 @@ class ModelExtensionPaymentYandexMoney extends Model
         if ($payment->getPaymentMethod()->getType() == PaymentMethodType::B2B_SBERBANK) {
             $payerBankDetails = $payment->getPaymentMethod()->getPayerBankDetails();
 
-            $fields      = array(
+            $fields  = array(
                 'fullName'   => 'Полное наименование организации',
                 'shortName'  => 'Сокращенное наименование организации',
                 'adress'     => 'Адрес организации',
@@ -320,7 +320,7 @@ class ModelExtensionPaymentYandexMoney extends Model
                 'bankBik'    => 'БИК банка организации',
                 'account'    => 'Номер счета организации',
             );
-            $message     = '';
+            $message = '';
 
             foreach ($fields as $field => $caption) {
                 if (isset($requestData[$field])) {
@@ -331,7 +331,7 @@ class ModelExtensionPaymentYandexMoney extends Model
             $this->model_checkout_order->addOrderHistory(
                 $orderId,
                 $statusId,
-                'Платёж номер "'.$payment->getId().'" подтверждён \n' . $message
+                'Платёж номер "'.$payment->getId().'" подтверждён \n'.$message
             );
         } else {
             $this->model_checkout_order->addOrderHistory(
@@ -492,8 +492,12 @@ class ModelExtensionPaymentYandexMoney extends Model
         } elseif (isset($orderInfo['phone'])) {
             $builder->setReceiptPhone($orderInfo['phone']);
         }
-        $taxRates       = $this->config->get('yandex_money_kassa_tax_rates');
-        $defaultVatCode = $this->config->get('yandex_money_kassa_tax_rate_default');
+        $taxRates                      = $this->config->get('yandex_money_kassa_tax_rates');
+        $defaultVatCode                = $this->config->get('yandex_money_kassa_tax_rate_default');
+        $defaultPaymentMode            = $this->config->get('yandex_money_kassa_default_payment_mode');
+        $defaultPaymentSubject         = $this->config->get('yandex_money_kassa_default_payment_subject');
+        $defaultDeliveryPaymentMode    = $this->config->get('yandex_money_kassa_default_delivery_payment_mode');
+        $defaultDeliveryPaymentSubject = $this->config->get('yandex_money_kassa_default_delivery_payment_subject');
 
         $orderProducts = $this->model_account_order->getOrderProducts($orderInfo['order_id']);
         foreach ($orderProducts as $prod) {
@@ -502,14 +506,16 @@ class ModelExtensionPaymentYandexMoney extends Model
             $vatCode     = isset($taxRates[$productInfo['tax_class_id']])
                 ? $taxRates[$productInfo['tax_class_id']]
                 : $defaultVatCode;
-            $builder->addReceiptItem($prod['name'], $price, $prod['quantity'], $vatCode);
+            $builder->addReceiptItem(mb_substr($prod['name'], 0, 128), $price, $prod['quantity'], $vatCode,
+                $defaultPaymentMode, $defaultPaymentSubject);
         }
 
         $order_totals = $this->model_account_order->getOrderTotals($orderInfo['order_id']);
         foreach ($order_totals as $total) {
             if (isset($total['code']) && $total['code'] === 'shipping') {
                 $price = $this->currency->format($total['value'], 'RUB', '', false);
-                $builder->addReceiptShipping($total['title'], $price, $defaultVatCode);
+                $builder->addReceiptShipping(mb_substr($total['title'], 0, 128), $price, $defaultVatCode,
+                    $defaultDeliveryPaymentMode, $defaultDeliveryPaymentSubject);
             }
         }
     }
@@ -536,12 +542,12 @@ class ModelExtensionPaymentYandexMoney extends Model
         if (!$this->config->get('yandex_money_metrika_active')
             || !$this->config->get('yandex_money_metrika_code')
         ) {
-             return '';
+            return '';
         }
 
         $this->load->model('checkout/order');
-        $order              = $this->model_checkout_order->getOrder($id);
-        $product_array      = $this->getOrderProducts($id);
+        $order         = $this->model_checkout_order->getOrder($id);
+        $product_array = $this->getOrderProducts($id);
 
         $products = array();
         foreach ($product_array as $k => $product) {
