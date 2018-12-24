@@ -5,6 +5,8 @@ namespace YandexMoneyModule\Model;
 use YandexCheckout\Model\PaymentData\B2b\Sberbank\VatDataRate;
 use YandexCheckout\Model\PaymentData\B2b\Sberbank\VatDataType;
 use YandexCheckout\Model\PaymentMethodType;
+use YandexCheckout\Model\Receipt\PaymentMode;
+use YandexCheckout\Model\Receipt\PaymentSubject;
 
 class KassaModel extends AbstractPaymentModel
 {
@@ -34,6 +36,11 @@ class KassaModel extends AbstractPaymentModel
     protected $b2bSberbankPaymentPurpose;
     protected $b2bSberbankDefaultTaxRate;
     protected $b2bTaxRates;
+    protected $defaultPaymentMode;
+    protected $defaultPaymentSubject;
+    protected $defaultDeliveryPaymentMode;
+    protected $defaultDeliveryPaymentSubject;
+
 
     /**
      * KassaModel constructor.
@@ -64,7 +71,9 @@ class KassaModel extends AbstractPaymentModel
         foreach (PaymentMethodType::getEnabledValues() as $value) {
             $property = 'payment_method_'.$value;
             $enabled  = (bool)$this->getConfigValue($property);
-            if ($value != PaymentMethodType::B2B_SBERBANK && (!$this->testMode || array_key_exists($value, self::$_enabledTestMethods))) {
+            if ($value != PaymentMethodType::B2B_SBERBANK && (!$this->testMode || array_key_exists($value,
+                        self::$_enabledTestMethods))
+            ) {
                 $this->paymentMethods[$value] = $enabled;
             }
         }
@@ -88,10 +97,14 @@ class KassaModel extends AbstractPaymentModel
 
         $this->showInFooter = $this->getConfigValue('show_in_footer');
 
-        $this->b2bSberbankEnabled        = $this->getConfigValue('b2b_sberbank_enabled');
-        $this->b2bSberbankPaymentPurpose = $this->getConfigValue('b2b_sberbank_payment_purpose');
-        $this->b2bSberbankDefaultTaxRate = $this->getConfigValue('b2b_tax_rate_default');
-        $this->b2bTaxRates               = $this->getConfigValue('b2b_tax_rates');
+        $this->b2bSberbankEnabled            = $this->getConfigValue('b2b_sberbank_enabled');
+        $this->b2bSberbankPaymentPurpose     = $this->getConfigValue('b2b_sberbank_payment_purpose');
+        $this->b2bSberbankDefaultTaxRate     = $this->getConfigValue('b2b_tax_rate_default');
+        $this->b2bTaxRates                   = $this->getConfigValue('b2b_tax_rates');
+        $this->defaultPaymentMode            = $this->getConfigValue('default_payment_mode');
+        $this->defaultPaymentSubject         = $this->getConfigValue('default_payment_subject');
+        $this->defaultDeliveryPaymentMode    = $this->getConfigValue('default_delivery_payment_mode');
+        $this->defaultDeliveryPaymentSubject = $this->getConfigValue('default_delivery_payment_subject');
     }
 
     public function isTestMode()
@@ -310,5 +323,69 @@ class KassaModel extends AbstractPaymentModel
     public function getB2bTaxRates()
     {
         return $this->b2bTaxRates;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getDefaultPaymentMode()
+    {
+        return $this->defaultPaymentMode;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getDefaultPaymentSubject()
+    {
+        return $this->defaultPaymentSubject;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getDefaultDeliveryPaymentMode()
+    {
+        return $this->defaultDeliveryPaymentMode;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getDefaultDeliveryPaymentSubject()
+    {
+        return $this->defaultDeliveryPaymentSubject;
+    }
+
+    public function getPaymentModeEnum()
+    {
+        return array(
+            PaymentMode::FULL_PREPAYMENT    => 'Полная предоплата ('.PaymentMode::FULL_PREPAYMENT.')',
+            PaymentMode::PARTIAL_PREPAYMENT => 'Частичная предоплата ('.PaymentMode::PARTIAL_PREPAYMENT.')',
+            PaymentMode::ADVANCE            => 'Аванс ('.PaymentMode::ADVANCE.')',
+            PaymentMode::FULL_PAYMENT       => 'Полный расчет ('.PaymentMode::FULL_PAYMENT.')',
+            PaymentMode::PARTIAL_PAYMENT    => 'Частичный расчет и кредит ('.PaymentMode::PARTIAL_PAYMENT.')',
+            PaymentMode::CREDIT             => 'Кредит ('.PaymentMode::CREDIT.')',
+            PaymentMode::CREDIT_PAYMENT     => 'Выплата по кредиту ('.PaymentMode::CREDIT_PAYMENT.')',
+        );
+    }
+
+    public function getPaymentSubjectEnum()
+    {
+        return array(
+            PaymentSubject::COMMODITY             => 'Товар ('.PaymentSubject::COMMODITY.')',
+            PaymentSubject::EXCISE                => 'Подакцизный товар ('.PaymentSubject::EXCISE.')',
+            PaymentSubject::JOB                   => 'Работа ('.PaymentSubject::JOB.')',
+            PaymentSubject::SERVICE               => 'Услуга ('.PaymentSubject::SERVICE.')',
+            PaymentSubject::GAMBLING_BET          => 'Ставка в азартной игре ('.PaymentSubject::GAMBLING_BET.')',
+            PaymentSubject::GAMBLING_PRIZE        => 'Выигрыш в азартной игре ('.PaymentSubject::GAMBLING_PRIZE.')',
+            PaymentSubject::LOTTERY               => 'Лотерейный билет ('.PaymentSubject::LOTTERY.')',
+            PaymentSubject::LOTTERY_PRIZE         => 'Выигрыш в лотерею ('.PaymentSubject::LOTTERY_PRIZE.')',
+            PaymentSubject::INTELLECTUAL_ACTIVITY => 'Результаты интеллектуальной деятельности ('.PaymentSubject::INTELLECTUAL_ACTIVITY.')',
+            PaymentSubject::PAYMENT               => 'Платеж ('.PaymentSubject::PAYMENT.')',
+            PaymentSubject::AGENT_COMMISSION      => 'Агентское вознаграждение ('.PaymentSubject::AGENT_COMMISSION.')',
+            PaymentSubject::COMPOSITE             => 'Несколько вариантов ('.PaymentSubject::COMPOSITE.')',
+            PaymentSubject::ANOTHER               => 'Другое ('.PaymentSubject::ANOTHER.')',
+        );
     }
 }
