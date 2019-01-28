@@ -11,7 +11,7 @@ use YandexCheckout\Model\PaymentStatus;
 class ControllerExtensionPaymentYandexMoney extends Controller
 {
     const MODULE_NAME = 'yandex_money';
-    const MODULE_VERSION = '1.2.1';
+    const MODULE_VERSION = '1.2.2';
 
     /**
      * @var integer
@@ -102,7 +102,10 @@ class ControllerExtensionPaymentYandexMoney extends Controller
                 ), $this->request->post);
                 $this->model_setting_setting->editSetting(self::MODULE_NAME, $newSettings);
 
-                if ($this->request->post['yandex_money_status'] && $this->request->post['yandex_money_kassa_b2b_sberbank_enabled'] == 'on') {
+                if ($this->request->post['yandex_money_status']
+                    && isset($this->request->post['yandex_money_kassa_b2b_sberbank_enabled'])
+                    && $this->request->post['yandex_money_kassa_b2b_sberbank_enabled'] == 'on'
+                ) {
                     $this->model_setting_setting->editSetting('yandex_money_b2b_sberbank', array(
                         'yandex_money_b2b_sberbank_status' => true,
                     ));
@@ -423,6 +426,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         $data['header']      = $this->load->controller('common/header');
         $data['column_left'] = $this->load->controller('common/column_left');
         $data['footer']      = $this->load->controller('common/footer');
+        $data['cancel']      = $this->url->link($this->getPrefix().'payment/yandex_money', 'token='.$this->session->data['token'], true);
 
         $this->response->setOutput($this->load->view($this->getTemplatePath('logs'), $data));
     }
@@ -434,7 +438,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         $this->load->model('setting/setting');
 
         if (!$this->getModel()->getKassaModel()->isEnabled()) {
-            $url = $this->url->link('payment/yandex_money', 'token='.$this->session->data['token'], true);
+            $url = $this->url->link($prefix.'payment/yandex_money', 'token='.$this->session->data['token'], true);
             $this->response->redirect($url);
         }
 
@@ -1346,7 +1350,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         $data['column_left'] = $this->load->controller('common/column_left');
         $data['footer']      = $this->load->controller('common/footer');
         $data['language']    = $this->language;
-
+        $data['cancel']      = $this->url->link('sale/order', 'token='.$this->session->data['token'], true);
         $data['breadcrumbs'] = array();
 
         $data['breadcrumbs'][] = array(

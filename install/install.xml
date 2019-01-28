@@ -2,7 +2,7 @@
 <modification>
     <name>Y.CMS 2.0 for Opencart 2.0.x - 2.3.x</name>
     <code>ycms.2.0</code>
-    <version>1.2.1</version>
+    <version>1.2.2</version>
     <author>Yandex.Money</author>
     <!-- Вставка кнопки в историю заказов-->
     <file path="catalog/controller/account/order.php">
@@ -103,11 +103,12 @@
         <operation>
             <search><![CDATA[$data['button_add'] = $this->language->get('button_add');]]></search>
             <add position="after"><![CDATA[
-        if ($this->config->get('yandex_money_kassa_enabled')) {
-            $data['button_invoice_kassa'] = $this->language->get('button_invoice_kassa');
-            $data['store_url'] = $this->request->server['HTTPS'] ? HTTPS_CATALOG : HTTP_CATALOG;
-            $data['prefix'] = $prefix;
-        }
+                $data['yandex_money_kassa_enabled'] = $this->config->get('yandex_money_kassa_enabled');
+                if ($this->config->get('yandex_money_kassa_enabled')) {
+                    $data['button_invoice_kassa'] = $this->language->get('button_invoice_kassa');
+                    $data['store_url'] = $this->request->server['HTTPS'] ? HTTPS_CATALOG : HTTP_CATALOG;
+                    $data['prefix'] = $prefix;
+                }
             ]]></add>
         </operation>
     </file>
@@ -135,6 +136,7 @@
         <operation>
             <search><![CDATA[$('input[name^=\'selected\']:first').trigger('change');]]></search>
             <add position="after"><![CDATA[//
+            <?php if($yandex_money_kassa_enabled):?>
             jQuery('.invoice-button').click(function(e) {
                 var node = this;
                 var text = 'Вы действительно хотите отправить счёт пользователю ' + node.dataset.customer + ' на адрес ' + node.dataset.email + '?';
@@ -160,7 +162,7 @@
                                 $.ajax({
                                     url: '<?php echo $store_url; ?>index.php?route=api/login',
                                     type: 'post',
-                                    data: 'key=<?php echo $api_key; ?>',
+                                    data: 'key=<?php echo empty($api_key)?'':$api_key; ?>',
                                     dataType: 'json',
                                     crossDomain: true,
                                     success: function(json) {
@@ -197,6 +199,7 @@
                     });
                 }
             });
+             <?php endif;?>
             //
             ]]></add>
         </operation>
@@ -310,7 +313,8 @@
             ]]></add>
         </operation>
         <operation>
-            <search trim="true"><![CDATA[$data['price'] = $this->currency->format($this->tax->calculate($product_info['price'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);]]></search>
+            <search trim="true">
+                <![CDATA[$data['price'] = $this->currency->format($this->tax->calculate($product_info['price'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);]]></search>
             <add position="after"><![CDATA[
                 $data['cost'] = sprintf('%.2f',$this->tax->calculate($product_info['price'], $product_info['tax_class_id'], $this->config->get('config_tax')));
             ]]></add>

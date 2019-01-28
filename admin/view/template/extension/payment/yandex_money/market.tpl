@@ -212,7 +212,7 @@
                 <?php foreach($market->getTaxClasses() as $taxClass): ?>
                 <div class="form-group">
                     <label class="col-sm-4 control-label yandex-money-market-font-weight-normal"
-                           for="kassa-tax-rate-<?php echo $taxClass->tax_class_id; ?>"><?php echo $taxClass['title']; ?></label>
+                           for="kassa-tax-rate-<?php echo $taxClass['tax_class_id']; ?>"><?php echo $taxClass['title']; ?></label>
                     <span class="col-sm-8">
                             <select name="yandex_money_market_vat[<?php echo $taxClass['tax_class_id']; ?>]" class="form-control">
                                 <?php foreach ($market->getVatList() as $vatId => $vatName): ?>

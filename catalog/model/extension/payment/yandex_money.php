@@ -13,7 +13,7 @@ require_once dirname(__FILE__).DIRECTORY_SEPARATOR.'yandex_money'.DIRECTORY_SEPA
  */
 class ModelExtensionPaymentYandexMoney extends Model
 {
-    const MODULE_VERSION = '1.2.1';
+    const MODULE_VERSION = '1.2.2';
 
     private $kassaModel;
     private $walletModel;
@@ -93,7 +93,7 @@ class ModelExtensionPaymentYandexMoney extends Model
         $this->load->language($this->getPrefix().'payment/yandex_money');
 
         $model = $this->getPaymentModel();
-        if ($model->getMinPaymentAmount() > 0 && $model->getMinPaymentAmount() > $total) {
+        if (is_null($model) || $model->getMinPaymentAmount() > 0 && $model->getMinPaymentAmount() > $total) {
             return $result;
         }
 
