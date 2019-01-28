@@ -434,7 +434,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         $this->load->model('setting/setting');
 
         if (!$this->getModel()->getKassaModel()->isEnabled()) {
-            $url = $this->url->link('payment/yandex_money', 'token='.$this->session->data['token'], true);
+            $url = $this->url->link($prefix.'payment/yandex_money', 'token='.$this->session->data['token'], true);
             $this->response->redirect($url);
         }
 
