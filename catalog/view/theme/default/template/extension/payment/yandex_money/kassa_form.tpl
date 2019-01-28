@@ -73,11 +73,20 @@
                 foreach ($kassa->getEnabledPaymentMethods() as $index =>  $method):
                 $key = 'text_method_' . $method;
             ?>
-                <label>
-                    <input type="radio" name="kassa_payment_method" value="<?php echo $method ?>"<?php echo ($index == 0 ? ' checked' : ''); ?> />
-                    <img src="<?php echo $image_base_path . '/' . $method; ?>.png" alt="<?php echo $language->get($key); ?>" />
-                    <?php echo $language->get($key);?>
-                </label>
+                <?php if ($method == \YandexCheckout\Model\PaymentMethodType::INSTALLMENTS) : ?>
+                    <label>
+                        <input type="radio" name="kassa_payment_method" value="<?php echo $method ?>"<?php echo ($index == 0 ? ' checked' : ''); ?> />
+                        <img src="<?php echo $image_base_path . '/' . $method; ?>.png" alt="<?php echo $text_method_installments; ?>" />
+                        <?php echo $text_method_installments;?>
+                    </label>
+                <?else: ?>
+                    <label>
+                        <input type="radio" name="kassa_payment_method" value="<?php echo $method ?>"<?php echo ($index == 0 ? ' checked' : ''); ?> />
+                        <img src="<?php echo $image_base_path . '/' . $method; ?>.png" alt="<?php echo $language->get($key); ?>" />
+                        <?php echo $language->get($key);?>
+                    </label>
+                <?php endif; ?>
+
                 <?php if ($method == \YandexCheckout\Model\PaymentMethodType::QIWI) : ?>
                     <div id="payment-qiwi" class="additional" style="display: none;">
                         <label for="qiwi-phone"><?php echo $language->get('text_payment_method_qiwi_phone'); ?></label><br />

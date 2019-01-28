@@ -8,7 +8,7 @@ namespace YandexMoneyModule\YandexMarket;
  * @property-read int $categoryId
  *
  */
-class Offer extends Object
+class Offer extends MarketObject
 {
     /**
      * @var ShopInfo
@@ -963,7 +963,7 @@ class Offer extends Object
      */
     public function setWeight($weight, $unit = 'kg')
     {
-        $unit       = strtolower($unit);
+        $unit       = mb_strtolower($unit);
         $multiplier = 1.0;
         if ($unit !== 'kg' && $unit !== 'кг') {
             $multipliers = array(

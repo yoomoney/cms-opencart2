@@ -157,7 +157,7 @@ class YmlBuilder
             $result .= $this->generateOutlets($offer);
         }
         if ($offer->hasDescription()) {
-            $result .= '        <description><![CDATA[' . $this->prepareValue($offer->getDescription()) . ']]></description>' . PHP_EOL;
+            $result .= '        <description><![CDATA[' . htmlspecialchars_decode($offer->getDescription()) . ']]></description>' . PHP_EOL;
         }
         if ($offer->hasSalesNotes()) {
             $result .= '        <sales_notes>'. $this->prepareValue($offer->getSalesNotes()) . '</sales_notes>' . PHP_EOL;

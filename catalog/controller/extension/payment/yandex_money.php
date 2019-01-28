@@ -112,7 +112,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
                 } else {
                     $installmentLabel = sprintf($this->language->get('text_method_installments'),
                         $monthlyInstallment['amount']);
-                    $data['language']->set('text_method_installments', $installmentLabel);
+                    $data['text_method_installments']=  $installmentLabel;
                 }
             }
         }

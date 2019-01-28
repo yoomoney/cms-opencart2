@@ -98,7 +98,7 @@ echo $column_left;
                                     <?php foreach ($products as $product) { ?>
                                     <tr>
                                         <td class="text-left">
-                                            <a href="<?php echo $product['href']; ?>"><?php echo $product['name']; ?></a>
+                                            <?php echo $product['name']; ?>
                                         </td>
                                         <td class="text-right">
                                             <input type="number"
@@ -123,7 +123,9 @@ echo $column_left;
                                     <?php } ?>
                                     <?php foreach ($vouchers as $voucher) { ?>
                                     <tr>
-                                        <td class="text-left"><a href="<?php echo $voucher['href']; ?>"><?php echo $voucher['description']; ?></a></td>
+                                        <td class="text-left"><a
+                                                    href="<?php echo $voucher['href']; ?>"><?php echo $voucher['description']; ?></a>
+                                        </td>
                                         <td class="text-left"></td>
                                         <td class="text-right">1</td>
                                         <td class="text-right"><?php echo $voucher['amount']; ?></td>
@@ -150,9 +152,8 @@ echo $column_left;
                         <input type="text" name="kassa_capture_amount_src"
                                value="<?php echo $capture_amount; ?>" id="kassa-capture-amount"
                                class="form-control" disabled/>
-
                         <input type="hidden" name="kassa_capture_amount"
-                               value="<?php echo $captureable_amount; ?>"/>
+                               value="<?php echo empty($captureable_amount)?:$captureable_amount; ?>"/>
                         <?php if (!empty($errors['kassa_capture_amount'])) : ?>
                         <p class="text-danger"><?php echo $errors['kassa_capture_amount']; ?></p>
                         <?php endif; ?>
