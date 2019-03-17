@@ -487,10 +487,10 @@ class ModelExtensionPaymentYandexMoney extends Model
         $this->load->model('account/order');
         $this->load->model('catalog/product');
 
-        if (isset($orderInfo['email'])) {
+        if (isset($orderInfo['email']) and $orderInfo['email'] !== '') {
             $builder->setReceiptEmail($orderInfo['email']);
-        } elseif (isset($orderInfo['phone'])) {
-            $builder->setReceiptPhone($orderInfo['phone']);
+        } elseif (isset($orderInfo['telephone'])) {
+            $builder->setReceiptPhone($orderInfo['telephone']);
         }
         $taxRates                      = $this->config->get('yandex_money_kassa_tax_rates');
         $defaultVatCode                = $this->config->get('yandex_money_kassa_tax_rate_default');
