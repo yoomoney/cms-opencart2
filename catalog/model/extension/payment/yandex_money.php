@@ -13,7 +13,7 @@ require_once dirname(__FILE__).DIRECTORY_SEPARATOR.'yandex_money'.DIRECTORY_SEPA
  */
 class ModelExtensionPaymentYandexMoney extends Model
 {
-    const MODULE_VERSION = '1.2.4';
+    const MODULE_VERSION = '1.2.5';
 
     private $kassaModel;
     private $walletModel;
@@ -135,10 +135,7 @@ class ModelExtensionPaymentYandexMoney extends Model
             $this->url->link($this->getPrefix().'payment/yandex_money/confirm', 'order_id='.$orderId, true)
         );
 
-        $amount = $orderInfo['total'];
-        if ($orderInfo['currency_code'] !== 'RUB') {
-            $amount = $this->currency->convert($amount, $orderInfo['currency_code'], 'RUB');
-        }
+        $amount = $this->currency->format($orderInfo['total'], 'RUB', '', false);
 
         try {
             $builder      = \YandexCheckout\Request\Payments\CreatePaymentRequest::builder();
@@ -212,10 +209,7 @@ class ModelExtensionPaymentYandexMoney extends Model
             $returnUrl = $this->url->link('account/order/info', 'order_id='.$order['order_id'], true);
         }
 
-        $amount = $order['total'];
-        if ($order['currency_code'] !== 'RUB') {
-            $amount = $this->currency->convert($amount, $order['currency_code'], 'RUB');
-        }
+        $amount = $this->currency->format($order['total'], 'RUB', '', false);
 
         try {
             $builder = \YandexCheckout\Request\Payments\CreatePaymentRequest::builder();
