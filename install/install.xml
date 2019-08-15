@@ -17,7 +17,7 @@
             }]]></add>
         </operation>
     </file>
-    <file path="catalog/view/theme/default/template/account/order_info.tpl">
+    <file path="catalog/view/theme/*/template/account/order_info.tpl">
         <operation>
             <search><![CDATA[</tfoot>]]></search>
             <add position="before"><![CDATA[<?php if (isset($yandex_money)) {?><tr>
@@ -321,7 +321,7 @@
         </operation>
     </file>
 
-    <file path="catalog/view/theme/default/template/product/product.tpl" error="skip">
+    <file path="catalog/view/theme/*/template/product/product.tpl" error="skip">
         <operation>
             <search><![CDATA[<?php if ($options) { ?>]]></search>
             <add position="before"><![CDATA[

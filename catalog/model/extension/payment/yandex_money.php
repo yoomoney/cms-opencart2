@@ -13,7 +13,7 @@ require_once dirname(__FILE__).DIRECTORY_SEPARATOR.'yandex_money'.DIRECTORY_SEPA
  */
 class ModelExtensionPaymentYandexMoney extends Model
 {
-    const MODULE_VERSION = '1.2.7';
+    const MODULE_VERSION = '1.2.8';
 
     private $kassaModel;
     private $walletModel;
@@ -335,6 +335,9 @@ class ModelExtensionPaymentYandexMoney extends Model
                 'Платёж номер "'.$payment->getId().'" подтверждён'
             );
         }
+
+        $this->updatePaymentInDatabase($payment);
+
         $sql = 'UPDATE `'.DB_PREFIX.'order_history` SET `comment` = \'Платёж подтверждён\' WHERE `order_id` = '
                .(int)$orderId.' AND `order_status_id` <= 1';
         $this->db->query($sql);

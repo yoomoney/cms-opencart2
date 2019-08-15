@@ -11,7 +11,7 @@ use YandexCheckout\Model\PaymentStatus;
 class ControllerExtensionPaymentYandexMoney extends Controller
 {
     const MODULE_NAME = 'yandex_money';
-    const MODULE_VERSION = '1.2.7';
+    const MODULE_VERSION = '1.2.8';
 
     /**
      * @var integer
@@ -210,7 +210,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             $data['billing']->setDisplayName($this->language->get('billing_default_display_name'));
         }
 
-        $url                     = new Url(HTTP_CATALOG);
+        $url                     = new Url(HTTP_CATALOG, HTTPS_CATALOG);
         $data['notificationUrl'] = $url->link($prefix.'payment/'.self::MODULE_NAME.'/capture', '', true);
         $data['callbackUrl']     = $url->link($prefix.'payment/'.self::MODULE_NAME.'/callback', '', true);
 
@@ -936,7 +936,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             $data[$a] = $this->config->get($a);
         }
 
-        $url = new Url(HTTPS_CATALOG);
+        $url = new Url(HTTP_CATALOG, HTTPS_CATALOG);
         if ($this->config->get('config_secure')) {
             $data['ya_kassa_fail']               = HTTPS_CATALOG.'index.php?route=checkout/failure';
             $data['ya_kassa_success']            = HTTPS_CATALOG.'index.php?route=checkout/success';
@@ -1167,7 +1167,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             ),
             2, '.', ''
         );
-        $urlHelper = new Url(HTTPS_CATALOG);
+        $urlHelper = new Url(HTTP_CATALOG, HTTPS_CATALOG);
         $url       = $urlHelper->link($this->getPrefix().'payment/yandex_money/simplepayment', 'order_id='.$order_id,
             true);
         $logo      = (is_file(DIR_IMAGE.$this->config->get('config_logo'))) ? DIR_IMAGE.$this->config->get('config_logo') : '';
