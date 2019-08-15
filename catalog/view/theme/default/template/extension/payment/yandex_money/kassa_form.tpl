@@ -65,7 +65,7 @@
             <input type="hidden" name="kassa_payment_method" value="" />
             <?php if ($kassa->useYandexButton()) : ?>
                 <div <?= $kassa->useInstallmentsButton() ?: 'class="buttons"';?> >
-                    <button id="continue-button" class="yamoney-pay-button"><?= $language->get('yamoney_pay_button_text'); ?></button>
+                    <button id="continue-button" class="yamoney-pay-button" data-loading-text="<?php echo $language->get('text_loading'); ?>"><?= $language->get('yamoney_pay_button_text'); ?></button>
                 </div>
             <?php endif; ?>
         <?php else: ?>
@@ -79,7 +79,7 @@
                         <img src="<?php echo $image_base_path . '/' . $method; ?>.png" alt="<?php echo $text_method_installments; ?>" />
                         <?php echo $text_method_installments;?>
                     </label>
-                <?else: ?>
+                <?php else: ?>
                     <label>
                         <input type="radio" name="kassa_payment_method" value="<?php echo $method ?>"<?php echo ($index == 0 ? ' checked' : ''); ?> />
                         <img src="<?php echo $image_base_path . '/' . $method; ?>.png" alt="<?php echo $language->get($key); ?>" />
@@ -105,7 +105,7 @@
         <?php if (!$kassa->getEPL() || ($kassa->getEPL() && !$kassa->useYandexButton())) : ?>
         <div class="buttons">
             <div class="pull-right">
-                <button class="btn btn-primary" id="continue-button" type="button"><?php echo $language->get('text_continue'); ?></button>
+                <button class="btn btn-primary" id="continue-button" type="button" data-loading-text="<?php echo $language->get('text_loading'); ?>"><?php echo $language->get('text_continue'); ?></button>
             </div>
         </div>
         <?php endif; ?>
@@ -119,7 +119,8 @@
                 jQuery(id).css('display', 'block');
             });
 
-            jQuery('#continue-button').bind('click', function () {
+            var continueButton = jQuery('#continue-button');
+            continueButton.bind('click', function () {
                 var form = jQuery("#yandex-money-payment-form")[0];
                 jQuery.ajax({
                     url: "<?php echo $validate_url; ?>",
@@ -129,6 +130,9 @@
                         paymentType: form.kassa_payment_method.value,
                         qiwiPhone: (form.qiwiPhone ? form.qiwiPhone.value : ''),
                         alphaLogin: (form.alfaLogin ? form.alfaLogin.value : '')
+                    },
+                    beforeSend: function() {
+                        continueButton.button('loading');
                     },
                     success: function (data) {
                         if (data.success) {
