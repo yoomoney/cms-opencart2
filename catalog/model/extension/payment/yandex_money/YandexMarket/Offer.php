@@ -199,7 +199,7 @@ class Offer extends MarketObject
     /**
      * Устанавливает статус товара — «готов к отправке» или «на заказ»
      *
-     * @param bool $value True если товар готов к отправке, false ели доступен только под заказ
+     * @param bool $value True если товар готов к отправке, false если доступен только под заказ
      * @return Offer Инстанс текущего объекта
      */
     public function setAvailable($value)
@@ -479,6 +479,7 @@ class Offer extends MarketObject
     {
         $value = str_replace(array('&amp;', ' '), array('&', '%20'), $value);
         $this->pictures[] = mb_substr(trim($value), 0, 512, 'utf-8');
+
         return $this;
     }
 
