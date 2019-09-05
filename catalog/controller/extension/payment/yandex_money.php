@@ -21,6 +21,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
 {
     /** @var string */
     const MODULE_NAME = 'yandex_money';
+   
     const INSTALLMENTS_MIN_AMOUNT = 3000;
 
     /**
@@ -33,6 +34,14 @@ class ControllerExtensionPaymentYandexMoney extends Controller
      */
     private $_marketModel;
 
+    /**
+     * @var \YandexMoneyModule\YandexMarket\YandexMarket
+     */
+    private $_market;
+
+    /**
+     * @var
+     */
     private $_prefix;
 
     /**
@@ -172,9 +181,6 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         return $this->load->view($this->getTemplatePath($template), $data);
     }
 
-    /**
-     *
-     */
     public function simplePayment()
     {
         $kassa = $this->getModel()->getKassaModel();
@@ -379,9 +385,6 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         $this->response->redirect($this->url->link('checkout/success', '', true));
     }
 
-    /**
-     *
-     */
     public function validate()
     {
         $this->load->language($this->getPrefix().'payment/'.self::MODULE_NAME);
@@ -559,6 +562,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         $this->response->setOutput($this->payment($order, true));
     }
 
+   
     public function productInfo()
     {
         $productId = !empty($this->request->post['id']) ?
@@ -583,32 +587,62 @@ class ControllerExtensionPaymentYandexMoney extends Controller
      */
     public function market()
     {
-        $this->load->model('catalog/product');
-        $this->load->model('tool/image');
-        $this->load->model('localisation/currency');
+        $xml = $this->getMarketXml();
 
+
+        $this->response->addHeader('Content-Type: application/xml; charset=utf-8');
+        $this->response->setOutput($xml);
+    }
+
+    /**
+     * @return string
+     * @throws Exception
+     */
+    private function getMarketXml()
+    {
+        $cache = new Cache("file");
+        $marketXml = $cache->get("ym_market_xml");
+
+        if ( empty($marketXml) ) {
+            $marketXml = $this->generateMarketXml();
+            $cache->set("ym_market_xml", $marketXml);
+        }
+
+        return $marketXml;
+    }
+
+    /**
+     * @return string
+     * @throws Exception
+     */
+    private function generateMarketXml()
+    {
         $this->getModel();
-        $model           = $this->getMarketModel();
-        $categories      = $model->getCategories();
+
+        $marketModel = $this->getMarketModel();
+        $market      = $this->getMarket();
+
+        $categories      = $marketModel->getCategories();
         $allCategoryIds  = array_map(function ($category) {
             return $category['category_id'];
         }, $categories);
+
         $allowCategories = (array)$this->config->get('yandex_money_market_category_list');
         $allowAllCat     = $this->config->get('yandex_money_market_category_all');
+
         if (!empty($allowCategories) || $allowAllCat) {
             $strCategoryIds = $allowAllCat ? null : implode(',', $allowCategories);
         } else {
             die("Need select categories");
         }
-        $products         = $model->getProducts($strCategoryIds, false);
-        $currencies       = $this->model_localisation_currency->getCurrencies();
+
         $offers_currency  = $this->config->get('config_currency');
-        $currency_default = $model->getCurrencyByISO($offers_currency);
+        $currency_default = $marketModel->getCurrencyByISO($offers_currency);
+
         if (!isset($currency_default['value'])) {
-            die("Not exist RUB");
+            die("Not exist " . $offers_currency);
         }
 
-        $market = new \YandexMoneyModule\YandexMarket\YandexMarket();
         $market->setShop(
             $this->config->get('yandex_money_market_shopname'),
             $this->config->get('yandex_money_market_full_shopname'),
@@ -617,6 +651,22 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         $market->getShop()->setPlatform('ya_opencart');
         $market->getShop()->setVersion(VERSION);
 
+        $additionalConditionIds = $this->getConditionIds();
+        $additionalConditionMap = !empty($additionalConditionIds) ?
+            $this->getConditionMap($additionalConditionIds, $allCategoryIds) :
+            null;
+
+
+        $this->setDelivery()
+             ->setCurrencies($currency_default, $offers_currency)
+             ->setCategories($categories, $allowCategories)
+             ->setProducts($currency_default, $strCategoryIds, $additionalConditionMap);
+
+        return $market->getXml($this->config->get('yandex_money_market_simple'));
+    }
+
+    private function setDelivery()
+    {
         for ($index = 1; $index <= 5; $index++) {
             $enabled = $this->getConfig('delivery_enabled', $index);
             if ($enabled !== 'on') {
@@ -633,10 +683,23 @@ class ControllerExtensionPaymentYandexMoney extends Controller
                 continue;
             }
             $orderBefore = $this->getConfig('delivery_order_before', $index);
-            $market->getShop()->addDeliveryOption($cost, $days, $orderBefore);
+            $this->getMarket()->getShop()->addDeliveryOption($cost, $days, $orderBefore);
         }
 
-        $cmsCurrencyIds = array_keys($this->model_localisation_currency->getCurrencies());
+        return $this;
+    }
+
+    /**
+     * @param $currency_default
+     * @param $offers_currency
+     */
+    private function setCurrencies($currency_default, $offers_currency)
+    {
+        $this->load->model('localisation/currency');
+
+        $currencies       = $this->model_localisation_currency->getCurrencies();
+        $cmsCurrencyIds   = array_keys($currencies);
+
         foreach (Currency::getAvailableCurrencies() as $currencyId) {
             if (!in_array($currencyId, $cmsCurrencyIds)) {
                 continue;
@@ -661,39 +724,70 @@ class ControllerExtensionPaymentYandexMoney extends Controller
                     $rate = (float)$currency_default['value'] / (float)$currencies[$currencyId]['value'];
                 }
             }
-            $market->addCurrency($currencyId, $rate, $plus);
-        }
 
+            $this->getMarket()->addCurrency($currencyId, $rate, $plus);
+        }
+        return $this;
+    }
+
+    /**
+     * @param $categories
+     * @param $allowCategories
+     */
+    private function setCategories($categories, $allowCategories)
+    {
         foreach ($categories as $category) {
             if ($this->config->get('yandex_money_market_category_all') !== 'on') {
                 if (!in_array($category['category_id'], $allowCategories)) {
                     continue;
                 }
             }
-            $market->addCategory($category['name'], $category['category_id'], $category['parent_id']);
+            $this->getMarket()->addCategory($category['name'], $category['category_id'], $category['parent_id']);
         }
+        return $this;
+    }
 
-        $additionalConditionIds     = array();
-        $additionalConditionMap     = array();
+   
+    private function getConditionIds()
+    {
         $additionalConditionEnabled = (array)$this->config->get('yandex_money_market_additional_condition_enabled');
+
         foreach ($additionalConditionEnabled as $id => $value) {
             if ($value === 'on') {
                 $additionalConditionIds[] = $id;
             }
         }
-        if (!empty($additionalConditionIds)) {
-            foreach ($additionalConditionIds as $conditionId) {
-                $additionalConditionCategoryIds
-                    = $this->getConfig('additional_condition_for_all_cat', $conditionId) === 'on'
-                    ? $allCategoryIds
-                    : $this->getConfig('additional_condition_categories', $conditionId, array());
-                foreach ($additionalConditionCategoryIds as $categoryId) {
-                    $additionalConditionMap[$categoryId][] = $conditionId;
-                }
+    }
+
+    /**
+     * @param $additionalConditionIds
+     * @param $allCategoryIds
+     */
+    private function getConditionMap($additionalConditionIds, $allCategoryIds)
+    {
+        foreach ($additionalConditionIds as $conditionId) {
+            $additionalConditionCategoryIds
+                = $this->getConfig('additional_condition_for_all_cat', $conditionId) === 'on'
+                ? $allCategoryIds
+                : $this->getConfig('additional_condition_categories', $conditionId, array());
+            foreach ($additionalConditionCategoryIds as $categoryId) {
+                $additionalConditionMap[$categoryId][] = $conditionId;
             }
         }
+    }
+
+    /**
+     * @param $currency_default
+     * @param $strCategoryIds
+     * @param $additionalConditionMap
+     */
+    private function setProducts($currency_default, $strCategoryIds, $additionalConditionMap)
+    {
+        $this->load->model('catalog/product');
+        $this->load->model('tool/image');
 
         $nameTemplate = explode('%', $this->config->get('yandex_money_market_name_template'));
+        $products     = $this->getMarketModel()->getProducts($strCategoryIds, false);
 
         if (class_exists('\Length')) {
             $length = new \Length($this->registry);
@@ -709,7 +803,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
                 continue;
             }
 
-            $offer = $market->createOffer($product['product_id'], $product['category_id']);
+            $offer = $this->getMarket()->createOffer($product['product_id'], $product['category_id']);
             if (!$offer) {
                 continue;
             }
@@ -781,7 +875,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
                 }
             }
 
-            $extraCategories   = $model->getProductCategories($product['product_id']);
+            $extraCategories   = $this->getMarketModel()->getProductCategories($product['product_id']);
             $extraCategories[] = (string)$offer->getCategoryId();
             $allCategories     = array_unique($extraCategories);
 
@@ -806,28 +900,25 @@ class ControllerExtensionPaymentYandexMoney extends Controller
                 }
             }
 
-            if (!$this->makeOfferColorSizeCombination($offer, $product, $market)) {
+            if (!$this->makeOfferColorSizeCombination($offer, $product, $this->getMarket())) {
                 $offer->setPrice($this->formatPrice($offer->getPrice()));
                 $offer->setOldPrice($this->formatPrice($offer->getOldPrice()));
-                $market->addOffer($offer);
+                $this->getMarket()->addOffer($offer);
             }
         }
-        $this->response->addHeader('Content-Type: application/xml; charset=utf-8');
-        $this->response->setOutput($market->getXml($this->config->get('yandex_money_market_simple')));
-    }
 
+        return $this;
+    }
 
     /**
      * @param Offer $commonOffer
      * @param $product
-     * @param YandexMarket $market
      *
      * @return bool
      */
     private function makeOfferColorSizeCombination(
         $commonOffer,
-        $product,
-        $market
+        $product
     ) {
         $colors = array();
         $sizes  = array();
@@ -882,20 +973,24 @@ class ControllerExtensionPaymentYandexMoney extends Controller
                     if ($offer->getOldPrice()) {
                         $offer->setOldPrice($this->formatPrice($offer->getOldPrice()));
                     }
-                    $market->addOffer($offer);
+                    $this->getMarket()->addOffer($offer);
                 }
             } else {
                 $colorOffer->setPrice($this->formatPrice($colorOffer->getPrice()));
                 if ($colorOffer->getOldPrice()) {
                     $colorOffer->setOldPrice($this->formatPrice($colorOffer->getOldPrice()));
                 }
-                $market->addOffer($colorOffer);
+                $this->getMarket()->addOffer($colorOffer);
             }
         }
 
         return true;
     }
 
+    /**
+     * @param $price
+     * @return int|string
+     */
     private function formatPrice($price)
     {
         $price = number_format((float)$price, 2, '.', '');
@@ -979,6 +1074,19 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         }
 
         return $this->_marketModel;
+    }
+
+    /**
+     * @return \YandexMoneyModule\YandexMarket\YandexMarket
+     */
+    private function getMarket()
+    {
+        if ($this->_market === null) {
+            $this->load->model($this->getPrefix().'payment/yandex_money');
+            $this->_market = new \YandexMoneyModule\YandexMarket\YandexMarket();
+        }
+
+        return $this->_market;
     }
 
     /**
