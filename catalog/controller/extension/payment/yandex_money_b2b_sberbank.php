@@ -179,7 +179,7 @@ class ControllerExtensionPaymentYandexMoneyB2bSberbank extends ControllerExtensi
                     ->setMetadata(array(
                         'order_id'       => $orderId,
                         'cms_name'       => 'ya_api_ycms_opencart',
-                        'module_version' => '1.2.9',
+                        'module_version' => '1.2.10',
                     ));
 
             $confirmation = array(
@@ -261,8 +261,8 @@ class ControllerExtensionPaymentYandexMoneyB2bSberbank extends ControllerExtensi
         foreach ($products as $product) {
             $product_info = $this->model_catalog_product->getProduct($product["product_id"]);
             $usedTax      = isset($product_info['tax_class_id']) && isset($taxRates[$product_info['tax_class_id']])
-                ? $taxRates[$product_info['tax_class_id']]
-                : $taxRates['default'];
+                            ? $taxRates[$product_info['tax_class_id']]
+                            : $kassa->getB2bSberbankDefaultTaxRate();
             $usedTaxes[]  = $usedTax;
         }
         $usedTaxes = array_unique($usedTaxes);
