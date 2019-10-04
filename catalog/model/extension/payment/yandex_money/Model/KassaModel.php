@@ -10,35 +10,147 @@ use YandexCheckout\Model\Receipt\PaymentSubject;
 
 class KassaModel extends AbstractPaymentModel
 {
+    /**
+     * @var array
+     */
     private static $_enabledTestMethods = array(
         PaymentMethodType::YANDEX_MONEY => true,
         PaymentMethodType::BANK_CARD    => true,
     );
 
+    /**
+     * @var string
+     */
     protected $shopId;
+
+    /**
+     * @var string
+     */
     protected $password;
+
+    /**
+     * @var bool
+     */
     protected $epl;
+
+    /**
+     * @var bool
+     */
     protected $useYandexButton;
+
+    /**
+     * @var array
+     */
     protected $paymentMethods;
-    protected $sendReceipt;
+
+    /**
+     * @var bool
+     */
+    protected $isSendReceipt;
+
+    /**
+     * @var bool
+     */
+    protected $isSecondReceipt;
+
+    /**
+     * @var int
+     */
+    protected $secondReceiptStatus;
+
+    /**
+     * @var int
+     */
     protected $defaultTaxRate;
+
+    /**
+     * @var array
+     */
     protected $taxRates;
-    protected $log;
-    protected $testMode;
+
+    /**
+     * @var bool
+     */
+    protected $isLog;
+
+    /**
+     * @var bool
+     */
+    protected $isTestMode;
+
+    /**
+     * @var int
+     */
     protected $showInFooter;
+
+    /**
+     * @var bool
+     */
     protected $useInstallmentsButton;
-    protected $enableHoldMode;
+
+    /**
+     * @var bool
+     */
+    protected $isEnableHoldMode;
+
+    /**
+     * @var int
+     */
     protected $holdOrderStatus;
+
+    /**
+     * @var string
+     */
     protected $paymentDescription;
+
+    /**
+     * @var int
+     */
     protected $orderCanceledStatus;
+
+    /**
+     * @var bool
+     */
     protected $addInstallmentsBlock;
+
+    /**
+     * @var int
+     */
     protected $b2bSberbankEnabled;
+
+    /**
+     * @var int
+     */
     protected $b2bSberbankPaymentPurpose;
+
+    /**
+     * @var int
+     */
     protected $b2bSberbankDefaultTaxRate;
+
+    /**
+     * @var int
+     */
     protected $b2bTaxRates;
+
+    /**
+     * @var string
+     */
     protected $defaultPaymentMode;
+
+    /**
+     * @var string
+     */
     protected $defaultPaymentSubject;
+
+    /**
+     * @var string
+     */
     protected $defaultDeliveryPaymentMode;
+
+    /**
+     * @var string
+     */
     protected $defaultDeliveryPaymentSubject;
 
 
@@ -57,30 +169,32 @@ class KassaModel extends AbstractPaymentModel
         $this->useYandexButton       = (bool)$this->getConfigValue('use_yandex_button');
         $this->useInstallmentsButton = (bool)$this->getConfigValue('use_installments_button');
         $this->addInstallmentsBlock  = (bool)$this->getConfigValue('add_installments_block');
-        $this->enableHoldMode        = (bool)$this->getConfigValue('enable_hold_mode');
+        $this->isEnableHoldMode      = (bool)$this->getConfigValue('enable_hold_mode');
         $this->holdOrderStatus       = $this->getConfigValue('hold_order_status');
         $this->paymentDescription    = $this->getConfigValue('payment_description');
         $this->orderCanceledStatus   = $this->getConfigValue('cancel_order_status');
 
-        $this->testMode = false;
+        $this->isTestMode = false;
         if ($this->enabled && strncmp('test_', $this->password, 5) === 0) {
-            $this->testMode = true;
+            $this->isTestMode = true;
         }
 
         $this->paymentMethods = array();
         foreach (PaymentMethodType::getEnabledValues() as $value) {
             $property = 'payment_method_'.$value;
             $enabled  = (bool)$this->getConfigValue($property);
-            if ($value != PaymentMethodType::B2B_SBERBANK && (!$this->testMode || array_key_exists($value,
+            if ($value != PaymentMethodType::B2B_SBERBANK && (!$this->isTestMode || array_key_exists($value,
                         self::$_enabledTestMethods))
             ) {
                 $this->paymentMethods[$value] = $enabled;
             }
         }
 
-        $this->sendReceipt    = (bool)$this->getConfigValue('send_receipt');
-        $this->defaultTaxRate = (int)$this->getConfigValue('tax_rate_default');
-        $this->log            = (bool)$this->getConfigValue('debug_log');
+        $this->isSendReceipt       = (bool)$this->getConfigValue('send_receipt');
+        $this->isSecondReceipt     = (bool)$this->getConfigValue('second_receipt_enable');
+        $this->secondReceiptStatus = (int)$this->getConfigValue('second_receipt_status');
+        $this->defaultTaxRate      = (int)$this->getConfigValue('tax_rate_default');
+        $this->isLog               = (bool)$this->getConfigValue('debug_log');
 
         $this->taxRates = array();
         $tmp            = $this->getConfigValue('tax_rates');
@@ -107,51 +221,81 @@ class KassaModel extends AbstractPaymentModel
         $this->defaultDeliveryPaymentSubject = $this->getConfigValue('default_delivery_payment_subject');
     }
 
+    /**
+     * @return bool
+     */
     public function isTestMode()
     {
-        return $this->testMode;
+        return $this->isTestMode;
     }
 
+    /**
+     * @return string
+     */
     public function getShopId()
     {
         return $this->shopId;
     }
 
+    /**
+     * @return string
+     */
     public function getPassword()
     {
         return $this->password;
     }
 
+    /**
+     * @return bool
+     */
     public function getEPL()
     {
-        return !$this->testMode && $this->epl;
+        return !$this->isTestMode && $this->epl;
     }
 
+    /**
+     * @return bool
+     */
     public function useYandexButton()
     {
         return $this->useYandexButton;
     }
 
+    /**
+     * @return bool
+     */
     public function useInstallmentsButton()
     {
         return $this->useInstallmentsButton;
     }
 
+    /**
+     * @return bool
+     */
     public function getAddInstallmentsBlock()
     {
         return $this->addInstallmentsBlock;
     }
 
+    /**
+     * @return bool
+     */
     public function showInstallmentsBlock()
     {
         return $this->useInstallmentsButton() && $this->getAddInstallmentsBlock();
     }
 
+    /**
+     * @return array
+     */
     public function getPaymentMethods()
     {
         return $this->paymentMethods;
     }
 
+    /**
+     * @return array
+     */
     public function getEnabledPaymentMethods()
     {
         $result = array();
@@ -164,31 +308,67 @@ class KassaModel extends AbstractPaymentModel
         return $result;
     }
 
+    /**
+     * @param $paymentMethod
+     * @return bool
+     */
     public function isPaymentMethodEnabled($paymentMethod)
     {
         return isset($this->paymentMethods[$paymentMethod]) && $this->paymentMethods[$paymentMethod];
     }
 
-    public function sendReceipt()
+    /**
+     * @return bool
+     */
+    public function isSendReceipt()
     {
-        return $this->sendReceipt;
+        return $this->isSendReceipt;
     }
 
+    /**
+     * @return bool
+     */
+    public function isSecondReceipt()
+    {
+        return $this->isSecondReceipt;
+    }
+
+    /**
+     * @return int
+     */
+    public function getSecondReceiptStatus()
+    {
+        return $this->secondReceiptStatus;
+    }
+
+    /**
+     * @return array
+     */
     public function getTaxRateList()
     {
         return array(1, 2, 3, 4, 5, 6);
     }
 
+    /**
+     * @return array
+     */
     public function getB2bRateList()
     {
         return array(VatDataType::UNTAXED, VatDataRate::RATE_7, VatDataRate::RATE_10, VatDataRate::RATE_18);
     }
 
+    /**
+     * @return int
+     */
     public function getDefaultTaxRate()
     {
         return $this->defaultTaxRate;
     }
 
+    /**
+     * @param $shopTaxRateId
+     * @return int|mixed
+     */
     public function getTaxRateId($shopTaxRateId)
     {
         if (isset($this->taxRates[$shopTaxRateId])) {
@@ -198,6 +378,10 @@ class KassaModel extends AbstractPaymentModel
         return $this->defaultTaxRate;
     }
 
+    /**
+     * @param $shopTaxRateId
+     * @return int
+     */
     public function getB2bTaxRateId($shopTaxRateId)
     {
         if (isset($this->b2bTaxRates[$shopTaxRateId])) {
@@ -207,16 +391,25 @@ class KassaModel extends AbstractPaymentModel
         return $this->b2bSberbankDefaultTaxRate;
     }
 
+    /**
+     * @return array
+     */
     public function getTaxRates()
     {
         return $this->taxRates;
     }
 
+    /**
+     * @return bool
+     */
     public function getDebugLog()
     {
-        return $this->log;
+        return $this->isLog;
     }
 
+    /**
+     * @return int
+     */
     public function getShowLinkInFooter()
     {
         return $this->showInFooter;
@@ -261,7 +454,7 @@ class KassaModel extends AbstractPaymentModel
      */
     public function getEnableHoldMode()
     {
-        return $this->enableHoldMode;
+        return $this->isEnableHoldMode;
     }
 
     /**
@@ -272,9 +465,13 @@ class KassaModel extends AbstractPaymentModel
         return $this->holdOrderStatus;
     }
 
+    /**
+     * @param $paymentMethod
+     * @return bool
+     */
     public function getCaptureValue($paymentMethod)
     {
-        return !($this->enableHoldMode && in_array($paymentMethod, array('', PaymentMethodType::BANK_CARD)));
+        return !($this->isEnableHoldMode && in_array($paymentMethod, array('', PaymentMethodType::BANK_CARD)));
     }
 
     /**
@@ -357,6 +554,9 @@ class KassaModel extends AbstractPaymentModel
         return $this->defaultDeliveryPaymentSubject;
     }
 
+    /**
+     * @return array
+     */
     public function getPaymentModeEnum()
     {
         return array(
@@ -370,6 +570,9 @@ class KassaModel extends AbstractPaymentModel
         );
     }
 
+    /**
+     * @return array
+     */
     public function getPaymentSubjectEnum()
     {
         return array(

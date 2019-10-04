@@ -229,7 +229,7 @@
         <div class="form-group">
             <div class="col-sm-10 col-sm-offset-2">
                 <label>
-                    <input type="checkbox" id="kassa-send-receipt" name="yandex_money_kassa_send_receipt" value="on"<?php echo $kassa->sendReceipt() ? ' checked' : ''; ?> />
+                    <input type="checkbox" id="kassa-send-receipt" name="yandex_money_kassa_send_receipt" value="on"<?php echo $kassa->isSendReceipt() ? ' checked' : ''; ?> />
                     <?php echo $language->get('kassa_send_receipt_label'); ?>
                 </label>
             </div>
@@ -333,6 +333,46 @@
                         <option value="<?php echo $id; ?>"<?php echo $kassa->getDefaultDeliveryPaymentSubject() == $id ? ' selected' : ''; ?>><?php echo $name; ?></option>
                         <?php endforeach; ?>
                     </select>
+                </div>
+            </div>
+
+            <div class="form-group receipt-only">
+
+                <label class="col-sm-2 control-label">
+                    <?= $language->get('kassa_second_receipt_header');?>
+                </label>
+                <div class="col-sm-10">
+                    <label style="font-weight: 600; padding-top: 9px; cursor: pointer" class="form-check-label">
+                        <input style="vertical-align:middle;margin:-2px 3px 0 0;cursor: pointer" type="radio" name="yandex_money_kassa_second_receipt_enable" value="1" class="form-check-input" <?= !$kassa->isSecondReceipt() ?: "checked"?>/>
+                        <?php echo $language->get('kassa_second_receipt_enable'); ?>
+                    </label>
+                    <label style="font-weight: 600; margin-left: 10px; cursor: pointer" class="form-check-label">
+                        <input style="vertical-align:middle;margin:-2px 3px 0 0;cursor: pointer" type="radio" name="yandex_money_kassa_second_receipt_enable" value="0" class="form-check-input" <?= $kassa->isSecondReceipt() ?: "checked"?>/>
+                        <?php echo $language->get('kassa_second_receipt_disable'); ?>
+                    </label>
+                </div>
+                <div class="col-sm-10 col-sm-offset-2 second-receipt-wrapper">
+                    <p><?php echo $language->get('kassa_second_receipt_description'); ?></p>
+                    <table class="table table-hover">
+                        <tbody>
+                        <tr>
+                            <td style="border: none">
+                                <label class="control-label">
+                                    <?= $language->get('kassa_second_receipt_enable_label'); ?>
+                                </label>
+                            </td>
+                            <td style="border: none">
+                                <select name="yandex_money_kassa_second_receipt_status" class="form-control col-xl-4 col-md-4" data-toggle="tooltip" data-placement="left" title="">
+                                    <?php foreach ($orderStatuses as $id => $status) : ?>
+                                    <option value="<?php echo $id; ?>"<?php echo ($id != $kassa->getSecondReceiptStatus() ?: ' selected="selected"'); ?>><?php echo htmlspecialchars($status); ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+
+                    <p class="help-block"><?php echo $language->get('kassa_second_receipt_help_info'); ?></p>
                 </div>
             </div>
         </div>
@@ -472,70 +512,83 @@
 
 <script type="text/javascript">
 
-jQuery(document).ready(function () {
+    jQuery(document).ready(function () {
 
-    function togglePaymentMode(value) {
-        if (value == 'kassa') {
-            jQuery('#kassa-payment-mode-kassa-container').slideDown();
-            jQuery('#kassa-payment-mode-shop-container').slideUp();
-        } else {
-            jQuery('#kassa-payment-mode-kassa-container').slideUp();
-            jQuery('#kassa-payment-mode-shop-container').slideDown();
+        function togglePaymentMode(value) {
+            if (value == 'kassa') {
+                jQuery('#kassa-payment-mode-kassa-container').slideDown();
+                jQuery('#kassa-payment-mode-shop-container').slideUp();
+            } else {
+                jQuery('#kassa-payment-mode-kassa-container').slideUp();
+                jQuery('#kassa-payment-mode-shop-container').slideDown();
+            }
         }
-    }
 
-    function toggleSendReceipt(value) {
-        if (value) {
-            jQuery('.receipt-only').slideDown();
-        } else {
-            jQuery('.receipt-only').slideUp();
+        function toggleSendReceipt(value) {
+            if (value) {
+                jQuery('.receipt-only').slideDown();
+            } else {
+                jQuery('.receipt-only').slideUp();
+            }
         }
-    }
 
-    function toggleInvoice(value) {
-        if (value) {
-            jQuery('.invoice-only').slideDown();
-        } else {
-            jQuery('.invoice-only').slideUp();
+        function toggleSecondReceipt(value) {
+            if (value == 1) {
+                jQuery('.second-receipt-wrapper').slideDown();
+            } else {
+                jQuery('.second-receipt-wrapper').slideUp();
+            }
         }
-    }
 
-    function toggleStatuses(value) {
-        if (value) {
-            jQuery('.statuses-wrapper').slideDown();
-        } else {
-            jQuery('.statuses-wrapper').slideUp();
+        function toggleInvoice(value) {
+            if (value) {
+                jQuery('.invoice-only').slideDown();
+            } else {
+                jQuery('.invoice-only').slideUp();
+            }
         }
-    }
 
-    var form = document.getElementById('form-payment-yandex-money');
-    togglePaymentMode(form.yandex_money_kassa_payment_mode.value);
-    toggleSendReceipt(form.yandex_money_kassa_send_receipt.checked);
-    toggleInvoice(form.yandex_money_kassa_invoice.checked);
-    toggleStatuses(form.yandex_money_kassa_enable_hold_mode.checked);
+        function toggleStatuses(value) {
+            if (value) {
+                jQuery('.statuses-wrapper').slideDown();
+            } else {
+                jQuery('.statuses-wrapper').slideUp();
+            }
+        }
 
-    jQuery('input[name=yandex_money_kassa_payment_mode]').click(function () {
-        togglePaymentMode(form.yandex_money_kassa_payment_mode.value)
-    });
+        var form = document.getElementById('form-payment-yandex-money');
+        togglePaymentMode(form.yandex_money_kassa_payment_mode.value);
+        toggleSendReceipt(form.yandex_money_kassa_send_receipt.checked);
+        toggleSecondReceipt(form.yandex_money_kassa_second_receipt_enable.value);
+        toggleInvoice(form.yandex_money_kassa_invoice.checked);
+        toggleStatuses(form.yandex_money_kassa_enable_hold_mode.checked);
 
-    jQuery('#kassa-send-receipt').bind('change', function () {
-        toggleSendReceipt(this.checked);
-    });
+        jQuery('input[name=yandex_money_kassa_payment_mode]').click(function () {
+            togglePaymentMode(form.yandex_money_kassa_payment_mode.value)
+        });
 
-    jQuery('#kassa-invoice').bind('change', function () {
-        toggleInvoice(this.checked);
-    });
+        jQuery('#kassa-send-receipt').bind('change', function () {
+            toggleSendReceipt(this.checked);
+        });
 
-    jQuery('#kassa-enable-hold-mode').bind('change', function () {
-        toggleStatuses(this.checked);
-    });
+        jQuery('input[name=yandex_money_kassa_second_receipt_enable]').bind('change', function () {
+            toggleSecondReceipt(this.value);
+        });
 
-    jQuery('input[name=yandex_money_kassa_add_installments_block]').on('change', function () {
-        var checked = this.checked;
-        jQuery('input[name=yandex_money_kassa_add_installments_block]').each(function() {
-            this.checked = checked;
+        jQuery('#kassa-invoice').bind('change', function () {
+            toggleInvoice(this.checked);
+        });
+
+        jQuery('#kassa-enable-hold-mode').bind('change', function () {
+            toggleStatuses(this.checked);
+        });
+
+        jQuery('input[name=yandex_money_kassa_add_installments_block]').on('change', function () {
+            var checked = this.checked;
+            jQuery('input[name=yandex_money_kassa_add_installments_block]').each(function() {
+                this.checked = checked;
+            });
         });
     });
-});
 
 </script>
