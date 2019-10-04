@@ -52,6 +52,13 @@ $_['kassa_default_display_name']     = 'Yandex.Checkout (bank cards, e-money, et
 
 $_['kassa_send_receipt_label']           = 'Transmit details for receipts to Yandex.Checkout (Federal Law 54-FZ)';
 $_['kassa_send_receipt_tax_rate_title']  = 'VAT';
+$_['kassa_second_receipt_header']        = 'Второй чек';
+$_['kassa_second_receipt_enable']        = 'Включен';
+$_['kassa_second_receipt_disable']       = 'Отключен';
+$_['kassa_second_receipt_description']   = 'Два чека нужно формировать, если покупатель вносит предоплату и потом получает товар или услугу. Первый чек — когда деньги поступают вам на счёт, второй — при отгрузке товаров или выполнении услуг.<br> <a href="#">Читать про второй чек в Яндекс.Кассе</a>';
+$_['kassa_second_receipt_enable_label']  = 'Формировать второй чек при переходе заказа в статус';
+$_['kassa_second_receipt_help_info']     = 'Если в заказе будут позиции с признаками «Полная предоплата» — второй чек отправится автоматически, когда заказ перейдёт в выбранный статус.';
+$_['kassa_second_receipt_history_info']  = 'Отправлен второй чек. Сумма %s рублей.';
 $_['kassa_tax_rate_default_label']       = 'Default rate';
 $_['kassa_tax_rate_default_description'] = 'The default rate applies if another rate is not set on the product\'s page.';
 $_['kassa_tax_rate_1_label']             = 'Without VAT';

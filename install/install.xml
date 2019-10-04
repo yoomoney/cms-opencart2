@@ -29,10 +29,6 @@
     <!-- загружаем вместе с заказами код способа оплаты -->
     <file path="admin/model/sale/order.php">
         <operation>
-            <search regex="true"><![CDATA[~o.date_added, o.date_modified FROM~]]></search>
-            <add><![CDATA[o.date_added, o.date_modified, o.payment_code, o.email, o.order_status_id FROM]]></add>
-        </operation>
-        <operation>
             <search regex="true"><![CDATA[/\$query\s=\s\$this->db->query\(\$sql\);\s+return\s\$query->rows;/]]></search>
             <add><![CDATA[
         $query = $this->db->query($sql);
@@ -64,6 +60,10 @@
 
         return array_values($result);
             ]]></add>
+        </operation>
+        <operation>
+            <search regex="true"><![CDATA[~o.date_added, o.date_modified FROM~]]></search>
+            <add><![CDATA[o.date_added, o.date_modified, o.payment_code, o.email, o.order_status_id FROM]]></add>
         </operation>
     </file>
     <file path="admin/language/{english,russian,en-gb,ru-ru}/sale/order.php">
@@ -365,6 +365,24 @@
                         }]}}});
                     });
                 //--></script>
+            ]]></add>
+        </operation>
+    </file>
+
+    <file path="catalog/model/checkout/order.php">
+        <operation>
+            <search><![CDATA[// Update the DB with the new statuses]]></search>
+            <add position="after"><![CDATA[
+                $prefix = (version_compare(VERSION, '2.3.0', '>=')) ? 'extension/' : '';
+                $this->load->model($prefix.'payment/yandex_money');
+
+                if ($prefix === '') {
+                    $model = $this->model_payment_yandex_money;
+                } else {
+                    $model = $this->model_extension_payment_yandex_money;
+                }
+
+                $model->hookOrderStatusChange($order_id, $order_status_id);
             ]]></add>
         </operation>
     </file>

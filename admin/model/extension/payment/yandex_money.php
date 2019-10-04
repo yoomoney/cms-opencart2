@@ -16,6 +16,7 @@ class ModelExtensionPaymentYandexMoney extends Model
     public function install()
     {
         $this->log('info', 'install yandex_money module');
+
         $this->db->query('
             CREATE TABLE IF NOT EXISTS `'.DB_PREFIX.'ya_money_payment` (
                 `order_id`          INTEGER  NOT NULL,
