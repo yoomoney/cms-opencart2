@@ -761,6 +761,7 @@ class ModelExtensionPaymentYandexMoney extends Model
             $this->load->model('localisation/stock_status');
             $this->load->model('localisation/tax_class');
             $this->load->model('catalog/category');
+            $this->load->model('catalog/option');
             $this->load->language('catalog/product');
             $this->market = new YandexMoneyMarketModel($this->config, $this->db, $this->language,
                 $this->model_localisation_stock_status,
