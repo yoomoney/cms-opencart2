@@ -382,7 +382,9 @@
                     $model = $this->model_extension_payment_yandex_money;
                 }
 
-                $model->hookOrderStatusChange($order_id, $order_status_id);
+                if (method_exists($model, 'hookOrderStatusChange')) {
+                    $model->hookOrderStatusChange($order_id, $order_status_id);
+                }
             ]]></add>
         </operation>
     </file>

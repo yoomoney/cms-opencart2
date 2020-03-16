@@ -43,6 +43,7 @@ $_['kassa_payment_method_yandex_money'] = 'Yandex.Money';
 $_['kassa_payment_method_mobile']       = 'Direct carrier billing';
 $_['kassa_payment_method_installments'] = 'Installments';
 $_['kassa_payment_method_tinkoff_bank'] = 'Tinkoff online banking';
+$_['kassa_payment_method_widget']       = 'Payment widget from Yandex.Checkout (cards, Apple Pay and Google Play)';
 
 $_['kassa_payment_method_error_required'] = 'Please select at least one option from the list';
 
