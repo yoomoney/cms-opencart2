@@ -1,9 +1,11 @@
 <?php
 
+use YandexCheckout\Model\ConfirmationType;
 use YandexCheckout\Model\Notification\NotificationSucceeded;
 use YandexCheckout\Model\Notification\NotificationWaitingForCapture;
 use YandexCheckout\Model\PaymentMethodType;
 use YandexCheckout\Model\PaymentStatus;
+use YandexMoneyModule\Model\KassaModel;
 use YandexMoneyModule\YandexMarket\Currency;
 use YandexMoneyModule\YandexMarket\Offer;
 use YandexMoneyModule\YandexMarket\YandexMarket;
@@ -84,6 +86,9 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         $this->load->language($this->getPrefix().'payment/'.self::MODULE_NAME);
         $this->document->setTitle($this->language->get('heading_title'));
 
+        if (isset($this->session->data['confirmation_token'])) {
+            $this->session->data['confirmation_token'] = null;
+        }
         $model = $this->getModel()->getPaymentModel();
         if ($model === null) {
             $this->failure('Yandex.Kassa module disabled');
@@ -109,7 +114,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         $data['sum']    = $amount;
         if ($this->getModel()->getKassaModel()->isEnabled()) {
             if (self::INSTALLMENTS_MIN_AMOUNT > $amount) {
-                /** @var \YandexMoneyModule\Model\KassaModel $model */
+                /** @var KassaModel $model */
                 $paymentMethods = $model->getPaymentMethods();
                 unset($paymentMethods[PaymentMethodType::INSTALLMENTS]);
                 $model->setPaymentMethods($paymentMethods);
@@ -237,7 +242,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             $this->failure($this->language->get('log_text_payment_create_failed'));
         }
         $confirmation = $payment->getConfirmation();
-        if ($confirmation !== null && $confirmation->getType() === \YandexCheckout\Model\ConfirmationType::REDIRECT) {
+        if ($confirmation !== null && $confirmation->getType() === ConfirmationType::REDIRECT) {
             $this->response->redirect($confirmation->getConfirmationUrl());
         }
         $this->session->data['error'] = $this->language->get('log_text_payment_init_failed');
@@ -296,6 +301,18 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             $this->jsonError('Payment method not specified');
         }
         $paymentMethod = $this->request->get['paymentType'];
+        $successUrl = $this->url->link('checkout/success', '', true);
+
+        if ($paymentMethod === KassaModel::CUSTOM_PAYMENT_METHOD_WIDGET
+            && !empty($this->session->data['confirmation_token'])) {
+            echo json_encode(array(
+                'success' => true,
+                'redirect' => $successUrl,
+                'token' => $this->session->data['confirmation_token'],
+            ));
+            exit();
+        }
+
         if ($kassa->getEPL()) {
             if (!empty($paymentMethod) && $paymentMethod !== PaymentMethodType::INSTALLMENTS) {
                 $this->jsonError('Invalid payment method');
@@ -322,11 +339,17 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         }
         $result       = array(
             'success'  => true,
-            'redirect' => $this->url->link('checkout/success', '', true),
+            'redirect' => $successUrl,
         );
         $confirmation = $payment->getConfirmation();
-        if ($confirmation !== null && $confirmation->getType() === \YandexCheckout\Model\ConfirmationType::REDIRECT) {
-            $result['redirect'] = $confirmation->getConfirmationUrl();
+
+        if ($confirmation !== null) {
+            if ($confirmation->getType() === ConfirmationType::REDIRECT) {
+                $result['redirect'] = $confirmation->getConfirmationUrl();
+            } elseif ($confirmation->getType() === ConfirmationType::EMBEDDED) {
+                $result['token'] = $confirmation->getConfirmationToken();
+                $this->session->data['confirmation_token'] = $result['token'];
+            }
         }
 
         if ($kassa->getCreateOrderBeforeRedirect()) {
@@ -413,6 +436,19 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         } else {
             $this->jsonError('Invalid payment type');
         }
+    }
+
+    public function resetToken()
+    {
+        $success = false;
+        if (isset($this->session->data['confirmation_token'])) {
+            $this->session->data['confirmation_token'] = null;
+            $success = true;
+        }
+
+        echo json_encode(array(
+            'success' => $success,
+        ));
     }
 
     /**

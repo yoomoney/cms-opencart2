@@ -10,12 +10,18 @@ use YandexCheckout\Model\Receipt\PaymentSubject;
 
 class KassaModel extends AbstractPaymentModel
 {
+    const CUSTOM_PAYMENT_METHOD_WIDGET = 'widget';
     /**
      * @var array
      */
     private static $_enabledTestMethods = array(
         PaymentMethodType::YANDEX_MONEY => true,
         PaymentMethodType::BANK_CARD    => true,
+    );
+
+    private static $_disabledPaymentMethods = array(
+        PaymentMethodType::B2B_SBERBANK,
+        PaymentMethodType::WECHAT,
     );
 
     /**
@@ -179,11 +185,16 @@ class KassaModel extends AbstractPaymentModel
             $this->isTestMode = true;
         }
 
+        $enabledPaymentMethods = array_merge(
+            array(self::CUSTOM_PAYMENT_METHOD_WIDGET),
+            PaymentMethodType::getEnabledValues()
+        );
+
         $this->paymentMethods = array();
-        foreach (PaymentMethodType::getEnabledValues() as $value) {
+        foreach ($enabledPaymentMethods as $value) {
             $property = 'payment_method_'.$value;
             $enabled  = (bool)$this->getConfigValue($property);
-            if ($value != PaymentMethodType::B2B_SBERBANK && (!$this->isTestMode || array_key_exists($value,
+            if (!in_array($value, self::$_disabledPaymentMethods) && (!$this->isTestMode || array_key_exists($value,
                         self::$_enabledTestMethods))
             ) {
                 $this->paymentMethods[$value] = $enabled;
@@ -427,6 +438,7 @@ class KassaModel extends AbstractPaymentModel
         $templateData['image_base_path'] = HTTPS_SERVER.'image/payment/yandex_money';
         $prefix                          = version_compare(VERSION, '2.3.0') >= 0 ? 'extension/' : '';
         $templateData['validate_url']    = $controller->url->link($prefix.'payment/yandex_money/create', '', true);
+        $templateData['reset_token_url']    = $controller->url->link($prefix.'payment/yandex_money/resetToken', '', true);
 
         $templateData['amount']         = $orderInfo['total'];
         $templateData['comment']        = $orderInfo['comment'];

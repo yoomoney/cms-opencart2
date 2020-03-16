@@ -110,6 +110,8 @@
         </div>
         <?php endif; ?>
     </form>
+    <div id="payment-form"></div>
+    <script src="https://kassa.yandex.ru/checkout-ui/v2.js"></script>
     <script type="text/javascript"><!--
         $(document).ready(function() {
             var paymentType = jQuery('input[name=kassa_payment_method]');
@@ -121,31 +123,9 @@
 
             var continueButton = jQuery('#continue-button');
             continueButton.bind('click', function () {
-                var form = jQuery("#yandex-money-payment-form")[0];
-                jQuery.ajax({
-                    url: "<?php echo $validate_url; ?>",
-                    dataType: "json",
-                    method: "GET",
-                    data: {
-                        paymentType: form.kassa_payment_method.value,
-                        qiwiPhone: (form.qiwiPhone ? form.qiwiPhone.value : ''),
-                        alphaLogin: (form.alfaLogin ? form.alfaLogin.value : '')
-                    },
-                    beforeSend: function() {
-                        continueButton.button('loading');
-                    },
-                    success: function (data) {
-                        if (data.success) {
-                            document.location = data.redirect;
-                        } else {
-                            onValidateError(data.error);
-                        }
-                    },
-                    failure: function () {
-                        onValidateError('Failed to create payment');
-                    }
-                });
+               createPayment();
             });
+
 
             jQuery('.yandex-money-payment-form-installments').on('submit', function (e) {
                 e.preventDefault();
@@ -170,6 +150,67 @@
                     }
                 });
             });
+
+            function createPayment() {
+                var form = jQuery("#yandex-money-payment-form")[0];
+
+                jQuery.ajax({
+                    url: "<?php echo $validate_url; ?>",
+                    dataType: "json",
+                    method: "GET",
+                    data: {
+                        paymentType: form.kassa_payment_method.value,
+                        qiwiPhone: (form.qiwiPhone ? form.qiwiPhone.value : ''),
+                        alphaLogin: (form.alfaLogin ? form.alfaLogin.value : '')
+                    },
+                    beforeSend: function() {
+                        continueButton.button('loading');
+                    },
+                    success: function (data) {
+                        if (data.success) {
+                            if (data.token) {
+                                jQuery('#payment-form').empty();
+                                initWidget(data);
+                            } else {
+                                document.location = data.redirect;
+                            }
+                            continueButton.button('reset');
+                        } else {
+                            onValidateError(data.error);
+                        }
+                    },
+                    failure: function () {
+                        onValidateError('Failed to create payment');
+                    }
+                });
+            }
+
+            function initWidget(data) {
+                const checkout = new window.YandexCheckout({
+                    confirmation_token: data.token,
+                    return_url: data.redirect,
+                    embedded_3ds: true,
+                    error_callback(error) {
+                        if (error.error === 'token_expired') {
+                            resetToken();
+                            createPayment();
+                        }
+                    }
+                });
+
+                checkout.render('payment-form');
+            }
+
+            function resetToken() {
+                jQuery.ajax({
+                    url: "<?php echo $reset_token_url; ?>",
+                    dataType: "json",
+                    method: "GET",
+                    failure: function () {
+                        onValidateError("Failed to reset token");
+                    }
+                });
+            }
 
             function onValidateError(errorMessage) {
                 var warning = jQuery('#yandex-money-payment-form .alert');
