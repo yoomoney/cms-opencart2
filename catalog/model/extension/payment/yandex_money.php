@@ -1,10 +1,21 @@
 <?php
 
+use YandexCheckout\Client;
 use YandexCheckout\Model\ConfirmationType;
+use YandexCheckout\Model\CurrencyCode;
 use YandexCheckout\Model\Payment;
 use YandexCheckout\Model\PaymentInterface;
 use YandexCheckout\Model\PaymentMethodType;
+use YandexCheckout\Model\PaymentStatus;
+use YandexCheckout\Request\Payments\CreatePaymentRequest;
+use YandexCheckout\Request\Payments\CreatePaymentRequestBuilder;
+use YandexCheckout\Request\Payments\Payment\CreateCaptureRequest;
+use YandexMoneyModule\Model\AbstractPaymentModel;
+use YandexMoneyModule\Model\BillingModel;
+use YandexMoneyModule\Model\CBRAgent;
 use YandexMoneyModule\Model\KassaModel;
+use YandexMoneyModule\Model\KassaSecondReceiptModel;
+use YandexMoneyModule\Model\WalletModel;
 
 require_once dirname(__FILE__).DIRECTORY_SEPARATOR.'yandex_money'.DIRECTORY_SEPARATOR.'autoload.php';
 
@@ -16,7 +27,7 @@ require_once dirname(__FILE__).DIRECTORY_SEPARATOR.'yandex_money'.DIRECTORY_SEPA
  */
 class ModelExtensionPaymentYandexMoney extends Model
 {
-    const MODULE_VERSION = '1.3.3';
+    const MODULE_VERSION = '1.4.0';
 
     private $kassaModel;
     private $walletModel;
@@ -37,31 +48,31 @@ class ModelExtensionPaymentYandexMoney extends Model
     }
 
     /**
-     * @return \YandexMoneyModule\Model\WalletModel
+     * @return WalletModel
      */
     public function getWalletModel()
     {
         if ($this->walletModel === null) {
-            $this->walletModel = new \YandexMoneyModule\Model\WalletModel($this->config);
+            $this->walletModel = new WalletModel($this->config);
         }
 
         return $this->walletModel;
     }
 
     /**
-     * @return \YandexMoneyModule\Model\BillingModel
+     * @return BillingModel
      */
     public function getBillingModel()
     {
         if ($this->billingModel === null) {
-            $this->billingModel = new \YandexMoneyModule\Model\BillingModel($this->config);
+            $this->billingModel = new BillingModel($this->config);
         }
 
         return $this->billingModel;
     }
 
     /**
-     * @return \YandexMoneyModule\Model\AbstractPaymentModel|null
+     * @return AbstractPaymentModel|null
      */
     public function getPaymentModel()
     {
@@ -79,7 +90,7 @@ class ModelExtensionPaymentYandexMoney extends Model
     protected function getClient()
     {
         if ($this->client === null) {
-            $this->client = new \YandexCheckout\Client();
+            $this->client = new Client();
             $this->client->setAuth(
                 $this->getKassaModel()->getShopId(),
                 $this->getKassaModel()->getPassword()
@@ -124,7 +135,7 @@ class ModelExtensionPaymentYandexMoney extends Model
      * @param int $orderId
      * @param string $paymentMethod
      *
-     * @return \YandexCheckout\Model\PaymentInterface
+     * @return PaymentInterface
      */
     public function createPayment($orderId, $paymentMethod)
     {
@@ -138,20 +149,36 @@ class ModelExtensionPaymentYandexMoney extends Model
             $this->url->link($this->getPrefix().'payment/yandex_money/confirm', 'order_id='.$orderId, true)
         );
 
-        $amount = $this->currency->format($orderInfo['total'], 'RUB', '', false);
+        $kassaCurrency = $this->getKassaModel()->getCurrency();
+        $this->log('debug', "AMOUNT CALC \n{data}", array(
+            'data' => json_encode(array(
+                'order_total' => $orderInfo['total'],
+                'kassa_currency' => $kassaCurrency,
+                'has_currency' => $this->currency->has($kassaCurrency) ? 'true' : 'false',
+            ), JSON_PRETTY_PRINT)));
+
+        if ($this->currency->has($kassaCurrency)) {
+            $amount = $this->currency->format($orderInfo['total'], $kassaCurrency, '', false);
+        } else {
+            if ($this->getKassaModel()->getCurrencyConvert()) {
+                $amount = $this->convertFromCbrf($orderInfo, $kassaCurrency);
+            } else {
+                $amount = $orderInfo['total'];
+            }
+        }
 
         try {
-            $builder      = \YandexCheckout\Request\Payments\CreatePaymentRequest::builder();
+            $builder      = CreatePaymentRequest::builder();
             $captureValue = $this->getKassaModel()->getCaptureValue($paymentMethod);
             $description  = $this->generatePaymentDescription($orderInfo);
             $builder->setAmount($amount)
-                    ->setCurrency('RUB')
+                    ->setCurrency($kassaCurrency)
                     ->setClientIp($_SERVER['REMOTE_ADDR'])
                     ->setCapture($captureValue)
                     ->setDescription($description)
                     ->setMetadata(array(
                         'order_id'       => $orderId,
-                        'cms_name'       => 'ya_api_ycms_opencart',
+                        'cms_name'       => 'ya_api_ycms_opencart2',
                         'module_version' => self::MODULE_VERSION,
                     ));
 
@@ -221,7 +248,7 @@ class ModelExtensionPaymentYandexMoney extends Model
         $amount = $this->currency->format($order['total'], 'RUB', '', false);
 
         try {
-            $builder = \YandexCheckout\Request\Payments\CreatePaymentRequest::builder();
+            $builder = CreatePaymentRequest::builder();
             $builder->setAmount($amount)
                     ->setCurrency('RUB')
                     ->setClientIp($_SERVER['REMOTE_ADDR'])
@@ -282,7 +309,9 @@ class ModelExtensionPaymentYandexMoney extends Model
      */
     public function hookOrderStatusChange($orderId, $newStatusId)
     {
+        $this->log('info', 'HookOrderStatusChange init');
         if ($newStatusId < 1) {
+            $this->log('info', 'Status invalid');
             return;
         }
 
@@ -293,7 +322,7 @@ class ModelExtensionPaymentYandexMoney extends Model
         $orderInfo   = $this->model_checkout_order->getOrder($orderId);
         $paymentInfo = $this->fetchPaymentInfo($paymentId);
 
-        $secondReceipt = new \YandexMoneyModule\Model\KassaSecondReceiptModel($this->config, $this->session, $orderId, $paymentInfo, $orderInfo);
+        $secondReceipt = new KassaSecondReceiptModel($this->config, $this->session, $orderId, $paymentInfo, $orderInfo);
 
         if ($secondReceipt->sendSecondReceipt($newStatusId)) {
             $settlementsSum = $secondReceipt->getSettlementsSum();
@@ -311,7 +340,7 @@ class ModelExtensionPaymentYandexMoney extends Model
     {
         $payment = $this->fetchPaymentInfo($paymentId);
         if ($payment !== null) {
-            if ($payment->getStatus() !== \YandexCheckout\Model\PaymentStatus::PENDING) {
+            if ($payment->getStatus() !== PaymentStatus::PENDING) {
                 $this->updatePaymentInDatabase($payment);
             }
         }
@@ -333,7 +362,7 @@ class ModelExtensionPaymentYandexMoney extends Model
 
     /**
      * @param int $orderId
-     * @param \YandexCheckout\Model\PaymentInterface $payment
+     * @param PaymentInterface $payment
      * @param $statusId
      */
     public function confirmOrderPayment($orderId, $payment, $statusId)
@@ -385,11 +414,11 @@ class ModelExtensionPaymentYandexMoney extends Model
 
 
     /**
-     * @param \YandexCheckout\Model\PaymentInterface $payment
+     * @param PaymentInterface $payment
      * @param bool $fetchPaymentInfo
      * @param null|int $amount
      *
-     * @return \YandexCheckout\Model\PaymentInterface
+     * @return PaymentInterface
      */
     public function capturePayment($payment, $fetchPaymentInfo = true, $amount = null)
     {
@@ -400,9 +429,9 @@ class ModelExtensionPaymentYandexMoney extends Model
             }
             $payment = $tmp;
         }
-        if ($payment->getStatus() === \YandexCheckout\Model\PaymentStatus::WAITING_FOR_CAPTURE) {
+        if ($payment->getStatus() === PaymentStatus::WAITING_FOR_CAPTURE) {
             try {
-                $builder = \YandexCheckout\Request\Payments\Payment\CreateCaptureRequest::builder();
+                $builder = CreateCaptureRequest::builder();
                 if (is_null($amount)) {
                     $builder->setAmount($payment->getAmount());
                 } else {
@@ -447,7 +476,7 @@ class ModelExtensionPaymentYandexMoney extends Model
     }
 
     /**
-     * @param \YandexCheckout\Model\PaymentInterface $payment
+     * @param PaymentInterface $payment
      *
      * @return int
      */
@@ -477,7 +506,7 @@ class ModelExtensionPaymentYandexMoney extends Model
             if (!empty($context)) {
                 foreach ($context as $key => $value) {
                     $search[]  = '{'.$key.'}';
-                    $replace[] = $value;
+                    $replace[] = (is_array($value)||is_object($value)) ? json_encode($value, JSON_PRETTY_PRINT) : $value;
                 }
             }
             $sessionId = $this->session->getId();
@@ -517,7 +546,7 @@ class ModelExtensionPaymentYandexMoney extends Model
     }
 
     /**
-     * @param \YandexCheckout\Request\Payments\CreatePaymentRequestBuilder $builder
+     * @param CreatePaymentRequestBuilder $builder
      * @param array $orderInfo
      */
     private function addReceipt($builder, $orderInfo)
@@ -561,7 +590,7 @@ class ModelExtensionPaymentYandexMoney extends Model
     /**
      * @param string $paymentId
      *
-     * @return \YandexCheckout\Model\PaymentInterface|null
+     * @return PaymentInterface|null
      */
     public function fetchPaymentInfo($paymentId)
     {
@@ -624,7 +653,7 @@ class ModelExtensionPaymentYandexMoney extends Model
     }
 
     /**
-     * @param \YandexCheckout\Model\PaymentInterface $payment
+     * @param PaymentInterface $payment
      * @param int $orderId
      */
     private function insertPayment($payment, $orderId)
@@ -655,7 +684,7 @@ class ModelExtensionPaymentYandexMoney extends Model
     }
 
     /**
-     * @param \YandexCheckout\Model\PaymentInterface $payment
+     * @param PaymentInterface $payment
      */
     private function updatePaymentInDatabase($payment)
     {
@@ -707,6 +736,46 @@ class ModelExtensionPaymentYandexMoney extends Model
         $description = (string)mb_substr($description, 0, Payment::MAX_LENGTH_DESCRIPTION);
 
         return $description;
+    }
+
+    /**
+     * @return array
+     */
+    public function getCbrfCourses()
+    {
+        $courses = $this->cache->get('cbrf_courses');
+        if (!$courses) {
+            $cbrf = new CBRAgent();
+            $courses = $cbrf->getList();
+            $this->cache->set('cbrf_courses', $courses);
+            $this->log('debug', "Get CBRF courses \n{courses}", array('courses' => $courses));
+        }
+        return $courses;
+    }
+
+    /**
+     * @param array $order
+     * @param string $currency
+     * @return string
+     */
+    private function convertFromCbrf($order, $currency)
+    {
+        $config_currency = $this->config->get('config_currency');
+
+        if ($config_currency == $currency) {
+            return $order['total'];
+        }
+
+        $courses = $this->getCbrfCourses();
+        if ((!empty($courses[$currency]) || $currency === CurrencyCode::RUB)
+            && (!empty($courses[$config_currency]) || $config_currency === CurrencyCode::RUB)) {
+            $input  = $config_currency != CurrencyCode::RUB ? $courses[$config_currency] : 1.0;
+            $output = $currency != CurrencyCode::RUB ? $courses[$currency] : 1.0;
+
+            return number_format($order['total'] * $input / $output, 2, '.', '');
+        }
+
+        return $order['total'];
     }
 }
 

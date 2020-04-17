@@ -106,7 +106,7 @@ class YandexMoneyKassaModel extends \YandexMoneyModule\Model\KassaModel
 
     public function setDebugLog($value)
     {
-        $this->log = $value ? true : false;
+        $this->isLog = $value;
     }
 
     public function setDisplayName($value)

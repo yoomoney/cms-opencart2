@@ -101,6 +101,31 @@
             </div>
         </div>
 
+        <!-- Currency Start-->
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label" for="yandex-money-kassa-currency"><?= $language->get('kassa_currency')?></label>
+            <div class="col-sm-5">
+                <select id="yandex-money-kassa-currency" name="yandex_money_kassa_currency" class="form-control">
+                    <?php foreach ($kassa_currencies as $code => $data): ?>
+                    <option value="<?= $code ?>"<?= $kassa->getCurrency() == $code ? ' selected' : '' ?>><?= $data['code'] ?> (<?= $data['title'] ?>)</option>
+                    <?php endforeach; ?>
+                </select>
+                <p class="help-block"><?= $language->get('kassa_currency_help')?></p>
+            </div>
+            <div class="col-sm-5">
+                <label class="form-check-label">
+                    <input type="checkbox" name="yandex_money_kassa_currency_convert" value="on"
+                           id="currency_convert="
+                           class="form-check-input"<?= $kassa->getCurrencyConvert() ? ' checked' : '' ?> />
+                    <?= $language->get('kassa_currency_convert')?>
+                </label>
+                <p class="help-block"><?= $language->get('kassa_currency_convert_help')?></p>
+            </div>
+        </div>
+
+        <!-- Sbbol Start-->
+
         <div class="form-group">
             <label class="col-sm-2 control-label" for="kassa-display-name"><?php echo $language->get('b2b_sberbank_label'); ?></label>
             <div class="col-sm-10">
@@ -343,11 +368,11 @@
                 </label>
                 <div class="col-sm-10">
                     <label style="font-weight: 600; padding-top: 9px; cursor: pointer" class="form-check-label">
-                        <input style="vertical-align:middle;margin:-2px 3px 0 0;cursor: pointer" type="radio" name="yandex_money_kassa_second_receipt_enable" value="1" class="form-check-input" <?= !$kassa->isSecondReceipt() ?: "checked"?>/>
+                        <input style="vertical-align:middle;margin:-2px 3px 0 0;cursor: pointer" type="radio" name="yandex_money_kassa_second_receipt_enable" value="1" class="form-check-input" <?= $kassa->isSecondReceipt() ? "checked" : '' ?>/>
                         <?php echo $language->get('kassa_second_receipt_enable'); ?>
                     </label>
                     <label style="font-weight: 600; margin-left: 10px; cursor: pointer" class="form-check-label">
-                        <input style="vertical-align:middle;margin:-2px 3px 0 0;cursor: pointer" type="radio" name="yandex_money_kassa_second_receipt_enable" value="0" class="form-check-input" <?= $kassa->isSecondReceipt() ?: "checked"?>/>
+                        <input style="vertical-align:middle;margin:-2px 3px 0 0;cursor: pointer" type="radio" name="yandex_money_kassa_second_receipt_enable" value="0" class="form-check-input" <?= $kassa->isSecondReceipt() ? '' : "checked" ?>/>
                         <?php echo $language->get('kassa_second_receipt_disable'); ?>
                     </label>
                 </div>

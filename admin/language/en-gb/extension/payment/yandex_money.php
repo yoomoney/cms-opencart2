@@ -51,15 +51,20 @@ $_['kassa_display_name_label']       = 'Payment serivce\'s name';
 $_['kassa_display_name_description'] = 'This title will be shown to the customer';
 $_['kassa_default_display_name']     = 'Yandex.Checkout (bank cards, e-money, etc.)';
 
+$_['kassa_currency']                     = 'The payment currency in the Yandex.Checkout';
+$_['kassa_currency_convert']             = 'Convert an amount from the store\'s current currency';
+$_['kassa_currency_help']                = 'Currency must match in the Yandex.Checkout and in the store';
+$_['kassa_currency_convert_help']        = 'A value from the store\'s currency list is used. If the currency is not in the list – the exchange rate of the Central Bank of the Russian Federation.';
+
 $_['kassa_send_receipt_label']           = 'Transmit details for receipts to Yandex.Checkout (Federal Law 54-FZ)';
 $_['kassa_send_receipt_tax_rate_title']  = 'VAT';
-$_['kassa_second_receipt_header']        = 'Второй чек';
-$_['kassa_second_receipt_enable']        = 'Включен';
-$_['kassa_second_receipt_disable']       = 'Отключен';
+$_['kassa_second_receipt_header']        = 'Second Receipt';
+$_['kassa_second_receipt_enable']        = 'Enabled';
+$_['kassa_second_receipt_disable']       = 'Disabled';
 $_['kassa_second_receipt_description']   = 'Два чека нужно формировать, если покупатель вносит предоплату и потом получает товар или услугу. Первый чек — когда деньги поступают вам на счёт, второй — при отгрузке товаров или выполнении услуг.<br> <a href="#">Читать про второй чек в Яндекс.Кассе</a>';
-$_['kassa_second_receipt_enable_label']  = 'Формировать второй чек при переходе заказа в статус';
+$_['kassa_second_receipt_enable_label']  = 'Generate a second receipt when the order changes to the status';
 $_['kassa_second_receipt_help_info']     = 'Если в заказе будут позиции с признаками «Полная предоплата» — второй чек отправится автоматически, когда заказ перейдёт в выбранный статус.';
-$_['kassa_second_receipt_history_info']  = 'Отправлен второй чек. Сумма %s рублей.';
+$_['kassa_second_receipt_history_info']  = 'The second receipt was sent. Amount %s rubles.';
 $_['kassa_tax_rate_default_label']       = 'Default rate';
 $_['kassa_tax_rate_default_description'] = 'The default rate applies if another rate is not set on the product\'s page.';
 $_['kassa_tax_rate_1_label']             = 'Without VAT';
