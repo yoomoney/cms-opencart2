@@ -65,7 +65,7 @@ class ModelExtensionPaymentYandexMoney extends Model
             if (!empty($context)) {
                 foreach ($context as $key => $value) {
                     $search[]  = '{'.$key.'}';
-                    $replace[] = $value;
+                    $replace[] = (is_array($value)||is_object($value)) ? json_encode($value, JSON_PRETTY_PRINT) : $value;
                 }
             }
             $sessionId = $this->session->getId();
@@ -429,7 +429,10 @@ class ModelExtensionPaymentYandexMoney extends Model
                 $this->getKassaModel()->getShopId(),
                 $this->getKassaModel()->getPassword()
             );
-            $this->client->setLogger($this);
+
+            $userAgent = $this->client->getApiClient()->getUserAgent();
+            $userAgent->setCms('OpenCart', VERSION);
+            $userAgent->setModule('Y.CMS',\ModelExtensionPaymentYandexMoney::MODULE_VERSION);
         }
 
         return $this->client;
