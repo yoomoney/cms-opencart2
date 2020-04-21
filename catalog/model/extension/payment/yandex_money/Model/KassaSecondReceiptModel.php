@@ -3,6 +3,7 @@
 
 namespace YandexMoneyModule\Model;
 
+use Session;
 use YandexCheckout\Client;
 use YandexCheckout\Model\PaymentInterface;
 use YandexCheckout\Model\Receipt\PaymentMode;
@@ -16,6 +17,8 @@ use YandexCheckout\Request\Receipts\ReceiptResponseItemInterface;
 
 class KassaSecondReceiptModel
 {
+    const MODULE_VERSION = '1.4.1';
+
     /**
      * @var \Config
      */
@@ -89,7 +92,7 @@ class KassaSecondReceiptModel
 
             $userAgent = $this->client->getApiClient()->getUserAgent();
             $userAgent->setCms('OpenCart', VERSION);
-            $userAgent->setModule('Y.CMS',\ModelExtensionPaymentYandexMoney::MODULE_VERSION);
+            $userAgent->setModule('Y.CMS', self::MODULE_VERSION);
         }
 
         return $this->client;

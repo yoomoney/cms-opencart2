@@ -2,6 +2,8 @@
 
 class ModelExtensionPaymentYandexMoney extends Model
 {
+    const MODULE_VERSION = '1.4.1';
+
     private $kassaModel;
     private $walletModel;
     private $billingModel;
@@ -432,7 +434,7 @@ class ModelExtensionPaymentYandexMoney extends Model
 
             $userAgent = $this->client->getApiClient()->getUserAgent();
             $userAgent->setCms('OpenCart', VERSION);
-            $userAgent->setModule('Y.CMS',\ModelExtensionPaymentYandexMoney::MODULE_VERSION);
+            $userAgent->setModule('Y.CMS', self::MODULE_VERSION);
         }
 
         return $this->client;
