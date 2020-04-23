@@ -2,7 +2,7 @@
 
 class ModelExtensionPaymentYandexMoney extends Model
 {
-    const MODULE_VERSION = '1.4.2';
+    const MODULE_VERSION = '1.4.3';
 
     private $kassaModel;
     private $walletModel;
@@ -78,6 +78,12 @@ class ModelExtensionPaymentYandexMoney extends Model
             if (empty($search)) {
                 $log->write('['.$level.'] ['.$userId.'] ['.$sessionId.'] - '.$message);
             } else {
+                foreach ($search as $object) {
+                    if (stripos($message, $object) === false) {
+                        $label = trim($object, "{}");
+                        $message .= " \n{$label}: {$object}";
+                    }
+                }
                 $log->write(
                     '['.$level.'] ['.$userId.'] ['.$sessionId.'] - '
                     .str_replace($search, $replace, $message)

@@ -17,7 +17,7 @@ use YandexCheckout\Request\Receipts\ReceiptResponseItemInterface;
 
 class KassaSecondReceiptModel
 {
-    const MODULE_VERSION = '1.4.2';
+    const MODULE_VERSION = '1.4.3';
 
     /**
      * @var \Config
@@ -339,6 +339,12 @@ class KassaSecondReceiptModel
             if (empty($search)) {
                 $log->write('['.$level.'] ['.$userId.'] ['.$sessionId.'] - '.$message);
             } else {
+                foreach ($search as $object) {
+                    if (stripos($message, $object) === false) {
+                        $label = trim($object, "{}");
+                        $message .= " \n{$label}: {$object}";
+                    }
+                }
                 $log->write(
                     '['.$level.'] ['.$userId.'] ['.$sessionId.'] - '
                     .str_replace($search, $replace, $message)
