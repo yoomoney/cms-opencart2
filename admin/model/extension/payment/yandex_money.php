@@ -2,7 +2,7 @@
 
 class ModelExtensionPaymentYandexMoney extends Model
 {
-    const MODULE_VERSION = '1.4.4';
+    const MODULE_VERSION = '1.4.5';
 
     private $kassaModel;
     private $walletModel;
