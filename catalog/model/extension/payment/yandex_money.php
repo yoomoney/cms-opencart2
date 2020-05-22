@@ -27,7 +27,7 @@ require_once dirname(__FILE__).DIRECTORY_SEPARATOR.'yandex_money'.DIRECTORY_SEPA
  */
 class ModelExtensionPaymentYandexMoney extends Model
 {
-    const MODULE_VERSION = '1.4.5';
+    const MODULE_VERSION = '1.4.6';
 
     private $kassaModel;
     private $walletModel;
@@ -150,7 +150,7 @@ class ModelExtensionPaymentYandexMoney extends Model
         );
 
         $kassaCurrency = $this->getKassaModel()->getCurrency();
-        $this->log('debug', "AMOUNT CALC \n{data}", array(
+        $this->log('info', "Amount calc \n{data}", array(
             'data' => json_encode(array(
                 'order_total' => $orderInfo['total'],
                 'kassa_currency' => $kassaCurrency,
@@ -754,7 +754,7 @@ class ModelExtensionPaymentYandexMoney extends Model
             $cbrf = new CBRAgent();
             $courses = $cbrf->getList();
             $this->cache->set('cbrf_courses', $courses);
-            $this->log('debug', "Get CBRF courses \n{courses}", array('courses' => $courses));
+            $this->log('info', "Get CBRF courses \n{courses}", array('courses' => $courses));
         }
         return $courses;
     }

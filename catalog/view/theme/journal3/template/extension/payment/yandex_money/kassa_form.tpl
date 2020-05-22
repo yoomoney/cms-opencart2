@@ -121,7 +121,7 @@
                 jQuery(id).css('display', 'block');
             });
 
-            var continueButton = jQuery('#continue-button');
+            var continueButton = jQuery('#quick-checkout-button-confirm');
             continueButton.off('click').on('click', function (event) {
                 event.preventDefault();
                 createPayment();

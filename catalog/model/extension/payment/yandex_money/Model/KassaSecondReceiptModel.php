@@ -17,7 +17,7 @@ use YandexCheckout\Request\Receipts\ReceiptResponseItemInterface;
 
 class KassaSecondReceiptModel
 {
-    const MODULE_VERSION = '1.4.5';
+    const MODULE_VERSION = '1.4.6';
 
     /**
      * @var \Config
