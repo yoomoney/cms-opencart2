@@ -270,7 +270,7 @@ class KassaModel extends AbstractPaymentModel
      */
     public function getEPL()
     {
-        return !$this->isTestMode && $this->epl;
+        return $this->epl;
     }
 
     /**
