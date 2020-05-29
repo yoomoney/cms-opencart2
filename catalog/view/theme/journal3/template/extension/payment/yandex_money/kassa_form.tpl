@@ -121,10 +121,11 @@
                 jQuery(id).css('display', 'block');
             });
 
-            var continueButton = jQuery('#quick-checkout-button-confirm');
-            continueButton.off('click').on('click', function (event) {
-                event.preventDefault();
-                createPayment();
+            var continueButton = '#quick-checkout-button-confirm, #continue-button';
+            jQuery(document).off('click.j3', continueButton).on('click.j3', continueButton, function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                createPayment(jQuery(this));
             });
 
             jQuery('.yandex-money-payment-form-installments').on('submit', function (e) {
@@ -151,7 +152,14 @@
                 });
             });
 
-            function createPayment() {
+            function buttonAction(button, action) {
+                if (jQuery.fn.button && button) {
+                    button.button(action);
+                }
+            }
+
+            function createPayment(button) {
+                button = button || null;
                 var form = jQuery("#yandex-money-payment-form")[0];
 
                 jQuery.ajax({
@@ -164,7 +172,7 @@
                         alphaLogin: (form.alfaLogin ? form.alfaLogin.value : '')
                     },
                     beforeSend: function() {
-                        continueButton.button('loading');
+                        buttonAction(button, 'loading');
                     },
                     success: function (data) {
                         if (data.success) {
@@ -176,12 +184,12 @@
                             }
                         } else {
                             onValidateError(data.error);
-                            continueButton.button('reset');
+                            buttonAction(button, 'reset');
                         }
                     },
                     failure: function () {
                         onValidateError('Failed to create payment');
-                        continueButton.button('reset');
+                        buttonAction(button, 'reset');
                     }
                 });
             }

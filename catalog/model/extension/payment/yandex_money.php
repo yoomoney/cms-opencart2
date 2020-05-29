@@ -27,7 +27,7 @@ require_once dirname(__FILE__).DIRECTORY_SEPARATOR.'yandex_money'.DIRECTORY_SEPA
  */
 class ModelExtensionPaymentYandexMoney extends Model
 {
-    const MODULE_VERSION = '1.4.6';
+    const MODULE_VERSION = '1.4.7';
 
     private $kassaModel;
     private $walletModel;
@@ -764,7 +764,7 @@ class ModelExtensionPaymentYandexMoney extends Model
      * @param string $currency
      * @return string
      */
-    private function convertFromCbrf($order, $currency)
+    public function convertFromCbrf($order, $currency)
     {
         $config_currency = $this->config->get('config_currency');
 

@@ -105,11 +105,12 @@ class ControllerExtensionPaymentYandexMoney extends Controller
 
         $data['language'] = $this->language;
         $shopId           = $this->config->get('yandex_money_kassa_shop_id');
-
-        $amount         = sprintf(
-            '%.2f',
-            $this->currency->convert($orderInfo['total'], $orderInfo['currency_code'], 'RUB')
-        );
+        $data['orderInfo'] = $orderInfo;
+        if ($this->currency->has('RUB')) {
+            $amount = sprintf('%.2f', $this->currency->format($orderInfo['total'], 'RUB', '', false));
+        } else {
+            $amount = sprintf('%.2f', $this->getModel()->convertFromCbrf($orderInfo, 'RUB'));
+        }
         $data['shopId'] = $shopId;
         $data['sum']    = $amount;
         if ($this->getModel()->getKassaModel()->isEnabled()) {
