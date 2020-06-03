@@ -4,6 +4,10 @@ namespace YandexMoneyModule\Model;
 
 class AbstractPaymentModel
 {
+    const PAYMENT_KASSA = 'kassa';
+    const PAYMENT_WALLET = 'wallet';
+    const PAYMENT_BILLING = 'billing';
+
     /**
      * @var \Config
      */
@@ -76,6 +80,11 @@ class AbstractPaymentModel
     public function getDisplayName()
     {
         return $this->displayName;
+    }
+
+    public function getSortOrder()
+    {
+        return (int)$this->getConfigValue('sort_order');
     }
 
     public function applyTemplateVariables($controller, &$templateData, $orderInfo)

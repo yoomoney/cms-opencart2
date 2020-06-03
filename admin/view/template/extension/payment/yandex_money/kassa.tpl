@@ -528,7 +528,7 @@
                 <?php echo $language->get('kassa_sort_order_label'); ?>
             </label>
             <div class="col-sm-10">
-                <input type="text" id="kassa-sort-order" name="yandex_money_sort_order" value="<?php echo $yandex_money_sort_order; ?>" class="form-control" />
+                <input type="text" id="kassa-sort-order" name="yandex_money_kassa_sort_order" value="<?php echo $yandex_money_kassa_sort_order; ?>" class="form-control" />
                 <p class="help-block"><?php echo $language->get('kassa_sort_order_description'); ?></p>
             </div>
         </div>

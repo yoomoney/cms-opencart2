@@ -14,7 +14,7 @@ class WalletModel extends AbstractPaymentModel
      */
     public function __construct($config)
     {
-        parent::__construct($config, 'wallet');
+        parent::__construct($config, self::PAYMENT_WALLET);
         $this->accountId = $this->getConfigValue('account_id');
         $this->password = $this->getConfigValue('password');
         $this->testMode = $this->getConfigValue('test_mode') == '1';

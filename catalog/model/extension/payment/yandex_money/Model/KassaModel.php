@@ -173,7 +173,7 @@ class KassaModel extends AbstractPaymentModel
      */
     public function __construct($config)
     {
-        parent::__construct($config, 'kassa');
+        parent::__construct($config, self::PAYMENT_KASSA);
 
         $this->shopId                = $this->getConfigValue('shop_id');
         $this->password              = $this->getConfigValue('password');

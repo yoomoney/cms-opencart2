@@ -13,7 +13,7 @@ use YandexCheckout\Model\PaymentStatus;
 class ControllerExtensionPaymentYandexMoney extends Controller
 {
     const MODULE_NAME = 'yandex_money';
-    const MODULE_VERSION = '1.4.7';
+    const MODULE_VERSION = '1.5.0';
 
     /**
      * @var integer
@@ -226,12 +226,12 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         $data['notificationUrl'] = $url->link($prefix.'payment/'.self::MODULE_NAME.'/capture', '', true);
         $data['callbackUrl']     = $url->link($prefix.'payment/'.self::MODULE_NAME.'/callback', '', true);
 
-        if (isset($this->request->post['yandex_money_sort_order'])) {
-            $data['yandex_money_sort_order'] = $this->request->post['yandex_money_sort_order'];
-        } elseif ($this->config->get('yandex_money_sort_order')) {
-            $data['yandex_money_sort_order'] = $this->config->get('yandex_money_sort_order');
+        if (isset($this->request->post['yandex_money_kassa_sort_order'])) {
+            $data['yandex_money_kassa_sort_order'] = $this->request->post['yandex_money_kassa_sort_order'];
+        } elseif ($this->config->get('yandex_money_kassa_sort_order')) {
+            $data['yandex_money_kassa_sort_order'] = $this->config->get('yandex_money_kassa_sort_order');
         } else {
-            $data['yandex_money_sort_order'] = '0';
+            $data['yandex_money_kassa_sort_order'] = '0';
         }
 
         if (isset($this->request->post['yandex_money_wallet_sort_order'])) {
@@ -611,10 +611,13 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         $enabled = false;
         if ($this->getModel()->getKassaModel()->isEnabled()) {
             $enabled = true;
+            $request->post['yandex_money_sort_order'] = $request->post['yandex_money_kassa_sort_order'];
         } elseif ($this->getModel()->getWalletModel()->isEnabled()) {
             $enabled = true;
+            $request->post['yandex_money_sort_order'] = $request->post['yandex_money_wallet_sort_order'];
         } elseif ($this->getModel()->getBillingModel()->isEnabled()) {
             $enabled = true;
+            $request->post['yandex_money_sort_order'] = $request->post['yandex_money_billing_sort_order'];
         }
         $request->post['yandex_money_status'] = $enabled;
 
@@ -634,10 +637,6 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         $enabled = false;
         if (isset($request->post['yandex_money_kassa_enabled']) && $this->isTrue($request->post['yandex_money_kassa_enabled'])) {
             $enabled = true;
-        }
-
-        if (!$enabled) {
-            return;
         }
 
         $request->post['kassa_enabled'] = $enabled;
@@ -769,10 +768,6 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             $enabled = true;
         }
 
-        if (!$enabled) {
-            return;
-        }
-
         $request->post['wallet_enabled'] = $enabled;
         $wallet->setIsEnabled($enabled);
 
@@ -830,10 +825,6 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         $enabled = false;
         if (isset($request->post['yandex_money_billing_enabled']) && $this->isTrue($request->post['yandex_money_billing_enabled'])) {
             $enabled = true;
-        }
-
-        if (!$enabled) {
-            return;
         }
 
         $request->post['billing_enabled'] = $enabled;
