@@ -27,7 +27,7 @@ require_once dirname(__FILE__).DIRECTORY_SEPARATOR.'yandex_money'.DIRECTORY_SEPA
  */
 class ModelExtensionPaymentYandexMoney extends Model
 {
-    const MODULE_VERSION = '1.4.7';
+    const MODULE_VERSION = '1.5.0';
 
     private $kassaModel;
     private $walletModel;
@@ -125,7 +125,7 @@ class ModelExtensionPaymentYandexMoney extends Model
             'code'       => 'yandex_money',
             'title'      => $model->getDisplayName(),
             'terms'      => '',
-            'sort_order' => $this->config->get('yandex_money_sort_order'),
+            'sort_order' => $model->getSortOrder(),
         );
 
         return $result;
