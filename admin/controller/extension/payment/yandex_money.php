@@ -13,7 +13,7 @@ use YandexCheckout\Model\PaymentStatus;
 class ControllerExtensionPaymentYandexMoney extends Controller
 {
     const MODULE_NAME = 'yandex_money';
-    const MODULE_VERSION = '1.5.0';
+    const MODULE_VERSION = '1.5.1';
 
     /**
      * @var integer
@@ -156,8 +156,11 @@ class ControllerExtensionPaymentYandexMoney extends Controller
                     $this->updateCounterCode();
                 }
 
+                $cache->delete("ym_market_xml");
+
                 $this->session->data['success']         = $this->language->get('kassa_text_success');
                 $this->session->data['last-active-tab'] = $data['lastActiveTab'];
+
                 if (isset($this->request->post['language_reload'])) {
                     $this->session->data['success-message'] = $this->language->get('kassa_text_success_message');
                     $this->response->redirect(
@@ -1090,24 +1093,27 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         $this->language->load($this->getPrefix().'payment/yandex_money');
         $data                  = array();
         $data['market_status'] = array();
+
         foreach ($this->getModel()->getMarket()->checkConfig() as $errorMessage) {
             $data['market_status'][] = $this->errors_alert($this->language->get($errorMessage));
         }
 
-        if ($this->config->get('yandex_money_metrika_number') == '') {
-            $data['metrika_status'][] = $this->errors_alert($this->language->get('market_error_counter_number'));
-        }
-        if ($this->config->get('yandex_money_metrika_idapp') == '') {
-            $data['metrika_status'][] = $this->errors_alert($this->language->get('market_error_id'));
-        }
-        if ($this->config->get('yandex_money_metrika_pw') == '') {
-            $data['metrika_status'][] = $this->errors_alert($this->language->get('market_error_password_empty'));
-        }
-        if ($this->config->get('yandex_money_metrika_o2auth') == '') {
-            $data['metrika_status'][] = $this->errors_alert($this->language->get('market_error_oauth_token'));
-        }
-        if (isset($this->request->get['err'])) {
-            $data['metrika_status'][] = $this->errors_alert($this->request->get['err']);
+        if ($this->config->get('yandex_money_metrika_active') == 1) {
+            if ($this->config->get('yandex_money_metrika_number') == '') {
+                $data['metrika_status'][] = $this->errors_alert($this->language->get('market_error_counter_number'));
+            }
+            if ($this->config->get('yandex_money_metrika_idapp') == '') {
+                $data['metrika_status'][] = $this->errors_alert($this->language->get('market_error_id'));
+            }
+            if ($this->config->get('yandex_money_metrika_pw') == '') {
+                $data['metrika_status'][] = $this->errors_alert($this->language->get('market_error_password_empty'));
+            }
+            if ($this->config->get('yandex_money_metrika_o2auth') == '') {
+                $data['metrika_status'][] = $this->errors_alert($this->language->get('market_error_oauth_token'));
+            }
+            if (isset($this->request->get['err'])) {
+                $data['metrika_status'][] = $this->errors_alert($this->request->get['err']);
+            }
         }
 
 
