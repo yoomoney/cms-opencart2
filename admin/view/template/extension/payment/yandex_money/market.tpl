@@ -99,6 +99,15 @@
             <p><?php echo $language->get('kassa_version_string'); ?> <?php echo $module_version; ?></p>
         </div>
         <div class="form-group">
+            <label class="col-sm-4 control-label"><?php echo $active; ?></label>
+            <div class="col-sm-8">
+                <label class="radio-inline">
+                    <input type="radio" <?php echo ($yandex_money_market_active ? ' checked="checked"' : ''); ?> name="yandex_money_market_active" value="1"/> <?php echo $active_on; ?></label>
+                <label class="radio-inline">
+                    <input type="radio" <?php echo (!$yandex_money_market_active ? ' checked="checked"' : ''); ?> name="yandex_money_market_active" value="0"/> <?php echo $active_off; ?></label>
+            </div>
+        </div>
+        <div class="form-group">
             <label class="col-sm-4 control-label" for="yandex_money_market_shopname"><?php echo $language->get('market_short_name'); ?></label>
             <div class="col-sm-8">
                 <input type="text" name="yandex_money_market_shopname" value="<?php echo $yandex_money_market_shopname; ?>" id="yandex_money_market_shopname" class="form-control" maxlength="20"/>

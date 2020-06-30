@@ -13,7 +13,7 @@ use YandexCheckout\Model\PaymentStatus;
 class ControllerExtensionPaymentYandexMoney extends Controller
 {
     const MODULE_NAME = 'yandex_money';
-    const MODULE_VERSION = '1.5.1';
+    const MODULE_VERSION = '1.5.2';
 
     /**
      * @var integer
@@ -114,7 +114,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
 
                 if ($this->request->post['yandex_money_status']
                     && isset($this->request->post['yandex_money_kassa_b2b_sberbank_enabled'])
-                    && $this->isTrue($this->request->post['yandex_money_kassa_b2b_sberbank_enabled'])
+                    && $this->request->post['yandex_money_kassa_b2b_sberbank_enabled'] == 'on'
                 ) {
                     $this->model_setting_setting->editSetting('yandex_money_b2b_sberbank', array(
                         'yandex_money_b2b_sberbank_status' => true,
@@ -638,7 +638,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
     {
         $kassa   = $this->getModel()->getKassaModel();
         $enabled = false;
-        if (isset($request->post['yandex_money_kassa_enabled']) && $this->isTrue($request->post['yandex_money_kassa_enabled'])) {
+        if (isset($request->post['yandex_money_kassa_enabled']) && $request->post['yandex_money_kassa_enabled'] === 'on') {
             $enabled = true;
         }
 
@@ -673,15 +673,15 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         $kassa->setEPL($epl);
 
         $value = isset($request->post['yandex_money_kassa_use_yandex_button']) ? $request->post['yandex_money_kassa_use_yandex_button'] : 'off';
-        $kassa->setUseYandexButton($this->isTrue($value));
+        $kassa->setUseYandexButton($value === 'on');
         $value = isset($request->post['yandex_money_kassa_use_installments_button']) ? $request->post['yandex_money_kassa_use_installments_button'] : 'off';
-        $kassa->setUseInstallmentsButton($this->isTrue($value));
+        $kassa->setUseInstallmentsButton($value === 'on');
         $request->post['yandex_money_kassa_use_yandex_button'] = $kassa->useYandexButton();
 
         $selected = false;
         foreach ($kassa->getPaymentMethods() as $id => $value) {
             $property = 'yandex_money_kassa_payment_method_'.$id;
-            $value    = isset($request->post[$property]) ? $this->isTrue($request->post[$property]) : false;
+            $value    = isset($request->post[$property]) ? $request->post[$property] === 'on' : false;
             $kassa->setPaymentMethodFlag($id, $value);
             $request->post[$property] = $value;
             if ($value) {
@@ -721,11 +721,11 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         $kassa->setGeoZoneId($value);
         $request->post['yandex_money_kassa_geo_zone'] = $kassa->getGeoZoneId();
 
-        $value = isset($request->post['yandex_money_kassa_debug_log']) ? $this->isTrue($request->post['yandex_money_kassa_debug_log']) : false;
+        $value = isset($request->post['yandex_money_kassa_debug_log']) ? $request->post['yandex_money_kassa_debug_log'] === 'on' : false;
         $kassa->setDebugLog($value);
         $request->post['yandex_money_kassa_debug_log'] = $kassa->getDebugLog();
 
-        $value = isset($request->post['yandex_money_kassa_invoice']) ? $this->isTrue($request->post['yandex_money_kassa_invoice']) : false;
+        $value = isset($request->post['yandex_money_kassa_invoice']) ? $request->post['yandex_money_kassa_invoice'] : false;
         $kassa->setInvoicesEnabled($value);
         $request->post['yandex_money_kassa_invoice'] = $kassa->isInvoicesEnabled();
 
@@ -740,26 +740,26 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         $kassa->setInvoiceMessage($value);
         $request->post['yandex_money_kassa_invoice_message'] = $kassa->getInvoiceMessage();
 
-        $value = isset($request->post['yandex_money_kassa_invoice_logo']) ? $this->isTrue($request->post['yandex_money_kassa_invoice_logo']) : false;
+        $value = isset($request->post['yandex_money_kassa_invoice_logo']) ? $request->post['yandex_money_kassa_invoice_logo'] === 'on' : false;
         $kassa->setSendInvoiceLogo($value);
         $request->post['yandex_money_kassa_invoice_logo'] = $kassa->getSendInvoiceLogo();
 
         $value = false;
-        if (isset($request->post['yandex_money_kassa_create_order_before_redirect']) && $this->isTrue($request->post['yandex_money_kassa_create_order_before_redirect'])) {
+        if (isset($request->post['yandex_money_kassa_create_order_before_redirect']) && $request->post['yandex_money_kassa_create_order_before_redirect'] === 'on') {
             $value = true;
         }
         $request->post['yandex_money_kassa_create_order_before_redirect'] = $value;
         $kassa->setCreateOrderBeforeRedirect($value);
 
         $value = false;
-        if (isset($request->post['yandex_money_kassa_clear_cart_before_redirect']) && $this->isTrue($request->post['yandex_money_kassa_clear_cart_before_redirect'])) {
+        if (isset($request->post['yandex_money_kassa_clear_cart_before_redirect']) && $request->post['yandex_money_kassa_clear_cart_before_redirect'] === 'on') {
             $value = true;
         }
         $request->post['yandex_money_kassa_clear_cart_before_redirect'] = $value;
         $kassa->setClearCartBeforeRedirect($value);
 
         $value = isset($request->post['yandex_money_kassa_show_in_footer']) ? $request->post['yandex_money_kassa_show_in_footer'] : 'off';
-        $kassa->setShowLinkInFooter($this->isTrue($value));
+        $kassa->setShowLinkInFooter($value === 'on');
         $request->post['yandex_money_kassa_show_in_footer'] = $kassa->getShowLinkInFooter();
     }
 
@@ -767,7 +767,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
     {
         $wallet  = $this->getModel()->getWalletModel();
         $enabled = false;
-        if (isset($request->post['yandex_money_wallet_enabled']) && $this->isTrue($request->post['yandex_money_wallet_enabled'])) {
+        if (isset($request->post['yandex_money_wallet_enabled']) && $request->post['yandex_money_wallet_enabled'] === 'on') {
             $enabled = true;
         }
 
@@ -808,14 +808,14 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         $request->post['yandex_money_wallet_geo_zone'] = $wallet->getGeoZoneId();
 
         $value = false;
-        if (isset($request->post['yandex_money_wallet_create_order_before_redirect']) && $this->isTrue($request->post['yandex_money_wallet_create_order_before_redirect'])) {
+        if (isset($request->post['yandex_money_wallet_create_order_before_redirect']) && $request->post['yandex_money_wallet_create_order_before_redirect'] === 'on') {
             $value = true;
         }
         $request->post['yandex_money_wallet_create_order_before_redirect'] = $value;
         $wallet->setCreateOrderBeforeRedirect($value);
 
         $value = false;
-        if (isset($request->post['yandex_money_wallet_clear_cart_before_redirect']) && $this->isTrue($request->post['yandex_money_wallet_clear_cart_before_redirect'])) {
+        if (isset($request->post['yandex_money_wallet_clear_cart_before_redirect']) && $request->post['yandex_money_wallet_clear_cart_before_redirect'] === 'on') {
             $value = true;
         }
         $request->post['yandex_money_wallet_clear_cart_before_redirect'] = $value;
@@ -826,7 +826,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
     {
         $billing = $this->getModel()->getBillingModel();
         $enabled = false;
-        if (isset($request->post['yandex_money_billing_enabled']) && $this->isTrue($request->post['yandex_money_billing_enabled'])) {
+        if (isset($request->post['yandex_money_billing_enabled']) && $request->post['yandex_money_billing_enabled'] === 'on') {
             $enabled = true;
         }
 
@@ -1094,8 +1094,10 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         $data                  = array();
         $data['market_status'] = array();
 
-        foreach ($this->getModel()->getMarket()->checkConfig() as $errorMessage) {
-            $data['market_status'][] = $this->errors_alert($this->language->get($errorMessage));
+        if ($this->config->get('yandex_money_market_active') == 1) {
+            foreach ($this->getModel()->getMarket()->checkConfig() as $errorMessage) {
+                $data['market_status'][] = $this->errors_alert($this->language->get($errorMessage));
+            }
         }
 
         if ($this->config->get('yandex_money_metrika_active') == 1) {
