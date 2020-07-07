@@ -13,7 +13,7 @@ use YandexCheckout\Model\PaymentStatus;
 class ControllerExtensionPaymentYandexMoney extends Controller
 {
     const MODULE_NAME = 'yandex_money';
-    const MODULE_VERSION = '1.5.2';
+    const MODULE_VERSION = '1.6.0';
 
     /**
      * @var integer
@@ -92,93 +92,83 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             'lastActiveTab' => $this->session->data['last-active-tab'],
         );
         if ($this->request->server['REQUEST_METHOD'] === 'POST') {
-            if ($this->validate($this->request)) {
-                $isUpdatedCounterSettings = $this->isUpdatedCounterSettings($this->request->post);
-                $settings                 = $this->model_setting_setting->getSetting(self::MODULE_NAME);
-                $cache                    = new Cache('file');
-                $newSettings              = array_merge(array(
-                    'yandex_money_metrika_o2auth' => isset($settings['yandex_money_metrika_o2auth'])
-                        ? $settings['yandex_money_metrika_o2auth']
-                        : '',
-                    'yandex_money_metrika_code'   => isset($settings['yandex_money_metrika_code'])
-                        ? $settings['yandex_money_metrika_code']
-                        : '',
-                ), $this->request->post);
 
-                $this->model_setting_setting->editSetting(self::MODULE_NAME, $newSettings);
+            $isUpdatedCounterSettings = $this->isUpdatedCounterSettings($this->request->post);
+            $settings                 = $this->model_setting_setting->getSetting(self::MODULE_NAME);
+            $cache                    = new Cache('file');
+            $newSettings              = array_merge(array(
+                'yandex_money_metrika_o2auth' => isset($settings['yandex_money_metrika_o2auth'])
+                    ? $settings['yandex_money_metrika_o2auth']
+                    : '',
+                'yandex_money_metrika_code'   => isset($settings['yandex_money_metrika_code'])
+                    ? $settings['yandex_money_metrika_code']
+                    : '',
+            ), $this->request->post);
+
+            $this->model_setting_setting->editSetting(self::MODULE_NAME, $newSettings);
 
 
-                if ($cache->get("ym_market_xml")) {
-                    $cache->delete("ym_market_xml");
-                }
+            if ($cache->get("ym_market_xml")) {
+                $cache->delete("ym_market_xml");
+            }
 
-                if ($this->request->post['yandex_money_status']
-                    && isset($this->request->post['yandex_money_kassa_b2b_sberbank_enabled'])
-                    && $this->request->post['yandex_money_kassa_b2b_sberbank_enabled'] == 'on'
-                ) {
-                    $this->model_setting_setting->editSetting('yandex_money_b2b_sberbank', array(
-                        'yandex_money_b2b_sberbank_status' => true,
-                    ));
-                } else {
-                    $this->model_setting_setting->editSetting('yandex_money_b2b_sberbank', array(
-                        'yandex_money_b2b_sberbank_status' => false,
-                    ));
-                }
-
-                if (empty($newSettings['yandex_money_metrika_number'])
-                    || empty($newSettings['yandex_money_metrika_idapp'])
-                    || empty($newSettings['yandex_money_metrika_pw'])
-                    || $isUpdatedCounterSettings
-                ) {
-                    $settings = $this->model_setting_setting->getSetting(self::MODULE_NAME);
-
-                    $settings['yandex_money_metrika_o2auth'] = '';
-                    $settings['yandex_money_metrika_code']   = '';
-                    $this->model_setting_setting->editSetting(self::MODULE_NAME, $settings);
-                }
+            if (empty($newSettings['yandex_money_metrika_number'])
+                || empty($newSettings['yandex_money_metrika_idapp'])
+                || empty($newSettings['yandex_money_metrika_pw'])
+                || $isUpdatedCounterSettings
+            ) {
                 $settings = $this->model_setting_setting->getSetting(self::MODULE_NAME);
 
-                $metrika_number = $settings['yandex_money_metrika_number'];
-                $metrika_idapp  = $settings['yandex_money_metrika_idapp'];
-                $metrika_pw     = $settings['yandex_money_metrika_pw'];
-                $metrika_o2auth = $settings['yandex_money_metrika_o2auth'];
-                if (!empty($metrika_number) && !empty($metrika_idapp) && !empty($metrika_pw) && empty($metrika_o2auth)) {
-                    $this->response->redirect(
-                        'https://oauth.yandex.ru/authorize?response_type=code&client_id='
-                        .$metrika_idapp.'&device_id='
-                        .md5('metrika'.$metrika_idapp)
-                        .'&client_secret='.$metrika_pw
-                    );
-                }
+                $settings['yandex_money_metrika_o2auth'] = '';
+                $settings['yandex_money_metrika_code']   = '';
+                $this->model_setting_setting->editSetting(self::MODULE_NAME, $settings);
+            }
+            $settings = $this->model_setting_setting->getSetting(self::MODULE_NAME);
 
-                $metrika_code = $settings['yandex_money_metrika_code'];
-                if (empty($metrika_code) && !empty($metrika_o2auth)) {
-                    $this->updateCounterCode();
-                }
+            $metrika_number = $settings['yandex_money_metrika_number'];
+            $metrika_idapp  = $settings['yandex_money_metrika_idapp'];
+            $metrika_pw     = $settings['yandex_money_metrika_pw'];
+            $metrika_o2auth = $settings['yandex_money_metrika_o2auth'];
 
-                $cache->delete("ym_market_xml");
+            if (!empty($metrika_number) && !empty($metrika_idapp) && !empty($metrika_pw) && empty($metrika_o2auth)) {
+                $this->response->redirect(
+                    'https://oauth.yandex.ru/authorize?response_type=code&client_id='
+                    .$metrika_idapp.'&device_id='
+                    .md5('metrika'.$metrika_idapp)
+                    .'&client_secret='.$metrika_pw
+                );
+            }
 
-                $this->session->data['success']         = $this->language->get('kassa_text_success');
-                $this->session->data['last-active-tab'] = $data['lastActiveTab'];
+            $metrika_code = $settings['yandex_money_metrika_code'];
+            if (empty($metrika_code) && !empty($metrika_o2auth)) {
+                $this->updateCounterCode();
+            }
 
-                if (isset($this->request->post['language_reload'])) {
-                    $this->session->data['success-message'] = $this->language->get('kassa_text_success_message');
-                    $this->response->redirect(
-                        $this->url->link($prefix.'payment/'.self::MODULE_NAME, 'token='.$this->session->data['token'],
-                            true)
-                    );
-                } else {
-                    $this->response->redirect(
-                        $this->url->link(
-                            'extension/extension', 'token='.$this->session->data['token'].'&type=payment', true
-                        )
-                    );
-                }
+            $this->session->data['success']         = $this->language->get('kassa_text_success');
+            $this->session->data['last-active-tab'] = $data['lastActiveTab'];
+
+            if ($this->validate($this->request)) {
+                $this->enableB2bSberbank();
             } else {
-                $this->applyValidationErrors($data);
+                $this->saveValidationErrors();
+            }
+
+            if (isset($this->request->post['language_reload'])) {
+                $this->session->data['success-message'] = $this->language->get('kassa_text_success_message');
+                $this->response->redirect(
+                    $this->url->link($prefix.'payment/'.self::MODULE_NAME, 'token='.$this->session->data['token'],
+                        true)
+                );
+            } else {
+                $this->response->redirect(
+                    $this->url->link(
+                        'extension/extension', 'token='.$this->session->data['token'].'&type=payment', true
+                    )
+                );
             }
         } else {
             $this->session->data['last-active-tab'] = $tab;
+            $this->applyValidationErrors($data);
         }
 
         $data['module_version'] = self::MODULE_VERSION;
@@ -867,12 +857,23 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         $request->post['yandex_money_billing_geo_zone'] = $billing->getGeoZoneId();
     }
 
-    private function applyValidationErrors(&$data)
+    private function saveValidationErrors()
     {
+        $this->session->data['errors_settings'] = array();
         if (!empty($this->error)) {
             foreach ($this->error as $key => $error) {
+                $this->session->data['errors_settings'][$key] = $error;
+            }
+        }
+    }
+
+    private function applyValidationErrors(&$data)
+    {
+        if (!empty($this->session->data['errors_settings'])) {
+            foreach ($this->session->data['errors_settings'] as $key => $error) {
                 $data['error_'.$key] = $error;
             }
+            unset($this->session->data['errors_settings']);
         }
     }
 
@@ -999,7 +1000,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             if (!isset($settings[$param])) {
                 continue;
             }
-            if ($post[$param] != $settings[$param]) {
+            if (isset($post[$param]) && $post[$param] != $settings[$param]) {
                 return true;
             }
         }
@@ -1694,6 +1695,22 @@ class ControllerExtensionPaymentYandexMoney extends Controller
     {
         $boolVal = ( is_string($val) ? filter_var($val, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) : (bool) $val );
         return ( $boolVal===null && !$return_null ? false : $boolVal );
+    }
+
+    private function enableB2bSberbank()
+    {
+        if ($this->request->post['yandex_money_status']
+            && isset($this->request->post['yandex_money_kassa_b2b_sberbank_enabled'])
+            && $this->request->post['yandex_money_kassa_b2b_sberbank_enabled'] == 'on'
+        ) {
+            $this->model_setting_setting->editSetting('yandex_money_b2b_sberbank', array(
+                'yandex_money_b2b_sberbank_status' => true,
+            ));
+        } else {
+            $this->model_setting_setting->editSetting('yandex_money_b2b_sberbank', array(
+                'yandex_money_b2b_sberbank_status' => false,
+            ));
+        }
     }
 }
 
