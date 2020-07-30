@@ -17,7 +17,7 @@ use YandexCheckout\Request\Receipts\ReceiptResponseItemInterface;
 
 class KassaSecondReceiptModel
 {
-    const MODULE_VERSION = '1.6.0';
+    const MODULE_VERSION = '1.6.1';
 
     /**
      * @var \Config
@@ -288,7 +288,7 @@ class KassaSecondReceiptModel
             $this->log("error", "Fail get receipt message: " . $e->getMessage());
         }
 
-        return array_pop($receipts);
+        return array_shift($receipts);
     }
 
     /**
