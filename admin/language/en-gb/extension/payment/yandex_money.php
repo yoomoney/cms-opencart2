@@ -136,7 +136,7 @@ $_['kassa_payment_list_link']       = 'View the list';
 
 $_['kassa_tab_header']   = 'Yandex.Checkout';
 $_['wallet_tab_header']  = 'Yandex.Money';
-$_['billing_tab_header'] = 'Yandex.Billing';
+$_['billing_tab_header'] = 'Billing';
 $_['metrika_tab_header'] = 'Yadnex.Metrica';
 $_['market_tab_header']  = 'Yandex.Market';
 
@@ -178,22 +178,22 @@ $_['wallet_any_geo_zone']         = 'Any area';
 $_['wallet_sort_order_label']       = 'Sorting';
 $_['wallet_sort_order_description'] = '';
 
-$_['billing_page_title']         = 'Yandex.Billing settings';
+$_['billing_page_title']         = 'Billing settings';
 $_['billing_header_description'] = '';
 $_['billing_version_string']     = 'Module version';
 
-$_['billing_enable_label']           = 'Activate payments via Yandex.Billing';
+$_['billing_enable_label']           = 'Activate payments via Billing';
 $_['billing_form_id_label']          = 'Form ID';
 $_['billing_form_id_description']    = '';
 $_['billing_form_id_error_required'] = 'Specify Form ID';
 
 $_['billing_purpose_label']       = 'Purpose of payment';
-$_['billing_purpose_description'] = 'The purpose of payment is added to the payment order: specify whatever will help identify the order paid via Yandex.Billing';
-$_['billing_default_purpose']     = 'Order No. %order_id% Payment via Yandex.Billing';
+$_['billing_purpose_description'] = 'The purpose of payment is added to the payment order: specify whatever will help identify the order paid via Billing';
+$_['billing_default_purpose']     = 'Order No. %order_id% Payment via Billing';
 
 $_['billing_display_name_label']       = 'Payment service title';
 $_['billing_display_name_description'] = 'This title will be shown to the customer';
-$_['billing_default_display_name']     = 'Yandex.Billing (bank cards, Wallet)';
+$_['billing_default_display_name']     = 'Billing (bank cards, Wallet)';
 
 $_['billing_success_order_status_label']       = 'Order status';
 $_['billing_success_order_status_description'] = 'The status should indicate that the result of the payment is unknown: you can only find out if the customer paid or not by checking the notification sent to your email or by contacting your bank';
