@@ -117,7 +117,6 @@ echo $column_left;
                                 <th><?= $language->get('refunds_header_id')?></th>
                                 <th><?= $language->get('refunds_header_status')?></th>
                                 <th><?= $language->get('refunds_header_date_create')?></th>
-                                <th><?= $language->get('refunds_header_date_refund')?></th>
                                 <th><?= $language->get('refunds_header_sum')?></th>
                             </tr>
                             </thead>
@@ -127,7 +126,6 @@ echo $column_left;
                                 <td><?php echo $refund['refund_id']; ?></td>
                                 <td><?php echo $language->get('kassa_refund_status_' . $refund['status'] . '_label'); ?></td>
                                 <td><?php echo $refund['created_at']; ?></td>
-                                <td><?php echo $refund['authorized_at']; ?></td>
                                 <td><?php echo $refund['amount'] . ' ' . $refund['currency']; ?></td>
                             </tr>
                             <?php endforeach; ?>

@@ -453,7 +453,6 @@ $_['refunds_history_empty']      = 'Для заказа №%s возвраты �
 $_['refunds_header_id']          = 'ID возврата';
 $_['refunds_header_status']      = 'Статус';
 $_['refunds_header_date_create'] = 'Дата создания';
-$_['refunds_header_date_refund'] = 'Дата проведения';
 $_['refunds_header_sum']         = 'Сумма';
 
 $_['kassa_show_url_link']             = 'Показывать ссылку на сайт Кассы';
