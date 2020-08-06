@@ -407,7 +407,6 @@ $_['refunds_history_empty']      = 'Для заказа №%s возвраты �
 $_['refunds_header_id']          = 'Refund ID';
 $_['refunds_header_status']      = 'Status';
 $_['refunds_header_date_create'] = 'Дата создания';
-$_['refunds_header_date_refund'] = 'Дата проведения';
 $_['refunds_header_sum']         = 'Refund amount';
 
 $_['captures_title']                  = 'Payment capture';
