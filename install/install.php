@@ -20,4 +20,3 @@ if (!file_exists(DIR_UPLOAD . $this->request->post['path']."/upload/admin/contro
         throw new Exception("Архив создавался не для этой версии Opencart. Загрузите правильную версию по адресу https://github.com/yandex-money/yandex-money-cms-opencart2/blob/master/ycms.oc20x21x.ocmod.zip?raw=true");
     }
 }
-?>
