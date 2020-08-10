@@ -17,7 +17,7 @@ use YandexCheckout\Request\Receipts\ReceiptResponseItemInterface;
 
 class KassaSecondReceiptModel
 {
-    const MODULE_VERSION = '1.7.0';
+    const MODULE_VERSION = '1.7.1';
 
     /**
      * @var \Config
@@ -107,7 +107,7 @@ class KassaSecondReceiptModel
         $this->log("info", "Hook send second receipt");
 
         if (!$this->isNeedSecondReceipt($statusId)) {
-            $this->log("info", "Второй чек не трубется");
+            $this->log("info", "Второй чек не требуется");
             return false;
         } elseif (!$this->isPaymentInfoValid($this->paymentInfo)) {
             $this->log("error", "Invalid paymentInfo");
@@ -178,7 +178,7 @@ class KassaSecondReceiptModel
             $resendItems = $this->getResendItems($lastReceipt->getItems());
 
             if (count($resendItems['items']) < 1) {
-                $this->log("info", "Второй чек не трубется");
+                $this->log("info", "Второй чек не требуется");
                 return;
             }
 
@@ -215,7 +215,7 @@ class KassaSecondReceiptModel
                 $this->log("error", $e->getMessage() . ". Property name:". $e->getProperty());
             }
         } else {
-            $this->log("info", "Второй чек не трубется");
+            $this->log("info", "Второй чек не требуется");
         }
     }
 

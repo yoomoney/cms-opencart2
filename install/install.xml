@@ -2,7 +2,7 @@
 <modification>
     <name>Y.CMS 2.0 for Opencart 2.0.x - 2.3.x</name>
     <code>ycms.2.0</code>
-    <version>1.7.0</version>
+    <version>1.7.1</version>
     <author>Yandex.Money</author>
     <!-- Вставка кнопки в историю заказов-->
     <file path="catalog/controller/account/order.php">
@@ -335,7 +335,9 @@
                 if ($this->currency->has('RUB')) {
                     $data['cost'] = sprintf('%.2f', $this->currency->format($cost, 'RUB', '', false));
                 } else {
-                    $data['cost'] = $this->getModel()->convertFromCbrf(array('total' => $cost), 'RUB');
+                    $prefix = (version_compare(VERSION, "2.3.0", '>=')) ? 'extension/' : '';
+                    $this->load->model($prefix.'payment/yandex_money');
+                    $data['cost'] = $this->{'model_'.str_replace('/', '_', $prefix).'payment_yandex_money'}->convertFromCbrf(array('total' => $cost), 'RUB');
                 }
             ]]></add>
         </operation>
@@ -421,8 +423,8 @@
 
     <file path="catalog/model/checkout/order.php">
         <operation>
-            <search><![CDATA[// Update the DB with the new statuses]]></search>
-            <add position="after"><![CDATA[
+            <search><![CDATA[// If old order status is the processing or complete status but new status is not then commence restock, and remove coupon, voucher and reward history]]></search>
+            <add position="before"><![CDATA[
                 $prefix = (version_compare(VERSION, '2.3.0', '>=')) ? 'extension/' : '';
                 $this->load->model($prefix.'payment/yandex_money');
 
