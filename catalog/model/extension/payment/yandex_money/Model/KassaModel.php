@@ -492,7 +492,15 @@ class KassaModel extends AbstractPaymentModel
      */
     public function getCaptureValue($paymentMethod)
     {
-        return !($this->isEnableHoldMode && in_array($paymentMethod, array('', PaymentMethodType::BANK_CARD)));
+        $paymentMethodsForHold = array(
+            '',
+            PaymentMethodType::BANK_CARD,
+            PaymentMethodType::YANDEX_MONEY,
+            PaymentMethodType::GOOGLE_PAY,
+            PaymentMethodType::APPLE_PAY,
+            self::CUSTOM_PAYMENT_METHOD_WIDGET,
+        );
+        return !($this->isEnableHoldMode && in_array($paymentMethod, $paymentMethodsForHold));
     }
 
     /**
