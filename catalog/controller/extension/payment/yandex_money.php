@@ -22,7 +22,8 @@ class ControllerExtensionPaymentYandexMoney extends Controller
 {
     /** @var string */
     const MODULE_NAME = 'yandex_money';
-   
+    const MODULE_VERSION = '1.8.1';
+
     const INSTALLMENTS_MIN_AMOUNT = 3000;
 
     /**
