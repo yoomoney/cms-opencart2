@@ -335,6 +335,9 @@ $_['active_off']       = 'Disabled';
 $_['active']           = 'Activity';
 $_['mod_off']          = 'Install the Yandex.Money extension from the payment modules folder.';
 
+$_['error_install_widget'] = 'Чтобы покупатели могли заплатить вам через Apple Pay, <a href="https://kassa.yandex.ru/docs/merchant.ru.yandex.kassa">скачайте файл apple-developer-merchantid-domain-association</a> и добавьте его в папку ./well-known на вашем сайте. Если не знаете, как это сделать, обратитесь к администратору сайта или в поддержку хостинга. Не забудьте также подключить оплату через Apple Pay <a href="https://kassa.yandex.ru/my/payment-methods/settings#applePay">в личном кабинете Кассы</a>. <a href="https://kassa.yandex.ru/developers/payment-forms/widget#apple-pay-configuration">Почитать о подключении Apple Pay в документации Кассы</a>';
+
+
 $_['update_tab_header']                  = 'Module update';
 $_['updater_success_message']            = 'Module version %s successfully downloaded and installed';
 $_['updater_error_unpack_failed']        = 'Unable to extract archive %s. More about the error in <a href="">module\'s logs</a>';
