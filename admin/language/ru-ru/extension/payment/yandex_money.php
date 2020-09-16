@@ -381,6 +381,8 @@ $_['active_on']        = 'Включено';
 $_['active_off']       = 'Выключено';
 $_['active']           = 'Активность';
 $_['mod_off']          = '<a href="%s">Установите "Библиотека для Y.CMS OpenCart3"</a> на вкладке модулей оплаты';
+$_['error_install_widget'] = 'Чтобы покупатели могли заплатить вам через Apple Pay, <a href="https://kassa.yandex.ru/docs/merchant.ru.yandex.kassa">скачайте файл apple-developer-merchantid-domain-association</a> и добавьте его в папку ./well-known на вашем сайте. Если не знаете, как это сделать, обратитесь к администратору сайта или в поддержку хостинга. Не забудьте также подключить оплату через Apple Pay <a href="https://kassa.yandex.ru/my/payment-methods/settings#applePay">в личном кабинете Кассы</a>. <a href="https://kassa.yandex.ru/developers/payment-forms/widget#apple-pay-configuration">Почитать о подключении Apple Pay в документации Кассы</a>';
+
 
 //Updater
 $_['update_tab_header']                  = 'Обновление модуля';

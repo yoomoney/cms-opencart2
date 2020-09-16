@@ -84,6 +84,7 @@
                 </label>
             </div>
             <div class="col-sm-10 col-sm-offset-2" id="kassa-payment-mode-shop-container">
+                <div id="kassa-payment-method-warning" style="display: none" class="alert alert-warning"></div>
                 <?php foreach ($kassa->getPaymentMethods() as $id => $enabled): $name = 'kassa_payment_method_' . $id; ?>
                 <label class="form-check-label">
                     <input type="checkbox" name="yandex_money_<?php echo $name; ?>" value="on" id="kassa-payment-method-<?php echo $id; ?>" class="form-check-input"<?php echo $enabled ? ' checked' : ''; ?> />
@@ -591,6 +592,25 @@
         jQuery('input[name=yandex_money_kassa_payment_mode]').click(function () {
             togglePaymentMode(form.yandex_money_kassa_payment_mode.value)
         });
+
+        jQuery('#kassa-payment-mode-shop-container input').change(function () {
+            if (jQuery(this).attr('name') !== 'yandex_money_kassa_payment_method_widget') {
+                return;
+            } else if (!jQuery(this).prop('checked')) {
+                return;
+            }
+
+            jQuery.ajax({
+                url: "<?php echo htmlspecialchars_decode($install_widget); ?>",
+                dataType: "json",
+                method: "GET",
+                success: function (data) {
+                    if (!data.ok) {
+                        jQuery('#kassa-payment-method-warning').html(data.error).show();
+                    }
+                },
+            });
+        })
 
         jQuery('#kassa-send-receipt').bind('change', function () {
             toggleSendReceipt(this.checked);
