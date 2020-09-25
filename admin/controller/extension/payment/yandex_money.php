@@ -13,7 +13,7 @@ use YandexCheckout\Model\PaymentStatus;
 class ControllerExtensionPaymentYandexMoney extends Controller
 {
     const MODULE_NAME = 'yandex_money';
-    const MODULE_VERSION = '1.9.0';
+    const MODULE_VERSION = '1.9.1';
 
     const WIDGET_INSTALL_STATUS_SUCCESS = true;
     const WIDGET_INSTALL_STATUS_FAIL    = false;
@@ -65,6 +65,10 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         }
 
         return $tpl;
+    }
+
+    public function incl($file) {
+        return modification(DIR_TEMPLATE . $this->getPrefix() . 'payment/yandex_money/' . $file);
     }
 
     public function index()
@@ -379,6 +383,8 @@ class ControllerExtensionPaymentYandexMoney extends Controller
                                                       && substr($this->getModel()->getKassaModel()->getPassword(), 0,
                 5) === 'live_'
                                                       && $data['nps_block_text'];
+
+        $data['module'] = $this;
 
         $this->response->setOutput($this->load->view($this->getTemplatePath(), $data));
     }
