@@ -53,22 +53,22 @@ echo $column_left;
             <input type="hidden" name="last_active_tab" id="last-active-tab" value="<?php echo $lastActiveTab; ?>" />
             <div class="tab-content bootstrap">
                 <div class="tab-pane<?php echo ($lastActiveTab == 'tab-kassa' ? ' active' : ''); ?>" id="tab-kassa">
-                    <?php include dirname(__FILE__) . '/yandex_money/kassa.tpl'; ?>
+                    <?php include_once $module->incl('kassa.tpl'); ?>
                 </div>
                 <div class="tab-pane<?php echo ($lastActiveTab == 'tab-wallet' ? ' active' : ''); ?>" id="tab-wallet">
-                    <?php include dirname(__FILE__) . '/yandex_money/wallet.tpl'; ?>
+                    <?php include_once $module->incl('wallet.tpl'); ?>
                 </div>
                 <div class="tab-pane<?php echo ($lastActiveTab == 'tab-billing' ? ' active' : ''); ?>" id="tab-billing">
-                    <?php include dirname(__FILE__) . '/yandex_money/billing.tpl'; ?>
+                    <?php include_once $module->incl('billing.tpl'); ?>
                 </div>
                 <div class="tab-pane<?php echo ($lastActiveTab == 'tab-metrika' ? ' active' : ''); ?>" id="tab-metrika">
-                    <?php include dirname(__FILE__) . '/yandex_money/metrika.tpl'; ?>
+                    <?php include_once $module->incl('metrika.tpl'); ?>
                 </div>
                 <div class="tab-pane<?php echo ($lastActiveTab == 'tab-market' ? ' active' : ''); ?>" id="tab-market">
-                    <?php include dirname(__FILE__) . '/yandex_money/market.tpl'; ?>
+                    <?php include_once $module->incl('market.tpl'); ?>
                 </div>
                 <div class="tab-pane<?php echo ($lastActiveTab == 'tab-update' ? ' active' : ''); ?>" id="tab-update">
-                    <?php include dirname(__FILE__) . '/yandex_money/update.tpl'; ?>
+                    <?php include_once $module->incl('update.tpl'); ?>
                 </div>
             </div>
         </form>

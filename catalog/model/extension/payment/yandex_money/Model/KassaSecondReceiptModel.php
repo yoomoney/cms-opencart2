@@ -17,7 +17,7 @@ use YandexCheckout\Request\Receipts\ReceiptResponseItemInterface;
 
 class KassaSecondReceiptModel
 {
-    const MODULE_VERSION = '1.9.0';
+    const MODULE_VERSION = '1.9.1';
 
     /**
      * @var \Config
@@ -251,7 +251,7 @@ class KassaSecondReceiptModel
         }
 
         if (isset($orderInfo['telephone']) && !empty($orderInfo['telephone'])) {
-            $customerData['phone'] = $orderInfo['telephone'];
+            $customerData['phone'] = preg_replace('/\D/', '', $orderInfo['telephone']);
         }
 
 
