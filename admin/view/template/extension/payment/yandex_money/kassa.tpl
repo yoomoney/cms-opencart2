@@ -117,7 +117,7 @@
             <div class="col-sm-5">
                 <label class="form-check-label">
                     <input type="checkbox" name="yandex_money_kassa_currency_convert" value="on"
-                           id="currency_convert="
+                           id="currency_convert"
                            class="form-check-input"<?= $kassa->getCurrencyConvert() ? ' checked' : '' ?> />
                     <?= $language->get('kassa_currency_convert')?>
                 </label>
@@ -220,7 +220,7 @@
                     <label> <?php echo $language->get('kassa_statuses_description_label'); ?> </label>
                 </div>
 
-                <label class="col-sm-2 control-label" for="kassa-success-order-status">
+                <label class="col-sm-2 control-label" for="kassa-hold-order-status">
                     <?php echo $language->get('kassa_hold_order_status_label'); ?>
                 </label>
 
@@ -231,7 +231,7 @@
                         <?php endforeach; ?>
                     </select>
                 </div>
-                <label class="col-sm-2 control-label" for="kassa-success-order-status">
+                <label class="col-sm-2 control-label" for="kassa-cancel-order-status">
                     <?php echo $language->get('kassa_cancel_order_status_label'); ?>
                 </label>
                 <div class="col-sm-10">
@@ -369,11 +369,11 @@
                 </label>
                 <div class="col-sm-10">
                     <label style="font-weight: 600; padding-top: 9px; cursor: pointer" class="form-check-label">
-                        <input style="vertical-align:middle;margin:-2px 3px 0 0;cursor: pointer" type="radio" name="yandex_money_kassa_second_receipt_enable" value="1" class="form-check-input" <?= $kassa->isSecondReceipt() ? "checked" : '' ?>/>
+                        <input style="vertical-align:middle;margin:-2px 3px 0 0;cursor: pointer" type="radio" id="kassa-second-receipt-enable-on" name="yandex_money_kassa_second_receipt_enable" value="1" class="form-check-input" <?= $kassa->isSecondReceipt() ? "checked" : '' ?>/>
                         <?php echo $language->get('kassa_second_receipt_enable'); ?>
                     </label>
                     <label style="font-weight: 600; margin-left: 10px; cursor: pointer" class="form-check-label">
-                        <input style="vertical-align:middle;margin:-2px 3px 0 0;cursor: pointer" type="radio" name="yandex_money_kassa_second_receipt_enable" value="0" class="form-check-input" <?= $kassa->isSecondReceipt() ? '' : "checked" ?>/>
+                        <input style="vertical-align:middle;margin:-2px 3px 0 0;cursor: pointer" type="radio" id="kassa-second-receipt-enable-off" name="yandex_money_kassa_second_receipt_enable" value="0" class="form-check-input" <?= $kassa->isSecondReceipt() ? '' : "checked" ?>/>
                         <?php echo $language->get('kassa_second_receipt_disable'); ?>
                     </label>
                 </div>
@@ -388,7 +388,7 @@
                                 </label>
                             </td>
                             <td style="border: none">
-                                <select name="yandex_money_kassa_second_receipt_status" class="form-control col-xl-4 col-md-4" data-toggle="tooltip" data-placement="left" title="">
+                                <select id="kassa-second-receipt-status" name="yandex_money_kassa_second_receipt_status" class="form-control col-xl-4 col-md-4" data-toggle="tooltip" data-placement="left" title="">
                                     <?php foreach ($orderStatuses as $id => $status) : ?>
                                     <option value="<?php echo $id; ?>"<?php echo ($id != $kassa->getSecondReceiptStatus() ?: ' selected="selected"'); ?>><?php echo htmlspecialchars($status); ?></option>
                                     <?php endforeach; ?>
@@ -415,7 +415,7 @@
         <div class="form-group">
             <label class="col-sm-2 control-label"><?php echo $language->get('kassa_show_url_link');?></label>
             <div class="col-sm-10">
-                <select id="kassa-debug-log" name="yandex_money_kassa_show_in_footer" class="form-control">
+                <select id="kassa-show-in-footer" name="yandex_money_kassa_show_in_footer" class="form-control">
                     <option value="off" <?php echo ($kassa->getShowLinkInFooter() ? '' : 'selected'); ?>><?php echo $language->get('kassa_debug_log_off'); ?></option>
                     <option value="on" <?php echo ($kassa->getShowLinkInFooter() ? 'selected' : ''); ?>><?php echo $language->get('kassa_debug_log_on'); ?></option>
                 </select>

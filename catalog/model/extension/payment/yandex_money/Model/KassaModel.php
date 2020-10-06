@@ -374,7 +374,7 @@ class KassaModel extends AbstractPaymentModel
      */
     public function getB2bRateList()
     {
-        return array(VatDataType::UNTAXED, VatDataRate::RATE_7, VatDataRate::RATE_10, VatDataRate::RATE_18);
+        return array(VatDataType::UNTAXED, VatDataRate::RATE_7, VatDataRate::RATE_10, VatDataRate::RATE_18, VatDataRate::RATE_20);
     }
 
     /**
