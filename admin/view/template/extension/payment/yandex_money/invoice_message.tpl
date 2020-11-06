@@ -151,7 +151,7 @@
                                     <tr>
                                         <td>
                                             <span>
-                                            <font color="#999999" size="2" face="Arial"><?php echo $language->get('invoice_footer_text')?><a href="https://github.com/yandex-money/yandex-money-cms-opencart2" target="_blank" style="font-weight:normal;text-decoration:none;cursor:pointer;">
+                                            <font color="#999999" size="2" face="Arial"><?php echo $language->get('invoice_footer_text')?><a href="https://github.com/yoomoney/yandex-money-ycms-v2-opencart" target="_blank" style="font-weight:normal;text-decoration:none;cursor:pointer;">
                                                     <font color="#666699" size="2" face="Arial"><?php echo $language->get('invoice_footer_text_ycms')?></font>
                                                 </a>
                                             </font>

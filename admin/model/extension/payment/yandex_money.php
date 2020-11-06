@@ -2,7 +2,7 @@
 
 class ModelExtensionPaymentYandexMoney extends Model
 {
-    const MODULE_VERSION = '1.9.2';
+    const MODULE_VERSION = '1.9.3';
 
     private $kassaModel;
     private $walletModel;
@@ -13,7 +13,7 @@ class ModelExtensionPaymentYandexMoney extends Model
     private $backupDirectory = 'yandex_money/backup';
     private $versionDirectory = 'yandex_money/updates';
     private $downloadDirectory = 'yandex_money';
-    private $repository = 'yandex-money/yandex-money-ycms-v2-opencart';
+    private $repository = 'yoomoney/yandex-money-ycms-v2-opencart';
 
     public function install()
     {
@@ -384,7 +384,7 @@ class ModelExtensionPaymentYandexMoney extends Model
             $builder->setAmount($amount)
                     ->setCurrency(\YandexCheckout\Model\CurrencyCode::RUB)
                     ->setPaymentId($payment->getId())
-                    ->setComment($comment);
+                    ->setDescription($comment);
             $request = $builder->build();
         } catch (Exception $e) {
             $this->log('error', 'Failed to create refund: '.$e->getMessage());
