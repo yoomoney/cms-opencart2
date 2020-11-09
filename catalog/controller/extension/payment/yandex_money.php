@@ -877,6 +877,10 @@ class ControllerExtensionPaymentYandexMoney extends Controller
                     ->setStore($this->getConfig("available_store", $statusId) === 'on');
             }
 
+            if ($product['minimum']) {
+                $offer->setSalesNotes('Минимальный заказ — ' . $product['minimum'] . ' шт.');
+            }
+            
             $offer->setPrice(round(floatval($product['price']), 2));
             if ($product['special'] && $product['special'] < $product['price']) {
                 $offer->setOldPrice($offer->getPrice());
