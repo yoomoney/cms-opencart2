@@ -26,7 +26,7 @@ require_once dirname(__FILE__).DIRECTORY_SEPARATOR.'yoomoney'.DIRECTORY_SEPARATO
  */
 class ModelExtensionPaymentYoomoney extends Model
 {
-    const MODULE_VERSION = '2.0.0';
+    const MODULE_VERSION = '2.0.1';
 
     private $kassaModel;
     private $walletModel;
