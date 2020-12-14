@@ -13,7 +13,7 @@ use YooKassa\Model\PaymentStatus;
 class ControllerExtensionPaymentYoomoney extends Controller
 {
     const MODULE_NAME = 'yoomoney';
-    const MODULE_VERSION = '2.0.0';
+    const MODULE_VERSION = '2.0.1';
 
     const WIDGET_INSTALL_STATUS_SUCCESS = true;
     const WIDGET_INSTALL_STATUS_FAIL    = false;
@@ -93,6 +93,8 @@ class ControllerExtensionPaymentYoomoney extends Controller
             } else {
                 $this->saveValidationErrors();
             }
+
+            $this->model_setting_setting->editSetting(self::MODULE_NAME, $this->request->post);
 
             $this->session->data['success']         = $this->language->get('kassa_text_success');
             $this->session->data['last-active-tab'] = $data['lastActiveTab'];
@@ -270,7 +272,7 @@ class ControllerExtensionPaymentYoomoney extends Controller
     public function vote_nps()
     {
         $this->load->model('setting/setting');
-        $this->model_setting_setting->editSettingValue('yoomoney', 'yoomoney_nps_prev_vote_time', time());
+        $this->model_setting_setting->editSettingValue(self::MODULE_NAME, 'yoomoney_nps_prev_vote_time', time());
     }
 
     public function logs()
@@ -495,7 +497,6 @@ class ControllerExtensionPaymentYoomoney extends Controller
             $request->post['yoomoney_sort_order'] = $request->post['yoomoney_wallet_sort_order'];
         }
         $request->post['yoomoney_status'] = $enabled;
-
 
         return empty($this->error);
     }
