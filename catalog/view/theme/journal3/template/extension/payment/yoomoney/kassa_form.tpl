@@ -236,8 +236,8 @@
         //--></script>
     <?php if ($kassa->showInstallmentsBlock()): ?>
         <script>
-            if (typeof YandexCheckoutCreditUI !== "undefined") {
-                const yoomoneyCheckoutCreditUI = YandexCheckoutCreditUI({
+            if (typeof CheckoutCreditUI !== "undefined") {
+                const yoomoneyCheckoutCreditUI = CheckoutCreditUI({
                     shopId: '<?= $shopId?>',
                     sum: '<?= $sum?>',
                     language: '<?= $language->get("code")?>'
