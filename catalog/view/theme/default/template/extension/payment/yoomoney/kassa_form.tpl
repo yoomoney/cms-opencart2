@@ -105,126 +105,127 @@
         </div>
         <?php endif; ?>
     </form>
-    <div id="payment-form"></div>
+    <div id="payment-form" style="display: none;"></div>
     <script src="https://yookassa.ru/checkout-ui/v2.js"></script>
     <script type="text/javascript"><!--
-        jQuery(document).ready(function() {
-            var paymentType = jQuery('input[name=kassa_payment_method]');
-            paymentType.change(function () {
-                var id = '#payment-' + jQuery(this).val();
-                jQuery('.additional').css('display', 'none');
-                jQuery(id).css('display', 'block');
-            });
+        var paymentType = jQuery('input[name=kassa_payment_method]');
+        paymentType.change(function () {
+            var id = '#payment-' + jQuery(this).val();
+            jQuery('.additional').css('display', 'none');
+            jQuery(id).css('display', 'block');
+        });
 
-            var continueButton = jQuery('#continue-button');
-            continueButton.off('click').on('click', function (event) {
-                event.preventDefault();
-                createPayment();
-            });
+        var continueButton = jQuery('#continue-button');
+        continueButton.off('click').on('click', function (event) {
+            event.preventDefault();
+            createPayment();
+        });
 
-            jQuery('.yoomoney-payment-form-installments').on('submit', function (e) {
-                e.preventDefault();
-                e.stopPropagation();
-                const form = this;
-                jQuery.ajax({
-                    url: "<?php echo $validate_url; ?>",
-                    dataType: "json",
-                    method: "GET",
-                    data: {
-                        paymentType: 'installments',
-                    },
-                    success: function (data) {
-                        if (data.success) {
-                            document.location = data.redirect;
-                        } else {
-                            onValidateError(data.error);
-                        }
-                    },
-                    failure: function () {
-                        onValidateError('Failed to create payment');
+        jQuery('.yoomoney-payment-form-installments').on('submit', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const form = this;
+            jQuery.ajax({
+                url: "<?php echo $validate_url; ?>",
+                dataType: "json",
+                method: "GET",
+                data: {
+                    paymentType: 'installments',
+                },
+                success: function (data) {
+                    if (data.success) {
+                        document.location = data.redirect;
+                    } else {
+                        onValidateError(data.error);
                     }
-                });
+                },
+                failure: function () {
+                    onValidateError('Failed to create payment');
+                }
             });
+        });
 
-            function createPayment() {
-                var form = jQuery("#yoomoney-payment-form")[0];
-
-                jQuery.ajax({
-                    url: "<?php echo $validate_url; ?>",
-                    dataType: "json",
-                    method: "GET",
-                    data: {
-                        paymentType: form.kassa_payment_method.value,
-                        qiwiPhone: (form.qiwiPhone ? form.qiwiPhone.value : ''),
-                        alphaLogin: (form.alfaLogin ? form.alfaLogin.value : '')
-                    },
-                    beforeSend: function() {
-                        continueButton.button('loading');
-                    },
-                    success: function (data) {
-                        if (data.success) {
-                            if (data.token) {
-                                jQuery('#payment-form').empty();
-                                initWidget(data);
-                            } else {
-                                document.location = data.redirect;
-                            }
+        function createPayment() {
+            var form = jQuery("#yoomoney-payment-form")[0];
+            jQuery('#payment-form').hide();
+            jQuery.ajax({
+                url: "<?php echo $validate_url; ?>",
+                dataType: "json",
+                method: "GET",
+                data: {
+                    paymentType: form.kassa_payment_method.value,
+                    qiwiPhone: (form.qiwiPhone ? form.qiwiPhone.value : ''),
+                    alphaLogin: (form.alfaLogin ? form.alfaLogin.value : '')
+                },
+                beforeSend: function() {
+                    continueButton.button('loading');
+                },
+                success: function (data) {
+                    if (data.success) {
+                        if (data.token) {
+                            initWidget(data);
                         } else {
-                            onValidateError(data.error);
-                            continueButton.button('reset');
+                            document.location = data.redirect;
                         }
-                    },
-                    failure: function () {
-                        onValidateError('Failed to create payment');
+                    } else {
+                        onValidateError(data.error);
                         continueButton.button('reset');
                     }
-                });
-            }
+                },
+                failure: function () {
+                    onValidateError('Failed to create payment');
+                    continueButton.button('reset');
+                }
+            });
+        }
 
-            function initWidget(data) {
-                const checkout = new window.YooKassa({
-                    confirmation_token: data.token,
-                    return_url: data.redirect,
-                    embedded_3ds: true,
-                    error_callback(error) {
-                        if (error.error === 'token_expired') {
-                            resetToken();
-                            createPayment();
-                        }
+        function initWidget(data) {
+            jQuery('#payment-form').empty();
+
+            const checkout = new window.YooMoneyCheckoutWidget({
+                confirmation_token: data.token,
+                return_url: data.redirect,
+                embedded_3ds: true,
+                error_callback(error) {
+                    if (error.error === 'token_expired') {
+                        resetToken();
+                        createPayment();
                     }
-                });
+                }
+            });
 
-                checkout.render('payment-form');
-            }
+            checkout.render('payment-form');
+            jQuery('#yoomoney-payment-form').hide();
+            jQuery('#payment-form').show();
+        }
 
-            function resetToken() {
-                jQuery.ajax({
-                    url: "<?php echo $reset_token_url; ?>",
-                    dataType: "json",
-                    method: "GET",
-                    failure: function () {
-                        onValidateError("Failed to reset token");
-                    }
-                });
-            }
+        function resetToken() {
+            jQuery.ajax({
+                url: "<?php echo $reset_token_url; ?>",
+                dataType: "json",
+                method: "GET",
+                failure: function () {
+                    onValidateError("Failed to reset token");
+                }
+            });
+        }
 
-            function onValidateError(errorMessage) {
-                var warning = jQuery('#yoomoney-payment-form .alert');
-                if (warning.length > 0) {
-                    warning.fadeOut(300, function () {
-                        warning.remove();
-                        var content = '<div class="alert alert-danger">' + errorMessage + '<button type="button" class="close" data-dismiss="alert">×</button></div>';
-                        jQuery('#yoomoney-payment-form').prepend(content);
-                        jQuery('#yoomoney-payment-form .alert').fadeIn(300);
-                    });
-                } else {
+        function onValidateError(errorMessage) {
+            var warning = jQuery('#yoomoney-payment-form .alert');
+            if (warning.length > 0) {
+                warning.fadeOut(300, function () {
+                    warning.remove();
                     var content = '<div class="alert alert-danger">' + errorMessage + '<button type="button" class="close" data-dismiss="alert">×</button></div>';
                     jQuery('#yoomoney-payment-form').prepend(content);
                     jQuery('#yoomoney-payment-form .alert').fadeIn(300);
-                }
+                });
+            } else {
+                var content = '<div class="alert alert-danger">' + errorMessage + '<button type="button" class="close" data-dismiss="alert">×</button></div>';
+                jQuery('#yoomoney-payment-form').prepend(content);
+                jQuery('#yoomoney-payment-form .alert').fadeIn(300);
             }
+        }
 
-        });
         //--></script>
     <?php if ($kassa->showInstallmentsBlock()): ?>
         <script>
