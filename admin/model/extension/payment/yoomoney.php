@@ -2,7 +2,7 @@
 
 class ModelExtensionPaymentYoomoney extends Model
 {
-    const MODULE_VERSION = '2.0.3';
+    const MODULE_VERSION = '2.0.4';
 
     private $kassaModel;
     private $walletModel;

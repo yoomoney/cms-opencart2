@@ -13,7 +13,7 @@ use YooKassa\Model\PaymentStatus;
 class ControllerExtensionPaymentYoomoney extends Controller
 {
     const MODULE_NAME = 'yoomoney';
-    const MODULE_VERSION = '2.0.3';
+    const MODULE_VERSION = '2.0.4';
 
     const WIDGET_INSTALL_STATUS_SUCCESS = true;
     const WIDGET_INSTALL_STATUS_FAIL    = false;
@@ -898,7 +898,7 @@ class ControllerExtensionPaymentYoomoney extends Controller
             $mail->setSender($this->config->get('config_email'));
             $mail->setSubject($subject);
             $mail->addAttachment(DIR_CATALOG.'view/theme/default/image/yoomoney_buttons.png');
-            if ($logo != '') {
+            if ($kassa->getSendInvoiceLogo() && $logo != '') {
                 $mail->addAttachment($logo);
             }
             $mail->setHtml($message);
