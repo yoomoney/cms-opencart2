@@ -16,14 +16,15 @@
                                 <table cellpadding="0" cellspacing="0" width="100%" height="auto" style="border-collapse:collapse;">
                                     <tbody>
                                     <tr>
+
                                         <td style="padding:15px 25px;">
                                             <a href="https://yookassa.ru/?_openstat=mail%3Bmy%3Binvoice_p%3Blogo" target="_blank" style="font-weight:normal;text-decoration:none;cursor:pointer;">
                                                 <font color="#4d7fd2" face="Arial" size="3">
-                                                    <img src="https://yoomoney.ru/i/html-letters/header__logo_theme_office.png" width="143" height="38" alt="ЮKassa" title="ЮKassa" style="border:0;vertical-align:middle;">
+                                                    <img src="https://yoomoney.ru/i/html-letters/header__logo_theme_kassa.png" width="146" height="38" alt="ЮKassa" title="ЮKassa" style="border:0;vertical-align:middle;">
                                                 </font>
                                             </a>
                                         </td>
-                                        <?php if ($b_logo===true && !empty($shop_logo)){ ?>
+                                        <?php if ($b_logo===true && !empty($shop_logo)) { ?>
                                         <td style="padding:15px 25px;" align="right">
                                             <a href="<?php echo $shop_url; ?>" target="_blank" style="font-weight:normal;text-decoration:none;cursor:pointer;">
                                                 <font color="#4d7fd2" face="Arial" size="3">
@@ -52,11 +53,11 @@
                                 </p>
                                 <p style="font-weight:normal;line-height:21px;padding:0;margin:0;margin-bottom:15px;">
                                     <font color="#000000" face="Arial" size="3">
-                                        <?php echo sprintf($language->get('invoice_thanks'), $shop_name, $order_id);?>.
+                                        <?php echo sprintf($language->get('invoice_thanks'), $shop_name, $order_id);?>
                                     </font>
                                 </p>
                                 <div>
-                                    <img src="https://yoomoney.ru/i/html-letters/margin-block.png" width="100%" height="13" style="border:0;background:#ffffff;">
+                                    <img src="https://yoomoney.ru/i/html-letters/margin-block.png" width="560" height="13" style="border:0;background:#ffffff;">
                                 </div>
                                 <h2 style="font-weight:normal;line-height:normal;padding:0;margin:0;margin-bottom:10px;font-weight:bold;">
                                     <font size="4" color="#000000" face="Arial"><?php echo $language->get('invoice_receipt_header');?></font>
@@ -84,9 +85,11 @@
                                     <tr>
                                         <td>
                                             <div>
-                                                <img src="https://yoomoney.ru/i/html-letters/margin-block.png" width="100%" height="10" style="border:0;background:#ffffff;">
+                                                <img src="https://yoomoney.ru/i/html-letters/margin-block.png" width="384" height="10" style="border:0;background:#ffffff;">
                                             </div>
                                         </td>
+                                        <td></td>
+                                        <td></td>
                                     </tr>
                                     </tbody>
                                 </table>
@@ -109,9 +112,11 @@
                                     <tr>
                                         <td>
                                             <div>
-                                                <img src="https://yoomoney.ru/i/html-letters/margin-block.png" width="100%" height="25" style="border:0;background:#ffffff;">
+                                                <img src="https://yoomoney.ru/i/html-letters/margin-block.png" width="384" height="25" style="border:0;background:#ffffff;">
                                             </div>
                                         </td>
+                                        <td></td>
+                                        <td></td>
                                     </tr>
                                     </tbody>
                                 </table>
@@ -121,14 +126,14 @@
                                 </div>
                                 <?php } ?>
                                 <div>
-                                    <img src="https://yoomoney.ru/i/html-letters/margin-block.png" width="100%" height="25" style="border:0;background:#ffffff;">
+                                    <img src="https://yoomoney.ru/i/html-letters/margin-block.png" width="560" height="25" style="border:0;background:#ffffff;">
                                 </div>
                                 <table cellpadding="0" cellspacing="0" width="100%" height="auto" style="border-collapse:collapse;">
                                     <tbody>
                                     <tr>
                                         <td style="padding-bottom:16px;">
 
-                                            <table border="0" cellspacing="1" align="center"  width = "80%">
+                                            <table border="0" cellspacing="1" align="center"  width="80%">
                                                 <tr>
                                                     <td align="center">
                                                         <div>
@@ -144,14 +149,14 @@
                                     </tbody>
                                 </table>
                                 <div>
-                                    <img src="https://yoomoney.ru/i/html-letters/margin-block.png" width="100%" height="45" style="border:0;background:#ffffff;">
+                                    <img src="https://yoomoney.ru/i/html-letters/margin-block.png" width="560" height="45" style="border:0;background:#ffffff;">
                                 </div>
                                 <table cellpadding="0" cellspacing="0" width="100%" height="auto" style="border-collapse:collapse;">
                                     <tbody>
                                     <tr>
                                         <td>
                                             <span>
-                                            <font color="#999999" size="2" face="Arial"><?php echo $language->get('invoice_footer_text')?><a href="https://github.com/yoomoney/yoomoney-yoomoney-v2-opencart" target="_blank" style="font-weight:normal;text-decoration:none;cursor:pointer;">
+                                            <font color="#999999" size="2" face="Arial"><?php echo $language->get('invoice_footer_text')?><a href="https://github.com/yoomoney/cms-opencart2" target="_blank" style="font-weight:normal;text-decoration:none;cursor:pointer;">
                                                     <font color="#666699" size="2" face="Arial"><?php echo $language->get('invoice_footer_text_yoomoney')?></font>
                                                 </a>
                                             </font>
