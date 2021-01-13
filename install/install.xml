@@ -2,8 +2,9 @@
 <modification>
     <name>YooMoney for Opencart 2.0.x - 2.3.x</name>
     <code>yoomoney</code>
-    <version>2.0.3</version>
+    <version>2.0.5</version>
     <author>YooMoney</author>
+    <link>https://github.com/yoomoney/cms-opencart3</link>
     <!-- Вставка кнопки в историю заказов-->
     <file path="catalog/controller/account/order.php">
         <operation>
@@ -36,7 +37,7 @@
         $result = array();
         $orderIds = array();
         foreach ($query->rows as $record) {
-            if ($record['payment_code'] === 'yoomoney') {
+            if (isset($record['payment_code']) && $record['payment_code'] === 'yoomoney') {
                 $orderIds[] = $record['order_id'];
             }
             $result[$record['order_id']] = $record;
@@ -92,7 +93,7 @@
         <operation>
             <search><![CDATA['shipping_code' => $result['shipping_code'],]]></search>
             <add position="after"><![CDATA[
-                'payment_code'   => $this->config->get('yoomoney_kassa_enabled') && $this->config->get('yoomoney_kassa_invoice') ? $result['payment_code'] : '',
+                'payment_code'   => $this->config->get('yoomoney_kassa_enabled') && $this->config->get('yoomoney_kassa_invoice') && isset($result['payment_code']) ? $result['payment_code'] : '',
                 'payment_status' => (isset($result['yoomoney_payment_status']) ? $result['yoomoney_payment_status'] : ''),
                 'email'          => (isset($result['email']) && $this->config->get('yoomoney_kassa_enabled')) ? $result['email'] : '',
                 'refund_amount'  => (isset($result['refund_amount']) ? $result['refund_amount'] : ''),
