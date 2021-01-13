@@ -17,7 +17,7 @@ use YooKassa\Request\Receipts\ReceiptResponseItemInterface;
 
 class KassaSecondReceiptModel
 {
-    const MODULE_VERSION = '2.0.4';
+    const MODULE_VERSION = '2.0.5';
 
     /**
      * @var \Config
