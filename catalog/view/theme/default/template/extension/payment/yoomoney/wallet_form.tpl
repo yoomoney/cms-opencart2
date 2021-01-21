@@ -61,16 +61,25 @@
     </div>
     <script type="text/javascript"><!--
     jQuery('#button-confirm').on('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var yooForm = jQuery('#paymentForm');
         $.ajax({
-            type: 'get',
+            type: 'post',
             url: '<?php echo $validate_url; ?>',
-            data: {
-                payment_type: jQuery('#paymentForm')[0]['paymentType'].value
-            },
+            data: yooForm.serialize(),
             cache: false,
-            success: function() {
-                jQuery('#paymentForm').submit();
+            dataType: 'json'
+        }).done(function(data) {
+            if (data.success) {
+                yooForm.submit();
+            } else {
+                console.error('YooMoney error: ' + data.error);
+                return false;
             }
+        }).fail(function(jqXHR, textStatus) {
+            console.error( "Request failed: " + textStatus );
+            return false;
         });
     });
     //--></script>
