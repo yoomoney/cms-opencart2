@@ -20,7 +20,7 @@ class ControllerExtensionPaymentYoomoney extends Controller
 {
     /** @var string */
     const MODULE_NAME = 'yoomoney';
-    const MODULE_VERSION = '2.0.6';
+    const MODULE_VERSION = '2.0.7';
 
     const INSTALLMENTS_MIN_AMOUNT = 3000;
 
@@ -415,7 +415,12 @@ class ControllerExtensionPaymentYoomoney extends Controller
             $this->load->model('checkout/order');
             $order_info = $this->model_checkout_order->getOrder($this->session->data['order_id']);
             $this->getModel()->log('info', 'post: ' . print_r(array($order_info, $_POST), true));
-            if ((float)$_POST['sum'] != (float)$order_info['total']) {
+            if ($this->currency->has('RUB')) {
+                $orderAmount = sprintf('%.2f', $this->currency->format($order_info['total'], 'RUB', '', false));
+            } else {
+                $orderAmount = sprintf('%.2f', $this->getModel()->convertFromCbrf($order_info, 'RUB'));
+            }
+            if ((float)$_POST['sum'] != (float)$orderAmount) {
                 $this->jsonError('Invalid total amount');
             }
 
@@ -423,10 +428,8 @@ class ControllerExtensionPaymentYoomoney extends Controller
                 $url     = $this->url->link($this->getPrefix().'payment/yoomoney/repay',
                     'order_id='.$this->session->data['order_id'], true);
                 $comment = '<a href="'.$url.'" class="button">'.$this->language->get('text_repay').'</a>';
-                if (!empty($this->model_checkout_order)) {
-                    $this->getModel()->log('info', 'create order - ' . $this->session->data['order_id']);
-                    $this->model_checkout_order->addOrderHistory($this->session->data['order_id'], 1, $comment);
-                }
+                $this->getModel()->log('info', 'Create order - ' . $this->session->data['order_id']);
+                $this->model_checkout_order->addOrderHistory($this->session->data['order_id'], 1, $comment);
             }
 
             if ($paymentModel->getClearCartBeforeRedirect()) {
