@@ -291,6 +291,7 @@
                     $this->load->model($prefix.'payment/yoomoney');
                     $data['cost'] = $this->{'model_'.str_replace('/', '_', $prefix).'payment_yoomoney'}->convertFromCbrf(array('total' => $cost), 'RUB');
                 }
+                $data['yoomoney_showInstallmentsBlock'] = $data['yoomoney_showInstallmentsBlock'] && ($data['cost'] >= 3000);
             ]]></add>
         </operation>
     </file>

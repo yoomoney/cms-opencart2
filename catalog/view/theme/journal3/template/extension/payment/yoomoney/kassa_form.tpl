@@ -194,7 +194,7 @@
                 confirmation_token: data.token,
                 return_url: data.redirect,
                 embedded_3ds: true,
-                error_callback(error) {
+                error_callback: function(error) {
                     if (error.error === 'token_expired') {
                         resetToken();
                         createPayment();
