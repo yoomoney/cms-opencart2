@@ -3,24 +3,39 @@
 
 namespace YooMoneyModule\Model;
 
+use Config;
+use Exception;
+use Log;
 use Session;
 use YooKassa\Client;
+use YooKassa\Common\Exceptions\ApiException;
+use YooKassa\Common\Exceptions\BadApiRequestException;
+use YooKassa\Common\Exceptions\ExtensionNotFoundException;
+use YooKassa\Common\Exceptions\ForbiddenException;
+use YooKassa\Common\Exceptions\InternalServerError;
+use YooKassa\Common\Exceptions\NotFoundException;
+use YooKassa\Common\Exceptions\ResponseProcessingException;
+use YooKassa\Common\Exceptions\TooManyRequestsException;
+use YooKassa\Common\Exceptions\UnauthorizedException;
 use YooKassa\Model\PaymentInterface;
+use YooKassa\Model\PaymentStatus;
 use YooKassa\Model\Receipt\PaymentMode;
 use YooKassa\Model\ReceiptCustomer;
 use YooKassa\Model\ReceiptItem;
 use YooKassa\Model\ReceiptType;
 use YooKassa\Model\Settlement;
 use YooKassa\Request\Receipts\CreatePostReceiptRequest;
+use YooKassa\Request\Receipts\PaymentReceiptResponse;
 use YooKassa\Request\Receipts\ReceiptResponseInterface;
+use YooKassa\Request\Receipts\ReceiptResponseItem;
 use YooKassa\Request\Receipts\ReceiptResponseItemInterface;
 
 class KassaSecondReceiptModel
 {
-    const MODULE_VERSION = '2.0.7';
+    const MODULE_VERSION = '2.0.8';
 
     /**
-     * @var \Config
+     * @var Config
      */
     private $config;
 
@@ -117,7 +132,18 @@ class KassaSecondReceiptModel
             return false;
         }
 
-        $receiptRequest = $this->buildSecondReceipt($this->getLastReceipt($this->paymentInfo->getid()), $this->paymentInfo, $this->orderInfo);
+        try {
+            $lastReceipt = $this->getLastReceipt($this->paymentInfo->getid());
+        } catch (Exception $e) {
+            $this->log("error", "Get last receipt error: " . $e->getMessage());
+            return false;
+        }
+
+        if (empty($lastReceipt)) {
+            return false;
+        }
+
+        $receiptRequest = $this->buildSecondReceipt($lastReceipt, $this->paymentInfo, $this->orderInfo);
 
         if (!empty($receiptRequest)) {
 
@@ -125,7 +151,7 @@ class KassaSecondReceiptModel
 
             try {
                 $response = $this->getClient()->createReceipt($receiptRequest);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $this->log("error", "Request second receipt error: " . $e->getMessage());
                 return false;
             }
@@ -211,7 +237,7 @@ class KassaSecondReceiptModel
                     ->setSend(true);
 
                 return $receiptBuilder->build();
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $this->log("error", $e->getMessage() . ". Property name:". $e->getProperty());
             }
         } else {
@@ -230,7 +256,7 @@ class KassaSecondReceiptModel
             return false;
         }
 
-        if ($paymentInfo->getStatus() !== \YooKassa\Model\PaymentStatus::SUCCEEDED) {
+        if ($paymentInfo->getStatus() !== PaymentStatus::SUCCEEDED) {
             $this->log("error", "Fail send second receipt payment have incorrect status: " . $paymentInfo->getStatus());
             return false;
         }
@@ -257,6 +283,7 @@ class KassaSecondReceiptModel
 
         return new ReceiptCustomer($customerData);
     }
+
     /**
      * @param $statusId
      * @return bool
@@ -275,20 +302,95 @@ class KassaSecondReceiptModel
     }
 
     /**
-     * @param $paymentId
+     * @param string $paymentId
      * @return mixed|ReceiptResponseInterface
+     * @throws ApiException
+     * @throws BadApiRequestException
+     * @throws ExtensionNotFoundException
+     * @throws ForbiddenException
+     * @throws InternalServerError
+     * @throws NotFoundException
+     * @throws ResponseProcessingException
+     * @throws TooManyRequestsException
+     * @throws UnauthorizedException
+     * @throws Exception
      */
     private function getLastReceipt($paymentId)
     {
-        try {
-            $receipts = $this->getClient()->getReceipts(array(
-                'payment_id' => $paymentId,
-            ))->getItems();
-        } catch (\Exception $e) {
-            $this->log("error", "Fail get receipt message: " . $e->getMessage());
+        $paymentReceipts = $this->getClient()->getReceipts(array('payment_id' => $paymentId))->getItems();
+        $lastPaymentReceipt = array_shift($paymentReceipts);
+
+        if ($lastPaymentReceipt) {
+            $refundReceipts = $this->getRefundReceipts($paymentId);
+            if (count($refundReceipts)) {
+                return $this->createNewPaymentReceipt($lastPaymentReceipt, $refundReceipts);
+            } else {
+                return $lastPaymentReceipt;
+            }
         }
 
-        return array_shift($receipts);
+        return null;
+    }
+
+    /**
+     * @param string $paymentId
+     * @return ReceiptResponseInterface[]
+     * @throws ApiException
+     * @throws BadApiRequestException
+     * @throws ExtensionNotFoundException
+     * @throws ForbiddenException
+     * @throws InternalServerError
+     * @throws NotFoundException
+     * @throws ResponseProcessingException
+     * @throws TooManyRequestsException
+     * @throws UnauthorizedException
+     */
+    private function getRefundReceipts($paymentId)
+    {
+        $refundReceipts = array();
+        $refunds = $this->getClient()->getRefunds(array('payment_id' => $paymentId))->getItems();
+        foreach ($refunds as $refund) {
+            $refundReceipts = array_merge(
+                $refundReceipts,
+                $this->getClient()->getReceipts(array('refund_id' => $refund->getId()))->getItems()
+            );
+        }
+        return $refundReceipts;
+    }
+
+    /**
+     * @param ReceiptResponseInterface $lastPaymentReceipt
+     * @param ReceiptResponseInterface[] $refundReceipts
+     * @return PaymentReceiptResponse
+     * @throws Exception
+     */
+    private function createNewPaymentReceipt($lastPaymentReceipt, $refundReceipts)
+    {
+        $newReceiptItems = array();
+        foreach ($lastPaymentReceipt->getItems() as $paymentReceiptItem) {
+            $newReceiptItem = new ReceiptResponseItem($paymentReceiptItem->jsonSerialize());
+            $newQuantity = $newReceiptItem->getQuantity();
+            foreach ($refundReceipts as $refundReceipt) {
+                foreach ($refundReceipt->getItems() as $refundReceiptItem) {
+                    if ($paymentReceiptItem->getDescription() == $refundReceiptItem->getDescription() &&
+                        $paymentReceiptItem->getPrice()->getValue() == $refundReceiptItem->getPrice()->getValue()) {
+                        $newQuantity -= $refundReceiptItem->getQuantity();
+                    }
+                }
+            }
+            if ($newQuantity > 0) {
+                $newReceiptItem->setQuantity($newQuantity);
+                $newReceiptItems[] = $newReceiptItem->jsonSerialize();
+            }
+        }
+        /** @var PaymentReceiptResponse $lastPaymentReceipt */
+        return new PaymentReceiptResponse([
+            'id' => $lastPaymentReceipt->getId(),
+            'payment_id' => $lastPaymentReceipt->getPaymentId(),
+            'type' => $lastPaymentReceipt->getType(),
+            'status' => $lastPaymentReceipt->getStatus(),
+            'items' => $newReceiptItems,
+        ]);
     }
 
     /**
@@ -322,7 +424,7 @@ class KassaSecondReceiptModel
     public function log($level, $message, $context = array())
     {
         if ($this->kassaModel->getDebugLog()) {
-            $log     = new \Log('yoomoney.log');
+            $log     = new Log('yoomoney.log');
             $search  = array();
             $replace = array();
             if (!empty($context)) {
