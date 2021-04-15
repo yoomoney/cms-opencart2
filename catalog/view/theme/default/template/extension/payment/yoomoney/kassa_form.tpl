@@ -115,10 +115,10 @@
             jQuery(id).css('display', 'block');
         });
 
-        var continueButton = jQuery('#continue-button');
-        continueButton.off('click').on('click', function (event) {
-            event.preventDefault();
-            createPayment();
+        var continueButton = '#continue-button';
+        jQuery(document).off('click.default', continueButton).on('click.default', continueButton, function (e) {
+            e.preventDefault();
+            createPayment(jQuery(this));
         });
 
         jQuery('.yoomoney-payment-form-installments').on('submit', function (e) {
@@ -145,7 +145,14 @@
             });
         });
 
-        function createPayment() {
+        function buttonAction(button, action) {
+            if (jQuery.fn.button && button) {
+                button.button(action);
+            }
+        }
+
+        function createPayment(button) {
+            button = button || null;
             var form = jQuery("#yoomoney-payment-form")[0];
             jQuery('#payment-form').hide();
             jQuery.ajax({
@@ -158,7 +165,7 @@
                     alphaLogin: (form.alfaLogin ? form.alfaLogin.value : '')
                 },
                 beforeSend: function() {
-                    continueButton.button('loading');
+                    buttonAction(button, 'loading');
                 },
                 success: function (data) {
                     if (data.success) {
@@ -169,12 +176,12 @@
                         }
                     } else {
                         onValidateError(data.error);
-                        continueButton.button('reset');
+                        buttonAction(button, 'reset');
                     }
                 },
                 failure: function () {
                     onValidateError('Failed to create payment');
-                    continueButton.button('reset');
+                    buttonAction(button, 'reset');
                 }
             });
         }
