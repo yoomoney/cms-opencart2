@@ -268,7 +268,7 @@
                 <div class="col-sm-10">
                     <select id="kassa-tax-rate-default" name="yoomoney_kassa_tax_rate_default" class="form-control">
                         <?php foreach ($kassaTaxRates as $id => $name) : ?>
-                        <option value="<?php echo $id; ?>"<?php echo $kassa->getDefaultTaxRate() == $id ? ' selected' : ''; ?>><?php echo $name; ?></option>
+                            <option value="<?php echo $id; ?>"<?php echo $kassa->getDefaultTaxRate() == $id ? ' selected' : ''; ?>><?php echo $name; ?></option>
                         <?php endforeach; ?>
                     </select>
                     <p class="help-block"><?php echo $language->get('kassa_tax_rate_default_description'); ?></p>
@@ -302,6 +302,21 @@
                         <?php endforeach; ?>
                         </tbody>
                     </table>
+                </div>
+            </div>
+
+            <div class="form-group receipt-only">
+                <label class="col-sm-2 control-label" for="kassa-tax-rate-default">
+                    <?php echo $language->get('kassa_tax_system_default_label'); ?>
+                </label>
+                <div class="col-sm-10">
+                    <select id="kassa-tax-system-default" name="yoomoney_kassa_tax_system_default" class="form-control">
+                        <option value="0">-</option>
+                        <?php foreach ($kassaTaxSystemCodes as $id => $name) : ?>
+                            <option value="<?php echo $id; ?>"<?php echo $kassa->getDefaultTaxSystemCode() == $id ? ' selected' : ''; ?>><?php echo $name; ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                    <p class="help-block"><?php echo $language->get('kassa_tax_system_default_description'); ?></p>
                 </div>
             </div>
 

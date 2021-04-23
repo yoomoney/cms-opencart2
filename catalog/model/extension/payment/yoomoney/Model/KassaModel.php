@@ -136,6 +136,11 @@ class KassaModel extends AbstractPaymentModel
     protected $b2bTaxRates;
 
     /**
+     * @var int
+     */
+    protected $defaultTaxSystemCode;
+
+    /**
      * @var string
      */
     protected $defaultPaymentMode;
@@ -201,11 +206,12 @@ class KassaModel extends AbstractPaymentModel
             }
         }
 
-        $this->isSendReceipt       = (bool)$this->getConfigValue('send_receipt');
-        $this->isSecondReceipt     = (bool)$this->getConfigValue('second_receipt_enable');
-        $this->secondReceiptStatus = (int)$this->getConfigValue('second_receipt_status');
-        $this->defaultTaxRate      = (int)$this->getConfigValue('tax_rate_default');
-        $this->isLog               = (bool)$this->getConfigValue('debug_log');
+        $this->isSendReceipt        = (bool)$this->getConfigValue('send_receipt');
+        $this->isSecondReceipt      = (bool)$this->getConfigValue('second_receipt_enable');
+        $this->secondReceiptStatus  = (int)$this->getConfigValue('second_receipt_status');
+        $this->defaultTaxRate       = (int)$this->getConfigValue('tax_rate_default');
+        $this->defaultTaxSystemCode = (int)$this->getConfigValue('tax_system_default');
+        $this->isLog                = (bool)$this->getConfigValue('debug_log');
 
         $this->taxRates = array();
         $tmp            = $this->getConfigValue('tax_rates');
@@ -358,6 +364,14 @@ class KassaModel extends AbstractPaymentModel
     /**
      * @return array
      */
+    public function getTaxSystemCodeList()
+    {
+        return array(1, 2, 3, 4, 5, 6);
+    }
+
+    /**
+     * @return array
+     */
     public function getB2bRateList()
     {
         return array(VatDataType::UNTAXED, VatDataRate::RATE_7, VatDataRate::RATE_10, VatDataRate::RATE_18, VatDataRate::RATE_20);
@@ -369,6 +383,14 @@ class KassaModel extends AbstractPaymentModel
     public function getDefaultTaxRate()
     {
         return $this->defaultTaxRate;
+    }
+
+    /**
+     * @return int
+     */
+    public function getDefaultTaxSystemCode()
+    {
+        return $this->defaultTaxSystemCode;
     }
 
     /**
