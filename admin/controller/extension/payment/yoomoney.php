@@ -13,7 +13,7 @@ use YooKassa\Model\PaymentStatus;
 class ControllerExtensionPaymentYoomoney extends Controller
 {
     const MODULE_NAME = 'yoomoney';
-    const MODULE_VERSION = '2.0.10';
+    const MODULE_VERSION = '2.1.0';
 
     const WIDGET_INSTALL_STATUS_SUCCESS = true;
     const WIDGET_INSTALL_STATUS_FAIL    = false;
@@ -117,13 +117,14 @@ class ControllerExtensionPaymentYoomoney extends Controller
             $this->applyValidationErrors($data);
         }
 
-        $data['module_version'] = self::MODULE_VERSION;
-        $data['breadcrumbs']    = $this->getBreadCrumbs();
-        $data['kassaTaxRates']  = $this->getKassaTaxRates();
-        $data['b2bTaxRates']    = $this->getB2bTaxRates();
-        $data['shopTaxRates']   = $this->getShopTaxRates();
-        $data['orderStatuses']  = $this->getAvailableOrderStatuses();
-        $data['geoZones']       = $this->getAvailableGeoZones();
+        $data['module_version']      = self::MODULE_VERSION;
+        $data['breadcrumbs']         = $this->getBreadCrumbs();
+        $data['kassaTaxSystemCodes'] = $this->getKassaTaxSystemCodes();
+        $data['kassaTaxRates']       = $this->getKassaTaxRates();
+        $data['b2bTaxRates']         = $this->getB2bTaxRates();
+        $data['shopTaxRates']        = $this->getShopTaxRates();
+        $data['orderStatuses']       = $this->getAvailableOrderStatuses();
+        $data['geoZones']            = $this->getAvailableGeoZones();
 
         if (isset($this->session->data['success-message'])) {
             $data['successMessage'] = $this->session->data['success-message'];
@@ -563,6 +564,10 @@ class ControllerExtensionPaymentYoomoney extends Controller
         $kassa->setDisplayName($value);
         $request->post['yoomoney_kassa_display_name'] = $kassa->getDisplayName();
 
+        $value = isset($request->post['yoomoney_kassa_tax_system_default']) ? $request->post['yoomoney_kassa_tax_system_default'] : 0;
+        $kassa->setDefaultTaxSystemCode($value);
+        $request->post['yoomoney_kassa_tax_system_default'] = $kassa->getDefaultTaxSystemCode();
+
         $value = isset($request->post['yoomoney_kassa_tax_rate_default']) ? $request->post['yoomoney_kassa_tax_rate_default'] : 1;
         $kassa->setDefaultTaxRate($value);
         $request->post['yoomoney_kassa_tax_rate_default'] = $kassa->getDefaultTaxRate();
@@ -724,6 +729,17 @@ class ControllerExtensionPaymentYoomoney extends Controller
         $result = array();
         foreach ($this->getModel()->getKassaModel()->getTaxRateList() as $taxRateId) {
             $key                = 'kassa_tax_rate_'.$taxRateId.'_label';
+            $result[$taxRateId] = $this->language->get($key);
+        }
+
+        return $result;
+    }
+
+    private function getKassaTaxSystemCodes()
+    {
+        $result = array();
+        foreach ($this->getModel()->getKassaModel()->getTaxSystemCodeList() as $taxRateId) {
+            $key                = 'kassa_tax_system_'.$taxRateId.'_label';
             $result[$taxRateId] = $this->language->get($key);
         }
 

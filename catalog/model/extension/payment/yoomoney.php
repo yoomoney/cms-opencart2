@@ -26,7 +26,7 @@ require_once dirname(__FILE__).DIRECTORY_SEPARATOR.'yoomoney'.DIRECTORY_SEPARATO
  */
 class ModelExtensionPaymentYoomoney extends Model
 {
-    const MODULE_VERSION = '2.0.10';
+    const MODULE_VERSION = '2.1.0';
 
     private $kassaModel;
     private $walletModel;
@@ -560,6 +560,7 @@ class ModelExtensionPaymentYoomoney extends Model
         }
         $taxRates                      = $this->config->get('yoomoney_kassa_tax_rates');
         $defaultVatCode                = $this->config->get('yoomoney_kassa_tax_rate_default');
+        $defaultTaxSystemCode          = $this->config->get('yoomoney_kassa_tax_system_default');
         $defaultPaymentMode            = $this->config->get('yoomoney_kassa_default_payment_mode');
         $defaultPaymentSubject         = $this->config->get('yoomoney_kassa_default_payment_subject');
         $defaultDeliveryPaymentMode    = $this->config->get('yoomoney_kassa_default_delivery_payment_mode');
@@ -583,6 +584,10 @@ class ModelExtensionPaymentYoomoney extends Model
                 $builder->addReceiptShipping(mb_substr($total['title'], 0, 128), $price, $defaultVatCode,
                     $defaultDeliveryPaymentMode, $defaultDeliveryPaymentSubject);
             }
+        }
+
+        if (!empty($defaultTaxSystemCode)) {
+            $builder->setTaxSystemCode($defaultTaxSystemCode);
         }
     }
 
