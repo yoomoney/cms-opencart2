@@ -306,7 +306,7 @@
             </div>
 
             <div class="form-group receipt-only">
-                <label class="col-sm-2 control-label" for="kassa-tax-rate-default">
+                <label class="col-sm-2 control-label" for="kassa-tax-system-default">
                     <?php echo $language->get('kassa_tax_system_default_label'); ?>
                 </label>
                 <div class="col-sm-10">
