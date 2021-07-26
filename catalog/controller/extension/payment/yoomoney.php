@@ -23,7 +23,7 @@ class ControllerExtensionPaymentYoomoney extends Controller
 {
     /** @var string */
     const MODULE_NAME = 'yoomoney';
-    const MODULE_VERSION = '2.1.2';
+    const MODULE_VERSION = '2.1.3';
 
     const INSTALLMENTS_MIN_AMOUNT = 3000;
 
