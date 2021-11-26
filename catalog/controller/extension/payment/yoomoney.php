@@ -23,7 +23,7 @@ class ControllerExtensionPaymentYoomoney extends Controller
 {
     /** @var string */
     const MODULE_NAME = 'yoomoney';
-    const MODULE_VERSION = '2.2.1';
+    const MODULE_VERSION = '2.2.2';
 
     const INSTALLMENTS_MIN_AMOUNT = 3000;
 
@@ -623,6 +623,7 @@ class ControllerExtensionPaymentYoomoney extends Controller
             );
             $this->response->redirect($this->url->link('account/login', '', true));
         }
+        $this->session->data['order_id'] = $this->request->get['order_id'];
         $this->load->model('account/order');
         $order = $this->model_account_order->getOrder((int)$this->request->get['order_id']);
         if (empty($order)) {
