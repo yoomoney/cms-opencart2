@@ -319,7 +319,6 @@
                     <p class="help-block"><?php echo $language->get('kassa_tax_system_default_description'); ?></p>
                 </div>
             </div>
-
             <div class="form-group receipt-only">
                 <label class="col-sm-2 control-label" >
                     <?php echo $language->get('kassa_default_payment_mode_label'); ?>
@@ -371,6 +370,36 @@
                     </select>
                 </div>
             </div>
+
+<!--Voucher-->
+            <p class="help-block receipt-only"><?php echo $language->get('kassa_voucher_default_description'); ?></p>
+            <div class="form-group receipt-only">
+                <label class="col-sm-2 control-label">
+                    <?php echo $language->get('kassa_voucher_payment_mode_default_label'); ?>
+                </label>
+                <div class="col-sm-10">
+                    <select id="kassa-voucher-payment-mode-default" name="yoomoney_kassa_default_voucher_payment_mode"
+                            class="form-control">
+                        <?php foreach ($kassa->getPaymentModeEnum() as $id => $name) : ?>
+                        <option value="<?php echo $id; ?>"<?php echo $kassa->getDefaultVoucherPaymentMode() == $id ? ' selected' : ''; ?>><?php echo $name; ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group receipt-only">
+                <label class="col-sm-2 control-label">
+                    <?php echo $language->get('kassa_voucher_payment_subject_default_label'); ?>
+                </label>
+                <div class="col-sm-10">
+                    <select id="kassa-voucher-payment-mode-default" name="yoomoney_kassa_default_voucher_payment_subject"
+                            class="form-control">
+                        <?php foreach ($kassa->getPaymentSubjectEnum() as $id => $name) : ?>
+                        <option value="<?php echo $id; ?>"<?php echo $kassa->getDefaultVoucherPaymentSubject() == $id ? ' selected' : ''; ?>><?php echo $name; ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </div>
+<!--End Voucher-->
 
             <div class="form-group receipt-only">
 

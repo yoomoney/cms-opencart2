@@ -26,7 +26,7 @@ require_once dirname(__FILE__).DIRECTORY_SEPARATOR.'yoomoney'.DIRECTORY_SEPARATO
  */
 class ModelExtensionPaymentYoomoney extends Model
 {
-    const MODULE_VERSION = '2.2.2';
+    const MODULE_VERSION = '2.2.3';
 
     private $kassaModel;
     private $walletModel;
@@ -565,6 +565,8 @@ class ModelExtensionPaymentYoomoney extends Model
         $defaultPaymentSubject         = $this->config->get('yoomoney_kassa_default_payment_subject');
         $defaultDeliveryPaymentMode    = $this->config->get('yoomoney_kassa_default_delivery_payment_mode');
         $defaultDeliveryPaymentSubject = $this->config->get('yoomoney_kassa_default_delivery_payment_subject');
+        $defaultVoucherPaymentMode     = $this->config->get('yoomoney_kassa_default_voucher_payment_mode');
+        $defaultVoucherPaymentSubject  = $this->config->get('yoomoney_kassa_default_voucher_payment_subject');
 
         $orderProducts = $this->model_account_order->getOrderProducts($orderInfo['order_id']);
         foreach ($orderProducts as $prod) {
@@ -575,6 +577,23 @@ class ModelExtensionPaymentYoomoney extends Model
                 : $defaultVatCode;
             $builder->addReceiptItem(mb_substr($prod['name'], 0, 128), $price, $prod['quantity'], $vatCode,
                 $defaultPaymentMode, $defaultPaymentSubject);
+        }
+
+        $orderVouchers = $this->model_account_order->getOrderVouchers($orderInfo['order_id']);
+
+        foreach ($orderVouchers as $voucher) {
+            $paymentMode    = $defaultVoucherPaymentMode;
+            $paymentSubject = $defaultVoucherPaymentSubject;
+            $price          = $this->currency->format($voucher['amount'], 'RUB', '', false);
+
+            $builder->addReceiptItem(
+                $voucher['description'],
+                $price,
+                1,
+                $defaultVatCode,
+                $paymentMode,
+                $paymentSubject
+            );
         }
 
         $order_totals = $this->model_account_order->getOrderTotals($orderInfo['order_id']);
