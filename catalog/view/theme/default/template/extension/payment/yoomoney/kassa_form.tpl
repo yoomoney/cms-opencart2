@@ -39,9 +39,9 @@
 
 <?php if($kassa->getEPL() && $kassa->useInstallmentsButton()):?>
 <style type="text/css">
-     .simplecheckout-button-block {
-         display: none;!important;
-     }
+     /* .simplecheckout-button-block { */ /* Для поддержки модуля Simple */
+     /*   display: none !important;    */ /* Раскомментировать, если нужна только кнопка кредитования */
+     /* } */
 </style>
 <?php endif;?>
 
