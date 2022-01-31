@@ -23,7 +23,7 @@ class ControllerExtensionPaymentYoomoney extends Controller
 {
     /** @var string */
     const MODULE_NAME = 'yoomoney';
-    const MODULE_VERSION = '2.2.3';
+    const MODULE_VERSION = '2.2.4';
 
     const INSTALLMENTS_MIN_AMOUNT = 3000;
 
@@ -634,7 +634,7 @@ class ControllerExtensionPaymentYoomoney extends Controller
         $this->response->setOutput($this->payment($order, true));
     }
 
-   
+
     public function productInfo()
     {
         $productId = !empty($this->request->post['id']) ?
